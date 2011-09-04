@@ -33,5 +33,35 @@ use vStore,
  * @since Aug 16, 2011
  */
 class ShopPage extends vBuilder\Application\UI\Controls\RedactionPage {
+
+	public function createComponentProductsListing($name) {
+		$listing = new ProductsListing($this, $name);
+		
+		$listing->setEntityClass('vStore\Redaction\Documents\Product');
+		return $listing;
+	}
+	
+	/*public function actionProduct($contentId) {
+		dd($contentId);
+	}*/
+	
+	public function actionDefault() {
+		/*$items = $this->branch->findAll('vStore\Redaction\Documents\Product')
+				->fetchAll(null, 10);
+		$storage = new vStore\Shop\SessionCartStorage($this->getPresenter()->context);*/
+		
+		/*foreach ($items as $item) {
+			$storage->save($item);
+		}*/
+		//dd($storage->load(1), $storage->loadAll());
+	}
+	
+	public function createComponentCartPreview($name) {
+		return new CartPreview($this, $name);
+	}
+	
+	public function createComponentCartControl($name) {
+		return new CartControl($this, $name);
+	}
 	
 }

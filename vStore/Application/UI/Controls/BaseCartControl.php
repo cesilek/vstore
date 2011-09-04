@@ -21,35 +21,29 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Redaction\Documents;
+namespace vStore\Application\UI\Controls;
 
-use vBuilder,
-	vBuilder\Redaction\Document;
+use vStore, Nette,
+	vBuilder,
+	Nette\Application\UI\Form;
 
 /**
- * Basic redaction data type
+ * Shop products listing
  *
- * @Table(name="redaction_doc_product")
- * 
- * @Column(perex, type="RedactionTemplate", cmsName="Perex", cmsType="ShortHTML")
- * @Column(content, type="RedactionTemplate", cmsName="Obsah", cmsType="HTML")
- * @Column(price, type="Float", cmsName="Cena")
- * @Column(image, type="RedactionImage", cmsName="Foto produktu", cmsType="Image")
- * 
- * @author Adam Staněk (velbloud)
+ * @author Jirka Vebr
  * @since Aug 16, 2011
  */
-class Product extends Document implements \vStore\Shop\ICartItem {
+abstract class BaseCartControl extends vBuilder\Application\UI\Controls\RedactionControl {
 	
-	public function getId() {
-		return parent::getId();
-	}
+	/**
+	 * @var vStore\Shop\Cart
+	 */
+	protected $cart;
 	
-	public function getTitle() {
-		return parent::getTitle();
+	public function __construct($parent = null, $name = null) {
+		parent::__construct($parent, $name);
+		$this->cart = $this->getContext()->cart;
+		$this->cart->setStorage(new vStore\Shop\SessionCartStorage($this->getContext()));
 	}
-	
-	public function getPrice() {
-		return parent::getPrice();
-	}
+
 }

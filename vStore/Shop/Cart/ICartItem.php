@@ -21,35 +21,22 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Redaction\Documents;
+namespace vStore\Shop;
 
-use vBuilder,
-	vBuilder\Redaction\Document;
+use vStore,
+	Nette,
+	 vBuilder;
 
 /**
- * Basic redaction data type
- *
- * @Table(name="redaction_doc_product")
- * 
- * @Column(perex, type="RedactionTemplate", cmsName="Perex", cmsType="ShortHTML")
- * @Column(content, type="RedactionTemplate", cmsName="Obsah", cmsType="HTML")
- * @Column(price, type="Float", cmsName="Cena")
- * @Column(image, type="RedactionImage", cmsName="Foto produktu", cmsType="Image")
- * 
- * @author Adam Staněk (velbloud)
- * @since Aug 16, 2011
+ * @author Jirka Vebr
  */
-class Product extends Document implements \vStore\Shop\ICartItem {
+interface ICartItem {
 	
-	public function getId() {
-		return parent::getId();
-	}
+	public function getId();
 	
-	public function getTitle() {
-		return parent::getTitle();
-	}
+	public function getTitle();
 	
-	public function getPrice() {
-		return parent::getPrice();
-	}
+	public function getPrice();
+	
+	//public function getVat(); // WTF?!?
 }

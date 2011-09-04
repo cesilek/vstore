@@ -1,0 +1,13 @@
+<br><br><div>
+	FULL CART:
+	<ul>
+		{var $price = 0}
+		{foreach $data as $item}
+			<li>{$item['title']}, ${$item['price']} 
+				<a n:href="delete! $item['id']">Delete from cart</a>
+			</li>
+			{var $price += $item['price']}
+		{/foreach}
+	</ul>
+	<span>Total price: {$price}</span>
+</div>

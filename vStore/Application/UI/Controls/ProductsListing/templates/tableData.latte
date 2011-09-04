@@ -1,0 +1,6 @@
+TABLE RENDER
+{foreach $products as $product}
+<div>{$product->title}, {$product->price}
+<a n:href="addToCart! $product->id">Add to cart</a>
+</div>
+{/foreach}
