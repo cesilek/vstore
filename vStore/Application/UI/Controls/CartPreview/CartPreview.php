@@ -36,7 +36,7 @@ use vStore, Nette,
 class CartPreview extends CartControl {
 	public function render() {
 		$template = $this->createTemplate();
-		$template->data = $this->cart->loadAll();
+		$template->data = (array) $this->cart->loadAll();
 		$template->setFile(__DIR__.'/templates/default.latte');
 		echo $template;
 	}
