@@ -173,7 +173,7 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	/**
 	 * @return IRenderer 
 	 */
-	protected function getRenderer() {
+	public function getRenderer() {
 		if (!$this->rendererClass) {
 			$this->rendererClass = new TableRenderer;
 		}

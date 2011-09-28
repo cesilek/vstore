@@ -1,4 +1,12 @@
-Product listing:
-{$paginator}
-{$adjustRender}
-{$data}
+{block productListing}
+	Product listing:
+	{block paginator}
+		{$paginator}
+	{/block}
+	{block adjustRender}
+		{$adjustRender}
+	{/block}
+	{block data}
+		{$data}
+	{/block}
+{/block}

@@ -36,15 +36,19 @@ abstract class BaseRenderer extends Nette\Object implements IRenderer {
 	
 	protected $control;
 	
+	protected $defaultFile;
+	
 	public function render(ProductsListing $control, $what = null) {
 		$this->control = $control;
 		
 		if ($what === null) {
 			// regular render
 			$template = $this->createTemplate();
+			
 			$template->paginator = $this->renderPaginator();
 			$template->adjustRender = $this->renderAdjustRender();
 			$template->data = $this->renderData();
+			$this->defaultFile && $template->setFile($this->defaultFile);
 		} else {
 			// manual render
 			if (method_exists($this, $method = 'render'. ucfirst($what))) {
@@ -71,5 +75,9 @@ abstract class BaseRenderer extends Nette\Object implements IRenderer {
 		$template = $this->control->createTemplate();
 		$template->setFile(__DIR__.'/../templates/'.$file.'.latte');
 		return $template;
+	}
+	
+	public function setFile($file) {
+		$this->defaultFile = $file;
 	}
 }
