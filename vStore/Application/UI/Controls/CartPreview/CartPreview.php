@@ -37,7 +37,7 @@ class CartPreview extends CartControl {
 	public function render() {
 		$template = $this->createTemplate();
 		$template->data = (array) $this->cart->loadAll();
-		$template->setFile(__DIR__.'/templates/default.latte');
+		$template->setFile($this->file ?: __DIR__.'/templates/default.latte');
 		echo $template;
 	}
 }

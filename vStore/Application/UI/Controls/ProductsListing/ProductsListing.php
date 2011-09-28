@@ -95,12 +95,6 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 			'perPage' => $this->perPage,
 			'sorting' => $this->sorting
 		));
-		if (in_array($this->renderer, array ('table', 'catalogue'))) {
-			$renderer = __NAMESPACE__ . '\\' . ucfirst($this->renderer).'Renderer';
-			$this->setRenderer(new $renderer);
-		} else {
-			$this->setRenderer(new TableRenderer);
-		}
 	}
 	
 	/**
@@ -175,7 +169,12 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	 */
 	public function getRenderer() {
 		if (!$this->rendererClass) {
-			$this->rendererClass = new TableRenderer;
+			if (in_array($this->renderer, array ('table', 'catalogue'))) {
+				$renderer = __NAMESPACE__ . '\\' . ucfirst($this->renderer).'Renderer';
+				$this->setRenderer(new $renderer);
+			} else {
+				$this->setRenderer(new TableRenderer);
+			}
 		}
 		return $this->rendererClass;
 	}

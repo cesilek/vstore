@@ -1,6 +1,13 @@
-<br><br><div>
-	CART:
-	<ul>
-		<li n:foreach="$data as $item">{$item['title']}, ${$item['price']}</li>
-	</ul>
+<div>
+	{var $count = count($data)}
+	{if $count}
+		{var $totalPrice = 0}
+		{foreach $data as $item}
+			{var $totalPrice += $item['price']}
+		{/foreach}
+		{$count} items for {$totalPrice}<br>
+		<a href="#">Browse the cart</a>
+	{else}
+		There are no items in the cart. <a href="#">How to buy?</a>
+	{/if}
 </div>
