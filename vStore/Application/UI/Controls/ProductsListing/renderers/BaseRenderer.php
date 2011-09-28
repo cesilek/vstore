@@ -73,6 +73,7 @@ abstract class BaseRenderer extends Nette\Object implements IRenderer {
 
 	protected function createTemplate($file = 'default') {
 		$template = $this->control->createTemplate();
+		$template->registerHelper('currency', 'vStore\Latte\Helpers\Shop::currency');
 		$template->setFile(__DIR__.'/../templates/'.$file.'.latte');
 		return $template;
 	}
