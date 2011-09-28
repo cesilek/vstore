@@ -44,6 +44,11 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	protected $rendererClass;
 	
 	/**
+	 * @var IRenderer
+	 */
+	protected $defaultRenderer;
+	
+	/**
 	 * @var vBuilder\Redaction\Document
 	 */
 	protected $entity;
@@ -66,7 +71,7 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	/**
 	 * @persistent
 	 */
-	public $renderer = 'table';
+	public $renderer;
 	
 
 	/**
@@ -173,7 +178,8 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 				$renderer = __NAMESPACE__ . '\\' . ucfirst($this->renderer).'Renderer';
 				$this->setRenderer(new $renderer);
 			} else {
-				$this->setRenderer(new TableRenderer);
+				$this->setRenderer($this->getDefaultRenderer());
+				$this->renderer = 'catalogue';
 			}
 		}
 		return $this->rendererClass;
@@ -188,6 +194,23 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 		return $this;
 	}
 	
+	/**
+	 * @return IRenderer 
+	 */
+	public function getDefaultRenderer() {
+		return $this->defaultRenderer ?: new TableRenderer();
+	}
+	
+	/**
+	 * @param IRenderer $renderer
+	 * @return ProductsListing 
+	 */
+	public function setDefaultRenderer(IRenderer $renderer) {
+		$this->defaultRenderer = $renderer;
+		return $this;
+	}
+
+
 	/**
 	 * @return array
 	 */
