@@ -30,6 +30,7 @@ CREATE TABLE `redaction_doc_product` (
   `lang` char(2) NOT NULL DEFAULT '',
   `pageId` int(11) NOT NULL,
   `title` varchar(256) NOT NULL DEFAULT '',
+	`menuTitle` varchar(256) NOT NULL DEFAULT '',
   `perex` text NOT NULL,
   `content` text NOT NULL,
   `price` float unsigned NOT NULL DEFAULT '0',
