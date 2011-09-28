@@ -270,4 +270,17 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 		}
 		return $this['paging']->getData();
 	}
+	
+	/**
+	 * Latte template filters and macros definition
+	 * 
+	 * @param Template $template 
+	 */
+	public function templatePrepareFilters($template) {
+		$engine = new Nette\Latte\Engine;
+				vBuilder\Latte\Macros\RedactionMacros::install($engine->parser);
+		
+		$template->registerFilter($engine);
+	}
+	
 }
