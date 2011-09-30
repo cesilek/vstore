@@ -40,14 +40,19 @@ class ProcessOrderControl extends BaseCartControl {
 	 */
 	protected $id;
 	
+	
+	public function __construct($parent = null, $name = null) {
+		parent::__construct($parent, $name);
+		$this->id = $this->presenter->getParam('productId');
+	}
+	
 	/**
 	 * @param int $id 
 	 */
-	public function render($id) {	
-		$this->id = $id;
+	public function render() {
 		$template = $this->createTemplate();
 		$template->setFile(__DIR__.'/templates/default.latte');
-		$template->product = $this->branch->get($id);
+		$template->product = $this->branch->get($this->id);
 		
 		echo $template;
 	}
@@ -81,10 +86,18 @@ class ProcessOrderControl extends BaseCartControl {
 		
 		$cart = $this->getContext()->cart;
 		$cart->setStorage(new vStore\Shop\SessionCartStorage($this->getContext()));
-		if ($cart->add($this->branch->get($values['id']), $values->amount)) {
+		if ($cart->add($this->branch->get($this->id), $values->amount)) {
+			if ($this->presenter->isAjax()) {
+				$this->presenter->payload->success = true;
+				$this->presenter->sendPayload();
+			}
 			$this->getPresenter()->flashMessage('The items were successfully added!');
-			$this->getPresenter()->redirect('redaction', array('id' => 7));
+			$this->getPresenter()->redirect('addedToCart');
 		} else {
+			if ($this->presenter->isAjax()) {
+				$this->presenter->payload->error = true;
+				$this->presenter->sendPayload();
+			}
 			$form->addError('An error occured while adding the items to the cart. Please try again.');
 		}
 	}

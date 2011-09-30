@@ -1,16 +1,30 @@
 <div>
-	{var $count = 0}
-	{var $totalPrice = 0}
-	{foreach $data as $item}
-		{var $count += $item['quantity']}
-		{var $totalPrice += $item['quantity']*$item['price']}
-	{/foreach}
-	{dump $data}
-	{if $count > 0}
-		{$count} položek v hodnotě {$totalPrice|currency}<br>
-		<a href="{rlink 7}">Procházet košík</a>
-	{else}
-		
-		V košíku nejsou žádné položky. <a href="#">Jak nakupovat?</a>
-	{/if}
+	<div>
+		<div n:class="$count === 0 ? hidden" id="cartPreview">
+			<span><span id="cartPreviewCount">{$count}</span> položek v hodnotě <span id="cartPreviewPrice">{$totalPrice|currency}</span></span><br>
+			<a href="{rlink 7}">Procházet košík</a>
+		</div>
+		<div n:class="$count > 0 ? hidden" id="cartEmpty">
+			V košíku nejsou žádné položky. <a href="#">Jak nakupovat?</a>
+		</div>
+	</div>
 </div>
+<script type="text/javascript">
+	var v3cms = v3cms || {};
+	
+	v3cms.reloadCartPreview = function () {
+		$.getJSON({link reload!}, function (data) {
+			var empty = $('#cartEmpty'),
+				preview = $('#cartPreview');
+			if (data.count) {
+				empty.hide();
+				preview.show();
+				$('#cartPreviewCount').html(data.count);
+				$('#cartPreviewPrice').html(data.totalPrice);
+			} else {
+				empty.show();
+				preview.hide();
+			}
+		});
+	}
+</script>

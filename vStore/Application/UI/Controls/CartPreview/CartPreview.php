@@ -36,8 +36,30 @@ use vStore, Nette,
 class CartPreview extends CartControl {
 	public function render() {
 		$template = $this->createTemplate();
-		$template->data = (array) $this->cart->loadAll();
+		$result = $this->processCartData();
+		$template->count = $result['count'];
+		$template->totalPrice = $result['totalPrice'];
 		$template->setFile($this->file ?: __DIR__.'/templates/default.latte');
 		echo $template;
+	}
+	
+	protected function processCartData() {
+		$result = array (
+			'count' => 0,
+			'totalPrice' => 0
+		);
+		foreach ($this->cart->loadAll() as $product) {
+			$result['count'] += $product['quantity'];
+			$result['totalPrice'] += $product['price'] * $product['quantity'];
+		}
+		return $result;
+	}
+
+
+	public function handleReload() {
+		$result = $this->processCartData();
+		$this->presenter->payload->count = $result['count'];
+		$this->presenter->payload->totalPrice = $this->template->currency($result['totalPrice']);
+		$this->presenter->sendPayload();
 	}
 }
