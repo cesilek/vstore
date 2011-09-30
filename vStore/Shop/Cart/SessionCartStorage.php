@@ -37,6 +37,8 @@ class SessionCartStorage extends BaseStorage implements ICartStorage {
 	 */
 	protected $session;
 	
+	protected $last;
+	
 	const SESSION_NAMESPACE = 'SessionCart';
 	
 	/**
@@ -54,7 +56,7 @@ class SessionCartStorage extends BaseStorage implements ICartStorage {
 	 * @return array 
 	 */
 	public function load($id) {
-		if (!is_int($id)) {
+		if (!is_int($id) || $id < 1) {
 			throw new Nette\InvalidArgumentException("Id must be an integer. '".gettype($var)."' given.");
 		}
 		return $this->session->cart[$id];
@@ -69,24 +71,69 @@ class SessionCartStorage extends BaseStorage implements ICartStorage {
 	
 	/**
 	 * @param ICartItem $item
+	 * @param int $quantity How many times to add $item
 	 * @return ICartItem 
 	 */
-	public function save(ICartItem $item) {
-		$this->session->cart[$item->getId()] = array (
-			'id'	=> $item->getId(),
-			'price' => $item->getPrice(),
-			'title' => $item->getTitle()
-		);
+	public function save(ICartItem $item, $quantity) {
+		if (!ctype_digit($quantity) || $quantity < 1) {
+			throw new Nette\InvalidArgumentException("The second argument passed to save() must be an integer greater than zero. '".gettype($quantity)."' given.");
+		}
+		$quantity = (int) $quantity;
+		if (isset($this->session->cart[$item->getPageId()]) && is_array($this->session->cart[$item->getPageId()])) {
+			$this->session->cart[$item->getPageId()]['quantity'] = $quantity;
+		} else {
+			$this->session->cart[$item->getPageId()] = array (
+				'contentId'	=> $item->getId(),
+				'pageId'	=> $item->getPageId(),
+				'price' => $item->getPrice(),
+				'title' => $item->getTitle(),
+				
+				'quantity' => $quantity
+			);
+			
+		}
+		return $item;
+	}
+	
+	/**
+	 * Adds a number of items
+	 * @param ICartItem $item
+	 * @param type $quantity
+	 * @return ICartItem 
+	 */
+	public function add(ICartItem $item, $quantity = 1) {
+		if (!ctype_digit($quantity) || $quantity < 1) {
+			throw new Nette\InvalidArgumentException("The second argument passed to add() must be an integer greater than zero. '".gettype($quantity)."' given.");
+		}
+		if (isset($this->session->cart[$item->getPageId()]) && is_array($this->session->cart[$item->getPageId()])) {
+			$toSave = $this->session->cart[$item->getPageId()]['quantity'] += $quantity;
+		} else {
+			$this->save($item, $quantity);
+		}
 		return $item;
 	}
 
 	/**
 	 * @param int $id
+	 * @param int $number How many items should be left. A negative value means to delete only some.
+					-2 will delete two regardles of the initial value. 0 will delete evverything.
 	 * @return bool 
 	 */
-	public function delete($id) {
+	public function delete($id, $number = 0) {
 		$id = intval($id);
-		unset($this->session->cart[$id]);
+		if (!is_int($number)) {
+			throw new Nette\InvalidArgumentException("Second argument of delete() must be an integer. '".gettype($number)."'given.");
+		}
+		if (isset($this->session->cart[$id])) {
+			if ($number > 0) {
+				$this->session->cart[$id]['quantity'] = $number;
+			} else {
+				$this->session->cart[$id]['quantity'] += $number;
+				if ($this->session->cart[$id]['quantity'] <= 0 || $number === 0) {
+					unset($this->session->cart[$id]);
+				}
+			}
+		}
 		return true;
 	}
 }

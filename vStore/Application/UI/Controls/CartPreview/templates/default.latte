@@ -1,13 +1,16 @@
 <div>
-	{var $count = count($data)}
-	{if $count}
-		{var $totalPrice = 0}
-		{foreach $data as $item}
-			{var $totalPrice += $item['price']}
-		{/foreach}
-		{$count} items for {$totalPrice}<br>
-		<a href="#">Browse the cart</a>
+	{var $count = 0}
+	{var $totalPrice = 0}
+	{foreach $data as $item}
+		{var $count += $item['quantity']}
+		{var $totalPrice += $item['quantity']*$item['price']}
+	{/foreach}
+	{dump $data}
+	{if $count > 0}
+		{$count} položek v hodnotě {$totalPrice|currency}<br>
+		<a href="{rlink 7}">Procházet košík</a>
 	{else}
-		There are no items in the cart. <a href="#">How to buy?</a>
+		
+		V košíku nejsou žádné položky. <a href="#">Jak nakupovat?</a>
 	{/if}
 </div>

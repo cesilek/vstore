@@ -45,6 +45,10 @@ class Product extends Document implements \vStore\Shop\ICartItem {
 		return parent::getId();
 	}
 	
+	public function getPageId() {
+		return parent::getPageId();
+	}
+	
 	public function getTitle() {
 		return parent::getTitle();
 	}

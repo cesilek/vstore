@@ -36,11 +36,15 @@ class DbCartStorage extends BaseStorage implements ICartStorage {
 		
 	}
 	
-	public function save(ICartItem $item) {
+	public function save(ICartItem $item, $quantity) {
 		
 	}
 	
-	public function delete($id) {
+	public function add(ICartItem $item, $quantity = 1) {
+		
+	}
+	
+	public function delete($id, $number = 0) {
 		
 	}
 	

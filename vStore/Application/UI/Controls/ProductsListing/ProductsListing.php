@@ -102,15 +102,9 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 		));
 	}
 	
-	/**
-	 * TODO: this method really shouldn't be in this class
-	 * @param int $id 
-	 */
-	public function handleAddToCart($id) {
-		$this->getContext()->cart->setStorage(new vStore\Shop\SessionCartStorage($this->getContext()))
-				->save($this->branch->findAll('vStore\Redaction\Documents\Product')
-					->where('[contentId] = %i', intval($id))->fetch());
-		$this->redirect('this');
+	
+	public function createComponentAddToCart($name) {
+		return new CartControl();
 	}
 
 
@@ -269,18 +263,5 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 			return $this->getFluent()->fetchAll();
 		}
 		return $this['paging']->getData();
-	}
-	
-	/**
-	 * Latte template filters and macros definition
-	 * 
-	 * @param Template $template 
-	 */
-	public function templatePrepareFilters($template) {
-		$engine = new Nette\Latte\Engine;
-				vBuilder\Latte\Macros\RedactionMacros::install($engine->parser);
-		
-		$template->registerFilter($engine);
-	}
-	
+	}	
 }

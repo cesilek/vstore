@@ -35,15 +35,70 @@ use vStore, Nette,
  */
 class CartControl extends BaseCartControl {
 	
+	/**
+	 * @var array
+	 */
+	protected $data;
+	
+	public function __construct($parent = null, $name = null) {
+		parent::__construct($parent, $name);
+		$this->data = $this->getContext()->cart->loadAll();
+	}	
+	
 	public function render() {
 		$template = $this->createTemplate();
-		$template->data = (array) $this->cart->loadAll();
+		$template->data = (array) $this->data;
 		$template->setFile(__DIR__.'/templates/default.latte');
 		echo $template;
 	}
 	
 	public function handleDelete($id) {
 		$this->cart->delete(intval($id));
+		$this->redirect('this');
+	}
+	
+	public function createComponentCartForm() {
+		$form = new Form;
+		$form->onSuccess[] = callback($this, 'cartFormSubmitted');
+		
+		foreach ($this->data as $product) {
+			$form->addCheckbox('check'.$product['pageId']);
+			$form->addText('range'.$product['pageId'])
+					->setDefaultValue($product['quantity'])
+					->addRule(Form::INTEGER, 'The number must be an integer!')
+					->addRule(function ($control) {
+						return $control->value < 1 ? !((bool) ($control->value = 1)) : true;
+					}, 'The amount must be greater than zero...')				
+					->addRule(Form::FILLED, 'The number must be filled!');
+		}
+
+		$form->addSubmit('delete', 'Delete selected');
+		$form->addSubmit('reCount', 'Recount');
+		$form->addSubmit('buy', 'Buy');
+		
+		return $form;
+	}
+	
+	public function cartFormSubmitted(Form $form) {
+		$values = $form->values;
+		if ($form['delete']->isSubmittedBy()) {
+			foreach ($this->data as $product) {
+				if ($values['check'.$product['pageId']] === true) {
+					$this->getContext()->cart->delete($product['pageId']);
+				}
+			}
+		} else if ($form['reCount']->isSubmittedBy()) {
+			foreach ($this->data as $product) {
+				if ($values['range'.$product['pageId']] !== $product['quantity']) {
+					$item = $this->branch->get($product['pageId']);
+					$this->getContext()->cart->save($item, $values['range'.$product['pageId']]);
+				}
+			}
+		} else if ($form['buy']->isSubmittedBy()) {
+			dd('and now whatever will be next...');
+		} else {
+			
+		}
 		$this->redirect('this');
 	}
 }

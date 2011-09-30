@@ -1,13 +1,47 @@
-<br><br><div>
-	FULL CART:
-	<ul>
-		{var $price = 0}
-		{foreach $data as $item}
-			<li>{$item['title']}, ${$item['price']} 
-				<a n:href="delete! $item['id']">Delete from cart</a>
-			</li>
-			{var $price += $item['price']}
-		{/foreach}
-	</ul>
-	<span>Total price: {$price}</span>
-</div>
+{if !empty($data)}
+	<div>
+		{form cartForm}
+			<ul class="errors" n:if="$form->hasErrors()">
+				<li n:foreach="$form->errors as $error">{$error}</li>
+			</ul>
+			<table>
+				<thead>
+					<tr>
+						<td></td>
+						<td>Název produktu</td>
+						<td>Množství</td>
+						<td>Cena/ks</td>
+						<td>Cena celkem</td>
+					</tr>
+				</thead>
+				<tbody>
+					{var $total = 0}
+					<tr n:foreach="$data as $product">
+						<td>{input 'check'.$product['pageId']}</td>
+						<td>{$product['title']}</td>
+						<td>{input 'range'.$product['pageId']}</td>
+
+						<td>{$product['price']|currency}</td>
+						<td>{$product['price']*$product['quantity']|currency}</td>
+						{var $total += $product['price']*$product['quantity']}
+					</tr>
+				</tbody>
+				<tfoot>
+					<tr>
+						<td></td>
+						<td>Celkem</td>
+						<td></td>
+						<td></td>
+
+						<td>{$total|currency}</td>
+					</tr>
+				</tfoot>
+			</table>
+			{input delete}
+			{input reCount}
+			{input buy}
+		{/form}
+	</div>
+{else}
+	V košíku nejsou žádné položky. <a href="#">Jak nakupovat?</a>
+{/if}

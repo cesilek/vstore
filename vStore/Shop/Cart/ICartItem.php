@@ -34,6 +34,8 @@ interface ICartItem {
 	
 	public function getId();
 	
+	public function getPageId();
+	
 	public function getTitle();
 	
 	public function getPrice();

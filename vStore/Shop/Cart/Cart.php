@@ -93,17 +93,29 @@ class Cart extends vBuilder\Object {
 	
 	/**
 	 * @param ICartItem $item
+	 * @param int $quantity
 	 * @return mixed 
 	 */
-	public function save(ICartItem $item) {
-		return $this->getStorage()->save($item);
+	public function save(ICartItem $item, $quantity) {
+		return $this->getStorage()->save($item, $quantity);
+	}
+	
+	/**
+	 * @param ICartItem $item
+	 * @param int $quantity
+	 * @return mixed 
+	 */
+	public function add(ICartItem $item, $quantity = 1) {
+		return $this->getStorage()->add($item, $quantity);
 	}
 	
 	/**
 	 * @param int $id
+	 * @param int $number How many items should be left. A negative value means to delete only some.
+					-2 will delete two regardles of the initial value. 0 will delete evverything.
 	 * @return bool 
 	 */
-	public function delete($id) {
-		return $this->getStorage()->delete($id);
+	public function delete($id, $number = 0) {
+		return $this->getStorage()->delete($id, $number);
 	}
 }
