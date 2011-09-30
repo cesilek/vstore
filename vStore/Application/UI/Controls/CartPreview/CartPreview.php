@@ -48,7 +48,7 @@ class CartPreview extends CartControl {
 			'count' => 0,
 			'totalPrice' => 0
 		);
-		foreach ($this->cart->loadAll() as $product) {
+		foreach ((array) $this->cart->loadAll() as $product) {
 			$result['count'] += $product['quantity'];
 			$result['totalPrice'] += $product['price'] * $product['quantity'];
 		}
