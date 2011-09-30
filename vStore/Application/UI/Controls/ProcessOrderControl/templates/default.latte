@@ -1,1 +1,28 @@
-{control adjustOrderForm}
+{form adjustOrderForm}
+	{input id}
+	{label amount /}
+	{input amount}
+	<a id="cartMore" href="#">+</a> | <a id="cartLess" href="#">-</a>
+	{input s}
+{/form}
+<script>
+	$(function () {
+		var changeAmount = function (addend) {
+			var input = $('input[name=amount]'),
+				num = parseInt(input.val(), 10),
+				result = num + addend;
+			input.val(result > 0 ? result : 1);
+		}, tmp = {
+			cartMore: 1,
+			cartLess: -1
+		};
+		for (var i in tmp) {
+			$('#'+i).click((function (m) {
+				return function (e){
+					changeAmount(tmp[m]);
+					e.preventDefault();
+				}
+			})(i));
+		}
+	});
+</script>
