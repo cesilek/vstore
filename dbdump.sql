@@ -34,6 +34,7 @@ CREATE TABLE `redaction_doc_product` (
   `perex` text NOT NULL,
   `content` text NOT NULL,
   `price` float unsigned NOT NULL DEFAULT '0',
+	`usualPrice` float unsigned NOT NULL DEFAULT '0',
   `image` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`contentId`,`lang`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
