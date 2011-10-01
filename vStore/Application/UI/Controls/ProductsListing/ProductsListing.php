@@ -257,12 +257,10 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 					break;
 			}
 			$children = $this->structure->getChildrenIds($this->redaction->getPageId());
-			$return = $this->branch
-				->findAll($this->entity);
-			if (!empty($children)) {
-				$return = $return->where('[pageId] IN ('.  implode(',', $children).')');
-			}
-			$this->fluent = $return->orderBy("[$order] $rev");
+			$this->fluent = $this->branch
+					->findAll($this->entity)
+					->where('[pageId] IN %in', $children)
+					->orderBy("[$order] $rev");
 		}
 		return $this->fluent;
 	}
