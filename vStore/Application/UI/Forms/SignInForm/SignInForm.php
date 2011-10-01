@@ -89,37 +89,15 @@ class SignInForm extends BaseForm {
 			}
 			$this->presenter->getUser()->login($values->username, $values->password);
 
-			$this->getHttpResponse()->setCookie('vStoreLastLoggedUser', $values->username, time() + 365 * 24 * 60 * 60);
+			$this->getContext()->httpResponse->setCookie('vStoreLastLoggedUser', $values->username, time() + 365 * 24 * 60 * 60);
 
-			if($values->backlink) {
+			if(isset($values->backlink) && !empty($values->backlink)) {
 				$this->getPresenter()->getApplication()->restoreRequest($values->backlink);
 			} else {
-				/*$u = $this->presenter->getUser()->getIdentity();
-				
-				//$config = Nette\Environment::getService('vBuilder\Config\IConfig');
-				$config = $this->getContext()->config;
-				$userLang = $config->get('system.language');
-				if($userLang !== null) Nette\Environment::getService('Nette\ITranslator')->setLang($userLang);
-				
-				/*if($u->getLastLoginInfo()->exists() && $u->getLastLoginInfo()->getTime() !== null) {
-					$host = gethostbyaddr($u->getLastLoginInfo()->getIp());
-					if($host != $u->getLastLoginInfo()->getIp()) $host .= ' ('.$u->getLastLoginInfo()->getIp().')';
-					
-					$this->flashMessage(_x('%s. Welcome back. Last time you logged in %s from %s.', array(
-						 $u->getSalutation(), 
-						 vManager\Application\Helpers::timeAgoInWords($u->getLastLoginInfo()->getTime()),
-						 /*$u->getLastLoginInfo()->getTime()->format('d.m.Y'),
-						 $u->getLastLoginInfo()->getTime()->format('h:i:s'), * /
-						 $host
-					)));
-				} else {
-					$this->flashMessage(_x('%s. Since this is the first time you have logged in it is recommended to change your password.', array(
-						 $u->getSalutation()
-					)));
-				}*/
+				// TODO: Melo by to bejt konfigurovatelny
+				$this->presenter->redirect('this', array ('id'=> 2 ));
 			}
 			
-			//$this->presenter->redirect('this', array ('id'=>2));
 		} catch(Nette\Security\AuthenticationException $e) {
 			$form->addError($e->getMessage());
 		}
