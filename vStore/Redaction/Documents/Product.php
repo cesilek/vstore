@@ -34,6 +34,7 @@ use vBuilder,
  * @Column(perex, type="RedactionTemplate", cmsName="Perex", cmsType="ShortHTML")
  * @Column(content, type="RedactionTemplate", cmsName="Obsah", cmsType="HTML")
  * @Column(price, type="Float", cmsName="Cena")
+ * @Column(usualPrice, type="Float", cmsName="Běžná cena")
  * @Column(image, type="RedactionImage", cmsName="Foto produktu", cmsType="Image")
  * 
  * @author Adam Staněk (velbloud)
