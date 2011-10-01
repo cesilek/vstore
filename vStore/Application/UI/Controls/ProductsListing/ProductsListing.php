@@ -52,6 +52,11 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	 * @var vBuilder\Redaction\Document
 	 */
 	protected $entity;
+	
+	/**
+	 * @var vBuilder\Orm\Fluent
+	 */
+	protected $fluent;
 
 	/**
 	 * @persistent
@@ -234,25 +239,32 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	/**
 	 * @return vBuilder\Orm\Fluent 
 	 */
-	protected function getFluent() {
-		$rev = 'ASC';
-		$order = "price";
-		switch ($this->sorting) {
-			case 'alphabet':
-				$order = "title";
-				break;
-			case 'cheapest':
-				break;
-			case 'mostExpensive':
-				$rev = 'DESC';
-				break;
-			default:
-				$order = 'title';
-				break;
+	protected function getFluent($refresh = false) {
+		if (!$this->fluent || $refresh) {
+			$rev = 'ASC';
+			$order = "price";
+			switch ($this->sorting) {
+				case 'alphabet':
+					$order = "title";
+					break;
+				case 'cheapest':
+					break;
+				case 'mostExpensive':
+					$rev = 'DESC';
+					break;
+				default:
+					$order = 'title';
+					break;
+			}
+			$children = $this->structure->getChildrenIds($this->presenter->id);
+			$return = $this->branch
+				->findAll($this->entity);
+			if (!empty($children)) {
+				$return = $return->where('[pageId] IN ('.  implode(',', $children).')');
+			}
+			$this->fluent = $return->orderBy("[$order] $rev");
 		}
-		return $this->branch
-			->findAll($this->entity)
-			->orderBy("[$order] $rev");
+		return $this->fluent;
 	}
 	
 	/**
@@ -262,6 +274,9 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 		if ($this->perPage === static::LIST_ALL) {
 			return $this->getFluent()->fetchAll();
 		}
-		return $this['paging']->getData();
+		return $this->getFluent()->fetchAll(
+			$this['paging']->getPaginator()->getOffset(),
+			$this['paging']->getPaginator()->itemsPerPage
+		);
 	}	
 }
