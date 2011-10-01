@@ -256,7 +256,7 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 					$order = 'title';
 					break;
 			}
-			$children = $this->structure->getChildrenIds($this->presenter->id);
+			$children = $this->structure->getChildrenIds($this->redaction->getPageId());
 			$return = $this->branch
 				->findAll($this->entity);
 			if (!empty($children)) {
