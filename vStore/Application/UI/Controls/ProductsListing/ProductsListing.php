@@ -48,15 +48,12 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	 */
 	protected $defaultRenderer;
 	
-	/**
-	 * @var vBuilder\Redaction\Document
-	 */
-	protected $entity;
 	
 	/**
-	 * @var vBuilder\Orm\Fluent
+	 * @var vBuilder\Redaction\Fluent
 	 */
 	protected $fluent;
+	private $appliedFluent;
 
 	/**
 	 * @persistent
@@ -79,6 +76,63 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	public $renderer;
 	
 
+	/**
+	 * Sets data source for product listing
+	 * 
+	 * @param vBuilder\Redaction\Fluent $fluent
+	 * @param type $raw 
+	 */
+	public function setFluent(vBuilder\Redaction\Fluent $fluent) {
+		if(!is_subclass_of($fluent->getRowClass(), $this->branch->getBaseDocument()))
+			throw new Nette\InvalidArgumentException("Fluent has to return entities descendant of '{$this->branch->getBaseDocument()}'");
+		
+		$this->fluent = $fluent;
+		$this->appliedFluent = null;
+		return $this->fluent;
+	}
+	
+	/**
+	 * Gets internal data source
+	 * 
+	 * @param bool true if internal filters should be reapplied
+	 * 
+	 * @return vBuilder\Orm\Fluent 
+	 */
+	protected function getFluent($refresh = false) {
+		if(isset($this->appliedFluent) && !$refresh) return $this->appliedFluent;
+		if(!isset($this->fluent))
+				throw new Nette\InvalidStateException("Missing data source " . get_called_class() . "::setFluent not called?");		
+		
+				
+		$this->appliedFluent = new vBuilder\Orm\Fluent($this->fluent->getRowClass(), $this->getContext());
+		$this->appliedFluent->select('*')->from('('.(string) $this->fluent.')')->as('pl');
+
+
+		switch ($this->sorting) {
+
+			case 'cheapest':
+				$order = "price";
+				$method = 'ASC';
+				break;
+
+			case 'mostExpensive':
+				$order = "price";
+				$method = 'DESC';
+				break;				
+
+			case 'alphabet':				
+			default:
+				$order = 'title';
+				$method = 'ASC';
+				break;
+
+		}
+		
+		$this->appliedFluent->orderBy("[$order] $method");
+
+		return $this->appliedFluent;
+	}
+	
 	/**
 	 * @param string $name
 	 * @return Paging
@@ -107,23 +161,9 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 		));
 	}
 	
-	
+	/** WTF? */
 	public function createComponentAddToCart($name) {
 		return new CartControl();
-	}
-
-
-	/**
-	 * @param string $entity
-	 * @return ProductsListing 
-	 */
-	public function setEntityClass($entity) {
-		if (!is_subclass_of($entity, $this->branch->getBaseDocument())) {
-			throw new Nette\InvalidArgumentException("Entity class must be an descendant of '{$this->branch->getBaseDocument()}'");
-		}
-		$this->entity = is_string($entity) ? new $entity($this->getContext()) : $entity;
-		
-		return $this;
 	}
 	
 	/**
@@ -235,36 +275,7 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 			'mostExpensive'	=> 'Most expensive first',
 		);
 	}
-	
-	/**
-	 * @return vBuilder\Orm\Fluent 
-	 */
-	protected function getFluent($refresh = false) {
-		if (!$this->fluent || $refresh) {
-			$rev = 'ASC';
-			$order = "price";
-			switch ($this->sorting) {
-				case 'alphabet':
-					$order = "title";
-					break;
-				case 'cheapest':
-					break;
-				case 'mostExpensive':
-					$rev = 'DESC';
-					break;
-				default:
-					$order = 'title';
-					break;
-			}
-			$children = $this->structure->getChildrenIds($this->redaction->getPageId());
-			$this->fluent = $this->branch
-					->findAll($this->entity)
-					->where('[pageId] IN %in', $children)
-					->orderBy("[$order] $rev");
-		}
-		return $this->fluent;
-	}
-	
+
 	/**
 	 * @return array
 	 */
