@@ -1,0 +1,243 @@
+{* Page margins in mm (top, left, bottom, right) *}
+{$renderer->setPageMargins(8, 8, 8, 8)}
+
+{* Fixed header height (in mm) *}
+{$renderer->setHeaderHeight(30)}
+<sethtmlpageheader name="invoiceHeader" page="ALL" value="on" show-this-page="1" />
+<htmlpageheader name="invoiceHeader">
+	{block pageHeader}
+	<table width="100%" style="font-family: Myriad Pro; font-size: 8pt; vertical-align: middle;" n:if="$invoice->supplier->logoUrl"><tr>
+		<td width="55mm">
+			<img src="{$invoice->supplier->logoUrl}" width="45mm" />
+		</td>
+		<td>
+			{$invoice->supplier->invoiceAddress->name}, {$invoice->supplier->invoiceAddress->street},
+			{$invoice->supplier->invoiceAddress->zip} {$invoice->supplier->invoiceAddress->city},
+			{$invoice->supplier->invoiceAddress->country}<br />
+			
+			IČ: {$invoice->supplier->in}{if $invoice->supplier->tin},
+			{$invoice->supplier->tin}{/if}{if $invoice->supplier->webpage},
+			{$invoice->supplier->webpage}{/if}{if $invoice->supplier->email},
+			{$invoice->supplier->email}{/if}{if $invoice->supplier->phone},
+			tel: {$invoice->supplier->phone}{/if}
+		</td>
+	</tr></table>
+	{/block}
+</htmlpageheader>
+
+
+{* Fixed footer height (in mm) *}
+{$renderer->setFooterHeight(50)}
+<sethtmlpagefooter name="invoiceFooter" page="ALL" value="on" show-this-page="1" />
+<htmlpagefooter name="invoiceFooter">
+<table width="100%" style="vertical-align: bottom; margin: 0 10mm;">
+	<tr>
+		<td>
+			{if $invoice->supplier->tin == null}Dodavatel není plátcem DPH.<br />
+			<br />{/if}
+			{if $invoice->author}Vystavil(a): {$invoice->author}{/if}
+		</td>
+		<td width="90mm">
+			<table class="totalTable">
+				<tr>
+					<td>Celkem:</td>
+					<td class="price">{$invoice->totalBeforeRounding|currency:true}</td>
+				</tr>
+				<tr>
+					<td>Zaokrouhlení:</td>
+					<td class="price">{$invoice->rounding|currency:true}</td>
+				</tr>
+				<tr class="total">
+					<td>Celkem k úhradě:</td>
+					<td class="price">{$invoice->total|currency}</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" style="padding: 12mm 0 5mm 0; text-align: center;">
+			- Strana {l}PAGENO{r}/{l}nb{r} -
+		</td>
+	</tr>
+</table>
+</htmlpagefooter>
+
+<!----------------------------------------------------------------------------->
+
+<style>
+	TABLE {
+		border-collapse: collapse;
+	}
+	
+	TABLE.productTable {
+		width: 100%;
+		margin-top: 13mm;
+	}
+	
+	TABLE.productTable THEAD TD {
+		font-weight: bold;
+		border-bottom: 1px solid #666666;
+	}
+	
+	TABLE.productTable TBODY TR.first TD {
+		padding-top: 1mm;
+	}
+	
+	TABLE.productTable TD.unit {
+		text-align: center;
+	}
+	
+	TABLE.productTable TD.amount,
+	TABLE.productTable TD.price,
+	TABLE.productTable TD.total {
+		text-align: right;
+	}
+	
+	TABLE.totalTable {
+		width: 90mm;
+		padding: 1mm 0 0 0;
+		border-top: 1px solid #333333;
+	}
+	
+	TABLE.totalTable TD.price {
+		text-align: right;
+	}
+	
+	TABLE.totalTable TR.total TD {
+		padding-top: 2mm;
+		font-size: 11pt;
+		font-weight: bold;
+	}
+</style>
+
+<!----------------------------------------------------------------------------->
+
+<div style="margin: 0px 10mm; font-family: Myriad Pro; font-size: 9pt;">
+
+<h1 style="text-align: right; font-size: 10pt; margin-bottom: 9pt; font-weight: normal;">FAKTURA č. <strong>{$invoice->id}</strong></h1>
+
+<table width="100%" style="vertical-align: top;">
+	<tr height="7mm">
+		<td width="100mm">
+			Dodavatel:
+		</td>
+
+		<td>
+			Odběratel:<br />
+			<span style="font-size: 8pt; font-style: italic;">Korespondenční adresa</span>
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			<strong>{$invoice->supplier->invoiceAddress->name}</strong><br />
+			{$invoice->supplier->invoiceAddress->street}<br />
+			{$invoice->supplier->invoiceAddress->zip} {$invoice->supplier->invoiceAddress->city}<br />
+			{$invoice->supplier->invoiceAddress->country}<br />
+			<br />
+			IČ: {$invoice->supplier->in}
+			{if $invoice->supplier->tin}DIČ: {$invoice->supplier->tin}{/if}
+		</td>
+		
+		<td>
+			<strong>{$invoice->customer->contactAddress->name}</strong><br />
+			{$invoice->customer->contactAddress->street}<br />
+			{$invoice->customer->contactAddress->zip} {$invoice->customer->contactAddress->city}<br />
+			{$invoice->customer->contactAddress->country}
+		</td>
+	</tr>
+	
+	<tr><td colspan="2" style="border-bottom: 0.1mm solid #888888; height: 3mm;"></td></tr>
+	<tr><td colspan="2" style="height: 1mm;"></td></tr>
+	
+	<tr>
+		<td>
+			{if $invoice->supplier->phone}Telefon: {$invoice->supplier->phone}<br />{/if}
+			{if $invoice->supplier->email}E-mail: {$invoice->supplier->email}<br />{/if}
+			{if $invoice->supplier->webpage}WWW: {$invoice->supplier->webpage}<br />{/if}
+		</td>
+		<td>
+			<div style="height: 9mm; font-size: 8pt; font-style: italic;">Fakturační adresa</div>
+			<strong>{$invoice->customer->invoiceAddress->name}</strong><br />
+			{$invoice->customer->invoiceAddress->street}<br />
+			{$invoice->customer->invoiceAddress->zip} {$invoice->customer->invoiceAddress->city}<br />
+			{$invoice->customer->invoiceAddress->country}
+			<br />
+			<strong>
+				IČ: {$invoice->customer->in}
+				{if $invoice->customer->tin}DIČ: {$invoice->customer->tin}{/if}
+			</strong>
+		</td>
+	</tr>
+	
+	<tr><td colspan="2" style="border-bottom: 0.1mm solid #888888; height: 2mm;"></td></tr>
+	<tr><td colspan="2" style="height: 1mm;"></td></tr>
+	
+	<tr>
+		<td>
+			<div style="height: 10mm; font-size: 8pt; font-style: italic;">Platební údaje</div>
+			<table cellpadding="0" cellspacing="0">
+				<tr>
+					<td width="30mm">
+						Způsob úhrady:<br />
+						Variabilní symbol:<br />
+						{if $invoice->specificSymbol}Specifický symbol:<br />{/if}
+						{if $invoice->constSymbol}Konstantní symbol:<br />{/if}
+						Banka:<br />
+						Číslo účtu:
+					</td>
+					<td>
+						Převodem<br />
+						<strong>{$invoice->varSymbol}</strong><br />
+						{if $invoice->specificSymbol}{$invoice->specificSymbol}<br />{/if}
+						{if $invoice->constSymbol}{$invoice->constSymbol}<br />{/if}
+						{$invoice->supplier->bankAccount->bankName}<br />
+						<strong>{$invoice->supplier->bankAccount->accountNumber}/{$invoice->supplier->bankAccount->bankCode}</strong>
+					</td>
+				</tr>
+			</table>
+		</td>
+		<td>
+			<table>
+				<tr>
+					<td width="40mm">
+						Datum zdanitelného plnění:<br />
+						Datum vystavení:<br />
+						Datum splatnosti:
+					</td>
+					<td style="text-align: right;">
+						{$invoice->getRevenueRecognitionDate()->format('j.m.Y')}<br />
+						{$invoice->getIssuanceDate()->format('j.m.Y')}<br />
+						{$invoice->getDueDate()->format('j.m.Y')}
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	
+	<tr><td colspan="2" style="border-bottom: 0.1mm solid #333333; height: 2mm;"></td></tr>
+</table>
+
+<table class="productTable">	
+	<thead>
+		<tr>
+			<td class="name">Předmět fakturace</td>
+			<td class="amount">Množství</td>
+			<td class="unit">M.J.</td>
+			<td class="price">Cena za jednotku</td>
+			<td class="total">Celkem</td>
+		</tr>
+	</thead>
+	
+	<tbody>
+		<tr n:foreach="$invoice->items as $item" n:class="$iterator->first ? first">
+			<td class="name">{$item->name}</td>
+			<td class="amount">{$item->amount}</td>
+			<td class="unit">{$item->unit}</td>
+			<td class="price">{$item->price|currency:true}</td>
+			<td class="total">{$item->total|currency:true}</td>
+		</tr>
+	</tbody>
+</table>
+	
+</div>
