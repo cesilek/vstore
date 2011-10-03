@@ -39,4 +39,12 @@ class BaseForm extends vBuilder\Application\UI\Controls\RedactionControl {
 	 * @var Nette\Application\UI\Form
 	 */
 	protected $form;
+	
+	public function __construct($parent = null, $name = null) {
+		parent::__construct($parent, $name);
+		
+		Form::extensionMethod('addIntegerPicker', function (Form $form) {
+			
+		});
+	}	
 }

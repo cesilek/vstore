@@ -44,6 +44,7 @@ class ProcessOrderControl extends BaseCartControl {
 	public function __construct($parent = null, $name = null) {
 		parent::__construct($parent, $name);
 		$this->id = $this->presenter->getParam('productId');
+		vBuilder\Application\UI\Form\IntegerPicker::register();
 	}
 	
 	/**
@@ -51,6 +52,7 @@ class ProcessOrderControl extends BaseCartControl {
 	 */
 	public function render() {
 		$template = $this->createTemplate();
+		$this->presenter->templatePrepareFilters($template);
 		$template->setFile(__DIR__.'/templates/default.latte');
 		$template->product = $this->branch->get($this->id);
 		
@@ -67,9 +69,11 @@ class ProcessOrderControl extends BaseCartControl {
 		
 		$form->addHidden('id')
 				->setDefaultValue($this->id);		
-		$form->addText('amount', 'How many?')
+		//$form->addText('amount', 'How many?')
+		$form->addIntegerPicker('amount', 'How Many?')
 				->setDefaultValue(1)
-				->addRule(Form::INTEGER, 'The amount must be a number!');
+				->addRule(vBuilder\Application\UI\Form\IntegerPicker::POSITIVE, 'The number has to be positive!');
+				//->addRule(Form::INTEGER, 'The amount must be a number!');
 		
 		$form->addProtection();
 		$form->addSubmit('s', 'Add to my cart');

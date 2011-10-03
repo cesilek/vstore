@@ -25,6 +25,7 @@ namespace vStore\Application\UI\Controls;
 
 use vStore, Nette,
 	vBuilder,
+	vBuilder\Application\UI\Form\IntegerPicker,
 	Nette\Application\UI\Form;
 
 /**
@@ -43,6 +44,7 @@ class CartControl extends BaseCartControl {
 	public function __construct($parent = null, $name = null) {
 		parent::__construct($parent, $name);
 		$this->data = $this->getContext()->cart->loadAll();
+		IntegerPicker::register();
 	}	
 	
 	public function render() {
@@ -63,12 +65,9 @@ class CartControl extends BaseCartControl {
 		
 		foreach ($this->data as $product) {
 			$form->addCheckbox('check'.$product['pageId']);
-			$form->addText('range'.$product['pageId'])
+			$form->addIntegerPicker('range'.$product['pageId'])
 					->setDefaultValue($product['quantity'])
-					->addRule(Form::INTEGER, 'The number must be an integer!')
-					->addRule(function ($control) {
-						return $control->value < 1 ? !((bool) ($control->value = 1)) : true;
-					}, 'The amount must be greater than zero...')				
+					->addRule(IntegerPicker::POSITIVE, 'The amount must be greater than zero...')
 					->addRule(Form::FILLED, 'The number must be filled!');
 		}
 
