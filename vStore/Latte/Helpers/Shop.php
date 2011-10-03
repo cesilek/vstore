@@ -31,8 +31,8 @@ namespace vStore\Latte\Helpers;
  */
 class Shop {
 
-	public static function currency($value) {
-		return str_replace(" ", "\xc2\xa0", number_format($value, 0, "", " "))."\xc2\xa0Kč";
+	public static function currency($value, $decimals = false) {
+		return str_replace(" ", "\xc2\xa0", number_format($value, $decimals ? 2 : 0, ",", " "))."\xc2\xa0Kč";
 	}
 
 }
