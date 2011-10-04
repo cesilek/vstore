@@ -65,6 +65,10 @@
 <!----------------------------------------------------------------------------->
 
 <style>
+	A {
+		color: #06B;
+	}
+	
 	TABLE {
 		border-collapse: collapse;
 	}
@@ -136,7 +140,7 @@
 			{$invoice->supplier->invoiceAddress->country}<br />
 			<br />
 			IČ: {$invoice->supplier->in}
-			{if $invoice->supplier->tin}DIČ: {$invoice->supplier->tin}{/if}
+			{if $invoice->supplier->tin}&nbsp;&nbsp;&nbsp;DIČ: {$invoice->supplier->tin}{/if}
 		</td>
 		
 		<td>
@@ -153,8 +157,8 @@
 	<tr>
 		<td>
 			{if $invoice->supplier->phone}Telefon: {$invoice->supplier->phone}<br />{/if}
-			{if $invoice->supplier->email}E-mail: {$invoice->supplier->email}<br />{/if}
-			{if $invoice->supplier->webpage}WWW: {$invoice->supplier->webpage}<br />{/if}
+			{if $invoice->supplier->email}E-mail: <a href="{$invoice->supplier->webpage}">{$invoice->supplier->email}</a><br />{/if}
+			{if $invoice->supplier->webpage}WWW: <a href="{$invoice->supplier->webpage}">{$invoice->supplier->webpage}</a><br />{/if}
 		</td>
 		<td>
 			<div style="height: 9mm; font-size: 8pt; font-style: italic;">Fakturační adresa</div>
@@ -164,7 +168,7 @@
 			{$invoice->customer->invoiceAddress->country}
 			<br />
 			<strong>
-				IČ: {$invoice->customer->in}
+				{if $invoice->customer->in}IČ: {$invoice->customer->in}&nbsp;&nbsp;&nbsp;{/if}
 				{if $invoice->customer->tin}DIČ: {$invoice->customer->tin}{/if}
 			</strong>
 		</td>
@@ -184,7 +188,9 @@
 						{if $invoice->specificSymbol}Specifický symbol:<br />{/if}
 						{if $invoice->constSymbol}Konstantní symbol:<br />{/if}
 						Banka:<br />
+						{if $invoice->supplier->bankAccount->swift}SWIFT:<br />{/if}
 						Číslo účtu:
+						{if $invoice->supplier->bankAccount->iban}<br />IBAN:{/if}
 					</td>
 					<td>
 						Převodem<br />
@@ -192,7 +198,9 @@
 						{if $invoice->specificSymbol}{$invoice->specificSymbol}<br />{/if}
 						{if $invoice->constSymbol}{$invoice->constSymbol}<br />{/if}
 						{$invoice->supplier->bankAccount->bankName}<br />
+						{if $invoice->supplier->bankAccount->swift}{$invoice->supplier->bankAccount->swift}<br />{/if}
 						<strong>{$invoice->supplier->bankAccount->accountNumber}/{$invoice->supplier->bankAccount->bankCode}</strong>
+						{if $invoice->supplier->bankAccount->iban}<br />{$invoice->supplier->bankAccount->iban}{/if}
 					</td>
 				</tr>
 			</table>
@@ -206,9 +214,9 @@
 						Datum splatnosti:
 					</td>
 					<td style="text-align: right;">
-						{$invoice->getRevenueRecognitionDate()->format('j.m.Y')}<br />
-						{$invoice->getIssuanceDate()->format('j.m.Y')}<br />
-						{$invoice->getDueDate()->format('j.m.Y')}
+						{$invoice->getRevenueRecognitionDate()->format('j. m. Y')}<br />
+						{$invoice->getIssuanceDate()->format('j. m. Y')}<br />
+						{$invoice->getDueDate()->format('j. m. Y')}
 					</td>
 				</tr>
 			</table>

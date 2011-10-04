@@ -72,14 +72,14 @@ class XmlInvoice extends Invoice {
 	 * @return \DateTime
 	 */
 	function getIssuanceDate() {
-		return \DateTime::createFromFormat('j.m.Y', (String) $this->xml['created']);
+		return \DateTime::createFromFormat('j.m.Y', preg_replace('/\s+/', '', (String) $this->xml['created']));
 	}
 	
 	/**
 	 * @return \DateTime
 	 */
 	function getDueDate() {
-		return \DateTime::createFromFormat('j.m.Y', (String) $this->xml->payment[0]->deadline[0]);
+		return \DateTime::createFromFormat('j.m.Y', preg_replace('/\s+/', '', (String) $this->xml->payment[0]->deadline[0]));
 	}
 		
 	/**
@@ -128,7 +128,13 @@ class XmlInvoice extends Invoice {
 				(int) $this->xml->supplier[0]['ic'],
 				isset($this->xml->supplier[0]['dic']) ? (String) $this->xml->supplier[0]['dic'] : null,
 				$addr,
-				new InvoiceBankAccount($accountNumber, $bankCode, $this->xml->payment[0]->bank[0]),
+				new InvoiceBankAccount(
+						$accountNumber,
+						$bankCode,
+						isset($this->xml->payment[0]->bank[0]) ? $this->xml->payment[0]->bank[0] : null,
+						isset($this->xml->payment[0]->swift[0]) ? $this->xml->payment[0]->swift[0] : null,
+						isset($this->xml->payment[0]->iban[0]) ? $this->xml->payment[0]->iban[0] : null
+				),
 				$this->xml->supplier[0]->email[0],
 				$this->xml->supplier[0]->tel[0],
 				$this->xml->supplier[0]->web[0],
@@ -140,23 +146,32 @@ class XmlInvoice extends Invoice {
 	 * @return IInvoiceParticipant
 	 */
 	function getCustomer() {
-		return new InvoiceParticipant(
-				(int) $this->xml->customer[0]['ic'],
-				isset($this->xml->customer[0]['dic']) ? (String) $this->xml->customer[0]['dic'] : null,
+		$invoiceName = isset($this->xml->customer[0]->invoicename[0]) ? (String) $this->xml->customer[0]->invoicename[0] : (String) $this->xml->customer[0]->name[0];
+		$name = isset($this->xml->customer[0]->name[0]) ? (String) $this->xml->customer[0]->name[0] : (String) $this->xml->customer[0]->invoicename[0];
+		
+		$invoiceAddr = !isset($this->xml->customer[0]->invoiceaddress[0]) ? null :
 				new InvoiceAddress(
-					(String) $this->xml->customer[0]->invoicename[0],
+					$invoiceName,
 					(String) $this->xml->customer[0]->invoiceaddress[0]->street[0],
 					(String) $this->xml->customer[0]->invoiceaddress[0]->city[0],
 					(String) $this->xml->customer[0]->invoiceaddress[0]->postal[0],
 					(String) $this->xml->customer[0]->invoiceaddress[0]->country[0]
-				),
+				);
+		
+		$contactAddr = !isset($this->xml->customer[0]->address[0]) ? $invoiceAddr :
 				new InvoiceAddress(
-					(String) $this->xml->customer[0]->name[0],
+					$name,
 					(String) $this->xml->customer[0]->address[0]->street[0],
 					(String) $this->xml->customer[0]->address[0]->city[0],
 					(String) $this->xml->customer[0]->address[0]->postal[0],
 					(String) $this->xml->customer[0]->address[0]->country[0]
-				)
+				);
+		
+		return new InvoiceParticipant(
+				(int) $this->xml->customer[0]['ic'],
+				isset($this->xml->customer[0]['dic']) ? (String) $this->xml->customer[0]['dic'] : null,
+				$invoiceAddr ? $invoiceAddr : $contactAddr,
+				$contactAddr
 		);
 	}
 	

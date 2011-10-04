@@ -28,8 +28,12 @@ use vBuilder,
 		Nette,
 		mPDF;
 
+// Trailing slashes!
+define("_MPDF_TEMP_PATH", TEMP_DIR . '/mpdf/');
+define('_MPDF_TTFONTDATAPATH', FILES_DIR . '/mpdf-fontdata/');
+
 // TODO: INCLUDE PATH
-include "/var/www/localhost/MPDF53/mpdf.php";
+include LIBS_DIR . '/mPDF/mpdf.php';
 
 /**
  * Renderer of invoices into PDF files
@@ -96,14 +100,15 @@ class InvoicePdfRenderer extends InvoiceRenderer {
 	 * @param IInvoice invoice 
 	 */
 	protected function setup(IInvoice $invoice) {
+		$this->mPdf = null;
 		$tpl = $this->getTemplate();
 		$tpl->invoice = $invoice;
 		
 		
 		// --------
 		$mPdfData = (String) $tpl;
-		$mPdf = $this->getMPdf();
-		$mPdf->WriteHTML($mPdfData);
+		$this->mPdf = $this->createMPdf();
+		$this->mPdf->WriteHTML($mPdfData);
 	}	
 	
 	/**
@@ -111,25 +116,31 @@ class InvoicePdfRenderer extends InvoiceRenderer {
 	 * 
 	 * @return mPDF instance
 	 */
-	protected function getMPdf() {
-		if(!isset($this->mPdf)) {
-			// http://mpdf1.com/manual/index.php?tid=184
-			$this->mPdf = new mPDF(
-				'utf-8',										// Mode
-				'a4',												// Format
-				$this->pageMarginTop,				// Margin left (in mm)
-				$this->pageMarginRight,			// Margin right (in mm)
-				$this->pageMarginBottom,		// Margin top (in mm)
-				$this->pageMarginLeft,			// Margin bottom (in mm)
-				$this->headerHeight,				// Header margin (in mm)
-				$this->footerHeight					// Footer margin (in mm)
-			);
-			
-			$this->mPdf->setAutoFont(0);
+	protected function createMPdf() {
+		if(!is_dir(_MPDF_TEMP_PATH)) {
+			if(@mkdir(_MPDF_TEMP_PATH, 0770, true) === false) // @ - is escalated to exception
+				throw new Nette\IOException("Cannot create directory '"._MPDF_TEMP_PATH."'");
 		}
-					
-					
-		return $this->mPdf;
+
+		if(!is_dir(_MPDF_TTFONTDATAPATH)) {
+			if(@mkdir(_MPDF_TTFONTDATAPATH, 0770, true) === false) // @ - is escalated to exception
+				throw new Nette\IOException("Cannot create directory '"._MPDF_TTFONTDATAPATH."'");
+		}
+
+		// http://mpdf1.com/manual/index.php?tid=184
+		$mPdf = new mPDF(
+			'utf-8',										// Mode
+			'a4',												// Format
+			$this->pageMarginTop,				// Margin left (in mm)
+			$this->pageMarginRight,			// Margin right (in mm)
+			$this->pageMarginBottom,		// Margin top (in mm)
+			$this->pageMarginLeft,			// Margin bottom (in mm)
+			$this->headerHeight,				// Header margin (in mm)
+			$this->footerHeight					// Footer margin (in mm)
+		);
+
+		$mPdf->setAutoFont(0);
+		return $mPdf;
 	}
 	
 	/**
