@@ -29,12 +29,12 @@ use vStore, Nette,
 	Nette\Application\UI\Form;
 
 /**
- * Shop products listing
+ * Cart control
  *
  * @author Jirka Vebr
  * @since Aug 16, 2011
  */
-class CartControl extends BaseCartControl {
+class CartControl extends vStore\Application\UI\Control {
 	
 	/**
 	 * @var array
@@ -43,16 +43,20 @@ class CartControl extends BaseCartControl {
 	
 	public function __construct($parent = null, $name = null) {
 		parent::__construct($parent, $name);
-		$this->data = $this->getContext()->cart->loadAll();
+
+		$this->data = $this->context->cart->loadAll();
 		IntegerPicker::register();
-	}	
-	
-	public function render() {
-		$template = $this->createTemplate();
-		$template->data = (array) $this->data;
-		$template->setFile(__DIR__.'/templates/default.latte');
-		echo $template;
 	}
+	
+	public function getCartData() {
+		return $this->data;
+	}
+	
+	protected function createRenderer() {
+		return new CartRenderer($this);
+	}
+	
+	// ***************************************************************************
 	
 	public function handleDelete($id) {
 		$this->cart->delete(intval($id));
@@ -83,21 +87,22 @@ class CartControl extends BaseCartControl {
 		if ($form['delete']->isSubmittedBy()) {
 			foreach ($this->data as $product) {
 				if ($values['check'.$product['pageId']] === true) {
-					$this->getContext()->cart->delete($product['pageId']);
+					$this->context->cart->delete($product['pageId']);
 				}
 			}
 		} else if ($form['reCount']->isSubmittedBy()) {
 			foreach ($this->data as $product) {
 				if ($values['range'.$product['pageId']] !== $product['quantity']) {
-					$item = $this->branch->get($product['pageId']);
-					$this->getContext()->cart->save($item, $values['range'.$product['pageId']]);
+					$item = $this->redaction->get($product['pageId']);
+					$this->context->cart->save($item, $values['range'.$product['pageId']]);
 				}
 			}
 		} else if ($form['buy']->isSubmittedBy()) {
-			dd('and now whatever will be next...');
+			$this->redirect('deliveryPage');
 		} else {
 			
 		}
 		$this->redirect('this');
 	}
+	
 }

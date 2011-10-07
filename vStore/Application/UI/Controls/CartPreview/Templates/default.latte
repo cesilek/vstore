@@ -2,10 +2,10 @@
 	<div>
 		<div n:class="$count === 0 ? hidden" id="cartPreview">
 			<span><span id="cartPreviewCount">{$count}</span> položek v hodnotě <span id="cartPreviewPrice">{$totalPrice|currency}</span></span><br>
-			<a href="{rlink 7}">Procházet košík</a>
+			<a n:if="isset($cartPageId)" href="{rlink $cartPageId}">Procházet košík</a>
 		</div>
-		<div n:class="$count > 0 ? hidden" id="cartEmpty">
-			V košíku nejsou žádné položky. <a href="#">Jak nakupovat?</a>
+		<div n:class="$count > 0 ? hidden" id="cartPreviewEmpty">
+			{block cartEmpty}V košíku nejsou žádné položky. <a n:if="isset($howtoPageId)" href="{rlink $howtoPageId}">Jak nakupovat?</a>{/block}
 		</div>
 	</div>
 </div>
@@ -14,7 +14,7 @@
 	
 	v3cms.reloadCartPreview = function () {
 		$.getJSON({link reload!}, function (data) {
-			var empty = $('#cartEmpty'),
+			var empty = $('#cartPreviewEmpty'),
 				preview = $('#cartPreview');
 			if (data.count) {
 				empty.hide();

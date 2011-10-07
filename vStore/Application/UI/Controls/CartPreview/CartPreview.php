@@ -28,38 +28,79 @@ use vStore, Nette,
 	Nette\Application\UI\Form;
 
 /**
- * Shop products listing
+ * Mini cart
  *
  * @author Jirka Vebr
  * @since Aug 16, 2011
  */
-class CartPreview extends CartControl {
-	public function render() {
-		$template = $this->createTemplate();
-		$result = $this->processCartData();
-		$template->count = $result['count'];
-		$template->totalPrice = $result['totalPrice'];
-		$template->setFile($this->file ?: __DIR__.'/templates/default.latte');
-		echo $template;
+class CartPreview extends vStore\Application\UI\Control {
+	
+	private $_total;
+	private $_amount;
+
+	/**
+	 * Creates renderer instance
+	 * 
+	 * @return ControlRenderer renderer
+	 */
+	protected function createRenderer() {
+		return new CartPreviewRenderer($this);
 	}
 	
-	protected function processCartData() {
-		$result = array (
-			'count' => 0,
-			'totalPrice' => 0
-		);
-		foreach ((array) $this->cart->loadAll() as $product) {
-			$result['count'] += $product['quantity'];
-			$result['totalPrice'] += $product['price'] * $product['quantity'];
-		}
-		return $result;
+	/**
+	 * Default action handler
+	 */
+	public function actionDefault() {
+		$this->processCartData();
 	}
-
-
+	
+	/**
+	 * AJAX refresh
+	 */
 	public function handleReload() {
-		$result = $this->processCartData();
-		$this->presenter->payload->count = $result['count'];
-		$this->presenter->payload->totalPrice = $this->template->currency($result['totalPrice']);
+		// Forced data refresh
+		$this->processCartData();
+		
+		$this->presenter->payload->count = $this->amount;
+		$this->presenter->payload->totalPrice = $this->template->currency($this->total);
 		$this->presenter->sendPayload();
 	}
+	
+	// ***************************************************************************
+	
+	/**
+	 * Returns current total price of all items
+	 * 
+	 * @return float
+	 */
+	public function getTotal() {
+		if(!isset($this->_total)) $this->processCartData();
+		
+		return $this->_total;
+	}
+	
+	/**
+	 * Returns number of items in the cart
+	 * 
+	 * @return int
+	 */
+	public function getAmount() {
+		if(!isset($this->_amount)) $this->processCartData();
+		
+		return $this->_amount;
+	}
+	
+	/**
+	 * Refresh data from current cart
+	 */
+	protected function processCartData() {
+		$this->_amount = 0;
+		$this->_total = 0.0;
+		
+		foreach ((array) $this->context->cart->loadAll() as $product) {
+			$this->_amount += $product['quantity'];
+			$this->_total += $product['price'] * $product['quantity'];
+		}
+	}
+
 }
