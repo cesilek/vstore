@@ -1,36 +1,42 @@
 {form deliveryPaymentForm}
 
-<table>
-
-	<tr n:foreach="$deliveryMethods as $method">
-		<td class="radioCol">
-			{? echo $form['delivery']->getControl($method->id)->offsetGet(0)}
-		</td>
-		<td class="methodCol">
-			<div class="name">{$method->name}</div>
-			<div class="description" n:if="!empty($method->description)">{$method->description}</div>
-		</td>
-	</tr>
+<div id="shoppingCartDAP" class="shoppingCart">
 	
-</table>
+	<h3 class="first">Způsob dopravy</h3>
+	<table id="shoppingCartDelivery">
 
-<table>
+		<tr n:foreach="$deliveryMethods as $method">
+			<td class="radioCol">
+				{? echo $form['delivery']->getControl($method->id)->offsetGet(0)}
+			</td>
+			<td class="methodCol">
+				<div class="name">{$method->name}</div>
+				<div class="description" n:if="!empty($method->description)">{$method->description}</div>
+			</td>
+		</tr>
 
-	<tr n:foreach="$paymentMethods as $method">
-		<td class="radioCol">
-			{? echo $form['payment']->getControl($method->id)->offsetGet(0)}
-		</td>
-		<td class="methodCol">
-			<div class="name">{$method->name}</div>
-			<div class="description" n:if="!empty($method->description)">{$method->description}</div>
-		</td>
-	</tr>
+	</table>
+
 	
-</table>
+	<h3>Druh platby</h3>
+	<table id="shoppingCartPayment">
 
-<div class="buttonBlock">
-	{input back}
-	{input next}
+		<tr n:foreach="$paymentMethods as $method">
+			<td class="radioCol">
+				{? echo $form['payment']->getControl($method->id)->offsetGet(0)}
+			</td>
+			<td class="methodCol">
+				<div class="name">{$method->name}</div>
+				<div class="description" n:if="!empty($method->description)">{$method->description}</div>
+			</td>
+		</tr>
+
+	</table>
+
+	<div class="buttonBlock">
+		{input back}
+		{input next}
+	</div>
 </div>
 
 {/form}
