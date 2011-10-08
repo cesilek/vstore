@@ -124,6 +124,67 @@ class CartControl extends vStore\Application\UI\Control {
 		return $this->order->amount > 0;
 	}
 	
+	public function createComponentDeliveryPaymentForm() {
+		$form = new Form;
+		$form->onSuccess[] = callback($this, 'deliveryPaymentFormSubmitted');
+		
+		$delivery = array();
+		$defaultDelivery = null;
+		foreach($this->shop->availableDeliveryMethods as $m) {
+			$delivery[$m->id] = $m->name;
+			if(!isset($defaultDelivery))
+				$defaultDelivery = $m->id;
+		}
+		$form->addRadioList('delivery')->setItems($delivery)
+					->addRule(Form::FILLED, 'Způsob platby musí být vybrán.');
+		
+		$defaultDelivery = $this->order->delivery ? $this->order->delivery->id : $defaultDelivery;
+		$form['delivery']->setDefaultValue($defaultDelivery);
+		
+		$payments = array();
+		$defaultPayment = null;
+		foreach($this->shop->availablePaymentMethods as $m) {
+			$payments[$m->id] = $m->name;
+			if(!isset($defaultPayment) && $this->shop->getDeliveryMethod($defaultDelivery)->isSuitableWith($m))
+				$defaultPayment = $m->id;
+		}
+		
+		$form->addRadioList('payment')->setItems($payments)
+					->addRule(Form::FILLED, 'Způsob doručení musí být vybrán.');
+		
+		$defaultPayment = $this->order->payment ? $this->order->payment->id : $defaultPayment;
+		if(isset($defaultPayment))
+				$form['payment']->setDefaultValue($defaultPayment);
+		
+		
+		$form->addSubmit('back', 'Zpět do košíku')->setValidationScope(false);
+		$form->addSubmit('next', 'Pokračovat v objednávce');
+		
+		return $form;
+	}
+	
+	public function deliveryPaymentFormSubmitted(Form $form) {
+		$values = $form->values;
+		
+		if($form['back']->isSubmittedBy()) {
+			$this->redirect('default');
+			
+		} elseif($form['next']->isSubmittedBy()) {
+			
+			try {
+				$this->shop->order->delivery = $this->shop->getDeliveryMethod($values->delivery);
+				$this->shop->order->payment = $this->shop->getPaymentMethod($values->payment);	
+				$this->redirect('customerPage');
+			
+			} catch(vStore\Shop\OrderException $e) {
+				$this->presenter->flashMessage('Zadaný neplatný způsob dobírky či platby.', 'warn');
+				$this->redirect('deliveryPage');
+			}
+			
+		} 
+	}
+	
+	
 	// </editor-fold>	
 	
 	// <editor-fold defaultstate="collapsed" desc="Customer page">

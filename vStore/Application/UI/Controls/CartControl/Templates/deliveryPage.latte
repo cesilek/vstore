@@ -1,3 +1,37 @@
-SELECT DELIVERY METHOD
+{form deliveryPaymentForm}
 
-<a n:href="default">Back</a>
+<table>
+
+	<tr n:foreach="$deliveryMethods as $method">
+		<td class="radioCol">
+			{? echo $form['delivery']->getControl($method->id)->offsetGet(0)}
+		</td>
+		<td class="methodCol">
+			<div class="name">{$method->name}</div>
+			<div class="description" n:if="!empty($method->description)">{$method->description}</div>
+		</td>
+	</tr>
+	
+</table>
+
+<table>
+
+	<tr n:foreach="$paymentMethods as $method">
+		<td class="radioCol">
+			{? echo $form['payment']->getControl($method->id)->offsetGet(0)}
+		</td>
+		<td class="methodCol">
+			<div class="name">{$method->name}</div>
+			<div class="description" n:if="!empty($method->description)">{$method->description}</div>
+		</td>
+	</tr>
+	
+</table>
+
+<div class="buttonBlock">
+	{input back}
+	{input next}
+</div>
+
+{/form}
+

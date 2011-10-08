@@ -134,7 +134,7 @@ class Shop extends vBuilder\Object {
 			foreach($methodIds as $id) {
 				$m = $methods->$id;
 				
-				$this->_availablePaymentMethods[] = new Shop\PaymentMethod($id, $m->get('name', $id), $m->get('description'), $m->get('charge', 0));
+				$this->_availablePaymentMethods[$id] = new Shop\PaymentMethod($id, $m->get('name', $id), $m->get('description'), $m->get('charge', 0));
 			}
 		}
 		

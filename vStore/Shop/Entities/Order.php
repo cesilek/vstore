@@ -187,7 +187,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	function setPayment(IPaymentMethod $method) {
 		$this->checkDeliveryPayment($this->delivery, $method);
 		
-		$this->data->delivery = $method->getId();
+		$this->data->payment = $method->getId();
 	}
 	
 	/**
