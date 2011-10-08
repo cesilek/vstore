@@ -31,32 +31,39 @@ use vStore, Nette,
 /**
  * Cart control
  *
- * @author Jirka Vebr
- * @since Aug 16, 2011
+ * @author Adam Staněk (velbloud)
+ * @since Oct 7, 2011
  */
 class CartControl extends vStore\Application\UI\Control {
 	
-	/**
-	 * @var array
-	 */
-	protected $data;
+	// <editor-fold defaultstate="collapsed" desc="General">
 	
 	public function __construct($parent = null, $name = null) {
 		parent::__construct($parent, $name);
 
-		$this->data = $this->context->cart->loadAll();
 		IntegerPicker::register();
 	}
 	
-	public function getCartData() {
-		return $this->data;
+	/**
+	 * Returns current order
+	 * 
+	 * @return vStore\Shop\Order
+	 */
+	public function getOrder() {
+		return $this->context->shop->order;
 	}
 	
 	protected function createRenderer() {
 		return new CartRenderer($this);
 	}
 	
-	// ***************************************************************************
+	// </editor-fold>	
+	
+	// <editor-fold defaultstate="collapsed" desc="Shopping cart (default)">
+	
+	public function actionDefault() {
+		
+	}
 	
 	public function handleDelete($id) {
 		$this->cart->delete(intval($id));
@@ -67,10 +74,10 @@ class CartControl extends vStore\Application\UI\Control {
 		$form = new Form;
 		$form->onSuccess[] = callback($this, 'cartFormSubmitted');
 		
-		foreach ($this->data as $product) {
-			$form->addCheckbox('check'.$product['pageId']);
-			$form->addIntegerPicker('range'.$product['pageId'])
-					->setDefaultValue($product['quantity'])
+		foreach($this->order->items as $item) {
+			$form->addCheckbox('check'.$item->uniqueId);
+			$form->addIntegerPicker('range'.$item->uniqueId)
+					->setDefaultValue($item->amount)
 					->addRule(IntegerPicker::POSITIVE, 'The amount must be greater than zero...')
 					->addRule(Form::FILLED, 'The number must be filled!');
 		}
@@ -82,19 +89,19 @@ class CartControl extends vStore\Application\UI\Control {
 		return $form;
 	}
 	
+	
 	public function cartFormSubmitted(Form $form) {
 		$values = $form->values;
 		if ($form['delete']->isSubmittedBy()) {
-			foreach ($this->data as $product) {
-				if ($values['check'.$product['pageId']] === true) {
-					$this->context->cart->delete($product['pageId']);
+			foreach ($this->order->items as $item) {
+				if($values['check'.$item->uniqueId] === true) {
+					$item->delete();
 				}
 			}
 		} else if ($form['reCount']->isSubmittedBy()) {
-			foreach ($this->data as $product) {
-				if ($values['range'.$product['pageId']] !== $product['quantity']) {
-					$item = $this->redaction->get($product['pageId']);
-					$this->context->cart->save($item, $values['range'.$product['pageId']]);
+			foreach ($this->order->items as $item) {
+				if($values['range'.$item->uniqueId] !== $item->amount) {
+					$item->amount = $values['range'.$item->uniqueId];
 				}
 			}
 		} else if ($form['buy']->isSubmittedBy()) {
@@ -104,5 +111,33 @@ class CartControl extends vStore\Application\UI\Control {
 		}
 		$this->redirect('this');
 	}
+	
+	// </editor-fold>	
+	
+	// <editor-fold defaultstate="collapsed" desc="Delivery page">
+	
+	public function actionDeliveryPage() {
+		if(!$this->checkDeliveryPage()) $this->redirect('default');
+	}
+	
+	protected function checkDeliveryPage() {
+		return $this->order->amount > 0;
+	}
+	
+	// </editor-fold>	
+	
+	// <editor-fold defaultstate="collapsed" desc="Customer page">
+	
+	public function actionCustomerPage() {
+		if(!$this->checkDeliveryPage()) $this->redirect('default');
+		if(!$this->checkCustomerPage()) $this->redirect('deliveryPage');
+	}
+	
+	protected function checkCustomerPage() {
+		return $this->order->delivery != null && $this->order->payment != null;
+	}
+	
+	// </editor-fold>	
+	
 	
 }

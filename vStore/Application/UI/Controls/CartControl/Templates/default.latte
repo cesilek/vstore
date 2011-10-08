@@ -1,4 +1,4 @@
-{if !empty($data)}
+{if $order->amount > 0}
 	<div>
 		{form cartForm}
 			<ul class="errors" n:if="$form->hasErrors()">
@@ -15,15 +15,13 @@
 					</tr>
 				</thead>
 				<tbody>
-					{var $total = 0}
-					<tr n:foreach="$data as $product">
-						<td>{input 'check'.$product['pageId']}</td>
-						<td>{$product['title']}</td>
-						<td>{input 'range'.$product['pageId']}</td>
+					<tr n:foreach="$order->items as $item">
+						<td>{input 'check'.$item->uniqueId}</td>
+						<td>{$item->name}</td>
+						<td>{input 'range'.$item->uniqueId}</td>
 
-						<td>{$product['price']|currency}</td>
-						<td>{$product['price']*$product['quantity']|currency}</td>
-						{var $total += $product['price']*$product['quantity']}
+						<td>{$item->price|currency}</td>
+						<td>{$item->price*$item->amount|currency}</td>
 					</tr>
 				</tbody>
 				<tfoot>
@@ -33,7 +31,7 @@
 						<td></td>
 						<td></td>
 
-						<td>{$total|currency}</td>
+						<td>{$order->getTotal(true)|currency}</td>
 					</tr>
 				</tfoot>
 			</table>

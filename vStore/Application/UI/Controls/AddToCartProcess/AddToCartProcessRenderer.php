@@ -25,25 +25,23 @@ namespace vStore\Application\UI\Controls;
 
 use vStore, Nette,
 	vBuilder,
+	vBuilder\Application\UI\Form\IntegerPicker,
 	Nette\Application\UI\Form;
 
 /**
- * Shop products listing
+ * Add to cart process renderer
  *
- * @author Jirka Vebr
- * @since Aug 16, 2011
+ * @author Adam Staněk (velbloud)
+ * @since Oct 7, 2011
  */
-abstract class BaseCartControl extends vBuilder\Application\UI\Controls\RedactionControl {
+class AddToCartProcessRenderer extends vStore\Application\UI\ControlRenderer {
+		
+	public function renderDefault() {
+		$this->template->products = $this->control->products;
+	}	
 	
-	/**
-	 * @var vStore\Shop\Cart
-	 */
-	protected $cart;
-	
-	public function __construct($parent = null, $name = null) {
-		parent::__construct($parent, $name);
-		$this->cart = $this->getContext()->cart;
-		$this->cart->setStorage(new vStore\Shop\SessionCartStorage($this->getContext()));
+	public function renderSuccess() {
+		
 	}
-
+	
 }

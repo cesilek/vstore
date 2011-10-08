@@ -24,7 +24,8 @@
 namespace vStore\Redaction\Documents;
 
 use vBuilder,
-	vBuilder\Redaction\Document;
+		vBuilder\Redaction\Document,
+		vStore;
 
 /**
  * Basic redaction data type
@@ -40,7 +41,7 @@ use vBuilder,
  * @author Adam Staněk (velbloud)
  * @since Aug 16, 2011
  */
-class Product extends Document implements \vStore\Shop\ICartItem {
+class Product extends Document implements vStore\Shop\IProduct {
 	
 	public function getId() {
 		return parent::getId();

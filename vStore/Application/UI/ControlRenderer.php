@@ -33,6 +33,14 @@ use vBuilder, Nette;
  */
 class ControlRenderer extends vBuilder\Application\UI\CmsControlRenderer {
 	
+	/**
+	 * Returns shop instance (shortcut)
+	 * 
+	 * @return vStore\Shop
+	 */
+	final public function getShop() {
+		return $this->context->shop;
+	}
 	
 	public function createTemplate($class = NULL) {
 		$template = parent::createTemplate($class);

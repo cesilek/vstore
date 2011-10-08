@@ -28,17 +28,17 @@ use vStore,
 	 vBuilder;
 
 /**
- * @author Jirka Vebr
+ * Interface of products
+ *
+ * @author Adam Staněk (velbloud)
+ * @since Oct 7, 2011
  */
-interface ICartItem {
-	
-	public function getId();
-	
+interface IProduct {
+
 	public function getPageId();
 	
 	public function getTitle();
 	
 	public function getPrice();
 	
-	//public function getVat(); // WTF?!?
 }

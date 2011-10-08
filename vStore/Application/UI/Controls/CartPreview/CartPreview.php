@@ -30,8 +30,8 @@ use vStore, Nette,
 /**
  * Mini cart
  *
- * @author Jirka Vebr
- * @since Aug 16, 2011
+ * @author Adam Staněk (velbloud)
+ * @since Oct 7, 2011
  */
 class CartPreview extends vStore\Application\UI\Control {
 	
@@ -48,19 +48,9 @@ class CartPreview extends vStore\Application\UI\Control {
 	}
 	
 	/**
-	 * Default action handler
-	 */
-	public function actionDefault() {
-		$this->processCartData();
-	}
-	
-	/**
 	 * AJAX refresh
 	 */
 	public function handleReload() {
-		// Forced data refresh
-		$this->processCartData();
-		
 		$this->presenter->payload->count = $this->amount;
 		$this->presenter->payload->totalPrice = $this->template->currency($this->total);
 		$this->presenter->sendPayload();
@@ -69,14 +59,12 @@ class CartPreview extends vStore\Application\UI\Control {
 	// ***************************************************************************
 	
 	/**
-	 * Returns current total price of all items
+	 * Returns current total price of all items (products only)
 	 * 
 	 * @return float
 	 */
 	public function getTotal() {
-		if(!isset($this->_total)) $this->processCartData();
-		
-		return $this->_total;
+		return $this->shop->order->getTotal(true);
 	}
 	
 	/**
@@ -85,22 +73,7 @@ class CartPreview extends vStore\Application\UI\Control {
 	 * @return int
 	 */
 	public function getAmount() {
-		if(!isset($this->_amount)) $this->processCartData();
-		
-		return $this->_amount;
-	}
-	
-	/**
-	 * Refresh data from current cart
-	 */
-	protected function processCartData() {
-		$this->_amount = 0;
-		$this->_total = 0.0;
-		
-		foreach ((array) $this->context->cart->loadAll() as $product) {
-			$this->_amount += $product['quantity'];
-			$this->_total += $product['price'] * $product['quantity'];
-		}
+		return $this->shop->order->getAmount();
 	}
 
 }

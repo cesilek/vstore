@@ -21,29 +21,39 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Application\UI\Controls;
-
-use vStore, Nette,
-	vBuilder,
-	vBuilder\Application\UI\Form\IntegerPicker,
-	Nette\Application\UI\Form;
+namespace vStore\Shop;
 
 /**
- * Cart renderer
+ * Interface of shop delivery method data class
  *
  * @author Adam Staněk (velbloud)
  * @since Oct 7, 2011
  */
-class CartRenderer extends vStore\Application\UI\ControlRenderer {
-		
-	public function renderDefault() {
-		$this->template->order = $this->control->order;
-	}
+interface IDeliveryMethod {
 	
-	public function renderDeliveryPage() {
-		$this->template->deliveryMethods = $this->shop->availableDeliveryMethods;
-		$this->template->paymentMethods = $this->shop->availablePaymentMethods;
-		$this->template->order = $this->shop->order;
-	}
-		
+	/**
+	 * @return string
+	 */
+	function getId();
+	
+	/**
+	 * @return float 
+	 */
+	function getCharge();
+	
+	/**
+	 * @return string
+	 */
+	function getName();
+	
+	/**
+	 * @return string
+	 */
+	function getDescription();
+	
+	/**
+	 * @return bool
+	 */
+	function isSuitableWith($payment);
+	
 }

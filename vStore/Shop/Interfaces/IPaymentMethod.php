@@ -23,24 +23,32 @@
 
 namespace vStore\Shop;
 
-use vStore,
-	Nette,
-	 vBuilder;
-
 /**
- * @author Jirka Vebr
+ * Interface of shop payment method data class
+ *
+ * @author Adam Staněk (velbloud)
+ * @since Oct 7, 2011
  */
-interface ICartStorage {
+interface IPaymentMethod {
 	
-	public function __construct(Nette\DI\IContainer $container);
-
-	public function load($id);
+	/**
+	 * @return string
+	 */
+	function getId();
 	
-	public function save(ICartItem $item, $quantity);
+	/**
+	 * @return float 
+	 */
+	function getCharge();
 	
-	public function add(ICartItem $item, $quantity = 1);
+	/**
+	 * @return string
+	 */
+	function getName();
 	
-	public function delete($id, $number = 0);
+	/**
+	 * @return string
+	 */
+	function getDescription();
 	
-	public function loadAll();
 }

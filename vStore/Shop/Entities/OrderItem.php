@@ -24,17 +24,37 @@
 namespace vStore\Shop;
 
 use vStore,
-	Nette,
-	 vBuilder;
+		vBuilder,
+		Nette;
 
 /**
- * @author Jirka Vebr
+ * Model for ordered items
+ *
+ * @Column(order, pk, type="integer")
+ * @Column(productId, pk, type="integer")
+ * @Column(name)
+ * @Column(amount, type="integer")
+ * @Column(price, type="float")
+ * @Column(params, type="Json")
+ * 
+ * @author Adam Staněk (velbloud)
+ * @since Oct 7, 2011
  */
-abstract class BaseStorage extends vBuilder\Object {
+class OrderItem extends vBuilder\Orm\ActiveEntity {
 	
-	protected $context;
+	/**
+	 * Returns unique id in the cart
+	 * 
+	 * @return string up to 32 char log 
+	 */
+	public function getUniqueId() {
+		if($this->params == null || count($this->params->toArray()) == 0) {
+			return $this->productId;
+		} else {
+			return md5($this->productId . $this->data->params);
+		}
+	}
 	
-	public function __construct(Nette\DI\IContainer $container) {
-		$this->context = $container;
-	}	
+
+		
 }

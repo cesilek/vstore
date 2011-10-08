@@ -23,32 +23,14 @@
 
 namespace vStore\Shop;
 
-use vStore,
-	Nette,
-	 vBuilder;
-
 /**
- * @author Jirka Vebr
+ * Exception for order error handling
+ *
+ * @author Adam Staněk (velbloud)
+ * @since Oct 7, 2011
  */
-class DbCartStorage extends BaseStorage implements ICartStorage {
+class OrderException extends \Exception {
+
+	const UNSUITABLE_DELIVERY_PAYMENT = 1;
 	
-	public function load($id) {
-		
-	}
-	
-	public function save(ICartItem $item, $quantity) {
-		
-	}
-	
-	public function add(ICartItem $item, $quantity = 1) {
-		
-	}
-	
-	public function delete($id, $number = 0) {
-		
-	}
-	
-	public function loadAll() {
-		
-	}
 }

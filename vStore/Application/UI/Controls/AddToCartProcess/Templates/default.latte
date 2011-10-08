@@ -1,0 +1,59 @@
+<style type="text/css">
+	#cartDetails {
+		float: left;
+		margin: 1.5em 1.5em 0 2.5em;
+	}
+</style>
+<div id="cartConfirm" class="productListingBlock">
+	<div id="productPreview">
+		{* TODO *}
+	</div>
+	<div id="cartDetails">
+		{form adjustOrderForm}
+			<table>
+				<tr n:foreach="$products as $product">
+					<td>{$product->title}</td>
+					{var $tmp = 'amount' . $product->pageId}
+					<td>{input $tmp}</td>
+				</tr>
+			</table>
+
+			{input s}
+		{/form}
+	</div>	
+</div>
+<div class="hidden">
+	<div id="cartError">
+		The content of this element will appear in the lightbox in case of an
+		error.
+	</div>
+</div>
+<script type="text/javascript">
+	$(function () {
+		$('#cartConfirm').find('form').submit(function (e) {
+			//error
+			$(this).ajaxSubmit(function (data, textStatus, jqXHR) {
+				if (data.success === true) {
+					$.colorbox({ 
+						href: {link success}
+					});
+				} else if (data.redirect) {
+					window.location.href = data.redirect;
+				} else {
+					$.colorbox({ 
+						inline: true,
+						href: '#cartError'
+					});
+				}
+			});			
+			
+			e.stopImmediatePropagation();
+			e.preventDefault();
+			return false; 
+		});
+		$('#close').click(function (e) {
+			$.colorbox.close();
+			e.preventDefault();
+		});
+	});
+</script>

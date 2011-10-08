@@ -40,10 +40,106 @@ class Shop extends vBuilder\Object {
 	 */
 	protected $context;
 	
+	private $_order;
+	private $_availableDeliveryMethods;
+	private $_availablePaymentMethods;
+	
 	public function __construct(Nette\DI\IContainer $context) {
-		$this->context = $context;
+		$this->context = $context;	
 	}
 	
+	public function __destruct() {
+		if(isset($this->_order)) {
+			$this->_order->save();
+		}
+	}
+	
+	/**
+	 * Returns order. If ID is null, then current (session) order is returned.
+	 * 
+	 * @param int id
+	 * 
+	 * @return Order
+	 */
+	public function getOrder($id = null) {
+		if($id !== null) {
+			$this->context->repository->get('vStore\\Shop\\Order', $id);
+		} else {
+			if(!isset($this->_order)) {
+				$this->_order = $this->context->sessionRepository->get('vStore\\Shop\\Order');
+			}
+
+			return $this->_order;
+		}
+	}
+	
+	/**
+	 * Returns delivery method object
+	 * 
+	 * @param string id of method
+	 * @return IDeliveryMethod 
+	 */
+	public function getDeliveryMethod($id) {
+		if($id === null) return null;
+		
+		if(!isset($this->availableDeliveryMethods[$id]))
+			throw new Nette\InvalidArgumentException("Delivery method '$id' not defined");
+		
+		return $this->availableDeliveryMethods[$id];
+	}
+	
+	/**
+	 * Returns available delivery methods
+	 * 
+	 * @return array of IDeliveryMethod
+	 */
+	public function getAvailableDeliveryMethods() {
+		if(!isset($this->_availableDeliveryMethods)) {
+			$methods = $this->context->config->shop->deliveryMethods;
+			$methodIds = $methods->getKeys();
+			foreach($methodIds as $id) {
+				$m = $methods->$id;
+				
+				$this->_availableDeliveryMethods[$id] = new Shop\DeliveryMethod($id, $m->get('name', $id), $m->get('description'), $m->get('charge', 0), $m->get('suitablePayments') ? $m->get('suitablePayments')->toArray() : null);
+			}
+		}
+		
+		return $this->_availableDeliveryMethods;
+	}
+	
+	/**
+	 * Returns payment method object
+	 * 
+	 * @param string id of method
+	 * @return IPaymentMethod 
+	 */
+	public function getPaymentMethod($id) {
+		if($id === null) return null;
+		
+		if(!isset($this->availablePaymentMethods[$id]))
+			throw new Nette\InvalidArgumentException("Payment method '$id' not defined");
+		
+		return $this->availablePaymentMethods[$id];
+	}
+	
+	/**
+	 * Returns available payment methods
+	 * 
+	 * @return array of IPaymentMethod
+	 */
+	public function getAvailablePaymentMethods() {
+		if(!isset($this->_availablePaymentMethods)) {
+			$methods = $this->context->config->shop->paymentMethods;
+			$methodIds = $methods->getKeys();
+			foreach($methodIds as $id) {
+				$m = $methods->$id;
+				
+				$this->_availablePaymentMethods[] = new Shop\PaymentMethod($id, $m->get('name', $id), $m->get('description'), $m->get('charge', 0));
+			}
+		}
+		
+		return $this->_availablePaymentMethods;
+	}
 	
 	
 }
