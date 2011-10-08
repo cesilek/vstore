@@ -1,1 +1,13 @@
-Success
+{block content}
+
+<a href="{$presenter->link('default', array ('id'=>7))}">Zobrazit košík</a>
+<a href="{$presenter->link('default', array ('id'=>2))}" id="continueShopping">Pokračovat v nákupu</a>
+<script type="text/javascript">
+	$(function () {
+		$('#continueShopping').click(function (e) {
+			v3cms.reloadCartPreview();
+			$.colorbox.close();
+			e.preventDefault();
+		});
+	});
+</script>
