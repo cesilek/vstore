@@ -111,9 +111,9 @@ class AddToCartProcess extends vStore\Application\UI\Control {
 	}
 	
 	public function actionDefault() {
-		/* foreach($this->products as $product) {
-			$this->shop->order->addProduct($this->products);
-		} */
+		$order = $this->context->shop->order;
+		$this->template->productSum = $order->getAmount();
+		$this->template->totalPrice = $order->getTotal();
 	}
 	
 	public function createComponentAdjustOrderForm($name) {
