@@ -20,7 +20,30 @@
 
 			{input s}
 		{/form}
-	</div>	
+	</div>
+	<table>
+		<tbody>
+			<tr>
+				<td>Current price</td>
+				<td>&nbsp;</td>
+				<td>{$totalPrice|currency}</td>
+			</tr>
+			{var $addToTotal = 0}
+			<tr n:foreach="$products as $product">
+				<td>{$product->title}</td>
+				<td id="productQuantity{$product->pageId}">1 ks</td>
+				<td id="productPrice{$product->pageId}">{$product->price|currency}</td>
+				{var $addToTotal += $product->price}
+			</tr>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td>The price of the purchase</td>
+				<td>&nbsp;</td>
+				<td id="totalPrice">{$totalPrice+$addToTotal|currency}</td>
+			</tr>
+		</tfoot>
+	</table>
 </div>
 <div class="hidden">
 	<div id="cartError">
@@ -30,6 +53,15 @@
 </div>
 <script type="text/javascript">
 	$(function () {
+		var productPrices = {
+		{foreach $products as $product}
+			{$product->pageId}: {$product->price},
+		{/foreach}
+			total: {$totalPrice+$addToTotal},
+			tempTotal: {$totalPrice+$addToTotal},
+			lastInput: 0
+		}
+		
 		$('#cartConfirm').find('form').submit(function (e) {
 			//error
 			$(this).ajaxSubmit(function (data, textStatus, jqXHR) {
@@ -54,6 +86,25 @@
 		$('#close').click(function (e) {
 			$.colorbox.close();
 			e.preventDefault();
+		});
+		
+		$('.integerPicker').change(function () {
+			var $this = $(this),
+				amount = parseInt($this.val(), 10),
+				pageId = $this.attr('name').match(/\d+/)[0],
+				currency = function (arg) {
+					return arg.toLocaleString().replace(' ', '&nbsp;') + ' Kč';
+				};
+			if (productPrices.lastInput !== pageId) {
+				productPrices.total = productPrices.tempTotal;
+			}
+			var newTotal = Math.round(productPrices.total + (amount-1)*productPrices[pageId]);
+			productPrices.lastInput = pageId;
+			$('#productQuantity'+pageId).html(''+amount+' ks');
+			$('#productPrice'+pageId).html(currency(amount*productPrices[pageId]));
+			$('#totalPrice').html(currency(newTotal));
+			console.log(productPrices.total, amount, newTotal);
+			productPrices.tempTotal = newTotal;
 		});
 	});
 </script>
