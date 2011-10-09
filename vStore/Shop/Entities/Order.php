@@ -161,6 +161,8 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	 * Sets delivery method
 	 * 
 	 * @param IDeliveryMethod method
+	 * 
+	 * @throws OrderException if methods are not meant to be used together
 	 */
 	function setDelivery(IDeliveryMethod $method) {
 		$this->checkDeliveryPayment($method, $this->payment);
@@ -185,11 +187,28 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	 * Sets payment method
 	 * 
 	 * @param IPaymentMethod method
+	 * 
+	 * @throws OrderException if methods are not meant to be used together
 	 */
 	function setPayment(IPaymentMethod $method) {
 		$this->checkDeliveryPayment($this->delivery, $method);
 		
 		$this->data->payment = $method->getId();
+	}
+	
+	/**
+	 * Sets both delivery and payment to avoid dependency hell
+	 * 
+	 * @param IDeliveryMethod delivery
+	 * @param IPaymentMethod payment
+	 * 
+	 * @throws OrderException if methods are not meant to be used together
+	 */
+	function setDeliveryAndPayment(IDeliveryMethod $delivery, IPaymentMethod $payment) {
+		$this->checkDeliveryPayment($delivery, $payment);
+		
+		$this->data->delivery = $delivery->getId();
+		$this->data->payment = $payment->getId();
 	}
 	
 	/**

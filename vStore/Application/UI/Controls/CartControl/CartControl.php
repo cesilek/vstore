@@ -172,8 +172,11 @@ class CartControl extends vStore\Application\UI\Control {
 		} elseif($form['next']->isSubmittedBy()) {
 			
 			try {
-				$this->shop->order->delivery = $this->shop->getDeliveryMethod($values->delivery);
-				$this->shop->order->payment = $this->shop->getPaymentMethod($values->payment);	
+				$this->shop->order->setDeliveryAndPayment(
+								$this->shop->getDeliveryMethod($values->delivery),
+								$this->shop->getPaymentMethod($values->payment)
+				);
+				
 				$this->redirect('customerPage');
 			
 			} catch(vStore\Shop\OrderException $e) {

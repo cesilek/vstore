@@ -113,7 +113,7 @@ class DeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 		if($payment instanceof IPaymentMethod) $payment = $payment->getId();
 		
 		foreach($this->_suitablePayments as $curr) {
-			if($curr === $payment) return true;
+			if($curr == $payment) return true;
 		}
 		
 		return false;
