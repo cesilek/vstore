@@ -11,6 +11,11 @@
 		<div n:if="$order->customer->phone" class="phone">Telefon: <span class="value">{$order->customer->phone}</span></div>
 	</div>
 	
+	<div class="shippingAddress" n:if="$order->delivery instanceof vStore\Shop\ParcelDeliveryMethod">
+		<div class="street">{$order->address->street}</div>
+		<div class="city">{$order->address->zip} {$order->address->city}</div>
+		<div class="country">{$order->address->country}</div>
+	</div>
 	
 	<div class="buttonBlock">
 		{input back}

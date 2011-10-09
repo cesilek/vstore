@@ -35,6 +35,7 @@ use vStore,
  * @Column(payment)
  * @Column(items, type="OneToMany", entity="vStore\Shop\OrderItem", joinOn="id=order")
  * @Column(customer, type="OneToOne", entity="vStore\Shop\CustomerInfo", joinOn="customer=id")
+ * @Column(address, type="OneToOne", entity="vStore\Shop\ShippingAddress", joinOn="address=id")
  * @Column(note)
  * 
  * @author Adam Staněk (velbloud)

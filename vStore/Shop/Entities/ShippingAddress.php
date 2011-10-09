@@ -28,18 +28,18 @@ use vStore,
 		Nette;
 
 /**
- * Customer info data holder
+ * Customer shipping address
  *
  * @Column(id, pk, type="integer", generatedValue)
- * @Column(name)
- * @Column(surname)
- * @Column(email)
- * @Column(phone)
+ * @Column(street)
+ * @Column(city)
+ * @Column(zip)
+ * @Column(country)
  * 
  * @author Adam Staněk (velbloud)
  * @since Oct 8, 2011
  */
-class CustomerInfo extends vBuilder\Orm\ActiveEntity {
+class ShippingAddress extends vBuilder\Orm\ActiveEntity {
 	
 	
 	

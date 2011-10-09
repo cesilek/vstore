@@ -232,6 +232,14 @@ class CartControl extends vStore\Application\UI\Control {
 						->addRule(Form::FILLED, 'Je nutné vyplnit adresu (PSČ).');
 
 			$form->addSelect('country', 'Země', $this->order->delivery->availableCountries);
+			
+			if($this->order->address) {
+				$form['street']->setDefaultValue($this->order->address->street);
+				$form['city']->setDefaultValue($this->order->address->city);
+				$form['zip']->setDefaultValue($this->order->address->zip);
+				$form['country']->setDefaultValue($this->order->address->country);
+			}
+			
 		}
 		
 		$form->addTextArea('note', 'Poznámka');		
@@ -266,6 +274,16 @@ class CartControl extends vStore\Application\UI\Control {
 			$this->order->customer->phone = $values->phone;
 			
 			$this->order->note = $values->note;
+			
+			if($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
+				if($this->order->address == null)
+					$this->order->address = $this->order->repository->create('vStore\\Shop\\ShippingAddress');
+				
+				$this->order->address->street = $values->street;
+				$this->order->address->city = $values->city;
+				$this->order->address->zip = $values->zip;
+				$this->order->address->country = $values->country;
+			}
 			
 			$this->redirect('reviewPage');
 		} 
