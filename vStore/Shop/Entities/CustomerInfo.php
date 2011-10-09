@@ -21,33 +21,26 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Application\UI\Controls;
+namespace vStore\Shop;
 
-use vStore, Nette,
-	vBuilder,
-	vBuilder\Application\UI\Form\IntegerPicker,
-	Nette\Application\UI\Form;
+use vStore,
+		vBuilder,
+		Nette;
 
 /**
- * Cart renderer
+ * Basic order implementation
  *
+ * @Column(id, pk, type="integer", generatedValue)
+ * @Column(name)
+ * @Column(surname)
+ * @Column(email)
+ * @Column(phone)
+ * 
  * @author Adam Staněk (velbloud)
- * @since Oct 7, 2011
+ * @since Oct 8, 2011
  */
-class CartRenderer extends vStore\Application\UI\ControlRenderer {
-		
-	public function renderDefault() {
-		$this->template->order = $this->control->order;
-	}
+class CustomerInfo extends vBuilder\Orm\ActiveEntity {
 	
-	public function renderDeliveryPage() {
-		$this->template->deliveryMethods = $this->shop->availableDeliveryMethods;
-		$this->template->paymentMethods = $this->shop->availablePaymentMethods;
-		$this->template->order = $this->shop->order;
-	}
 	
-	public function renderReviewPage() {
-		$this->template->order = $this->shop->order;
-	}
-		
+	
 }

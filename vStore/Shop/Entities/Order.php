@@ -34,6 +34,8 @@ use vStore,
  * @Column(delivery)
  * @Column(payment)
  * @Column(items, type="OneToMany", entity="vStore\Shop\OrderItem", joinOn="id=order")
+ * @Column(customer, type="OneToOne", entity="vStore\Shop\CustomerInfo", joinOn="customer=id")
+ * @Column(note)
  * 
  * @author Adam Staněk (velbloud)
  * @since Oct 7, 2011

@@ -233,10 +233,12 @@ class CartControl extends vStore\Application\UI\Control {
 		
 		$form->addTextArea('note', 'Poznámka');		
 		
-		
 		if($this->order->customer) {
 			$form['name']->setDefaultValue($this->order->customer->name);
 			$form['surname']->setDefaultValue($this->order->customer->surname);
+			$form['email']->setDefaultValue($this->order->customer->email);
+			$form['phone']->setDefaultValue($this->order->customer->phone);
+			$form['note']->setDefaultValue($this->order->note);
 		}
 		
 		$form->addSubmit('back', 'Zpět k výběru dopravy')->setValidationScope(false);
@@ -257,11 +259,52 @@ class CartControl extends vStore\Application\UI\Control {
 			
 			$this->order->customer->name = $values->name;
 			$this->order->customer->surname = $values->surname;
-
+			$this->order->customer->email = $values->email;
+			$this->order->customer->phone = $values->phone;
+			
+			$this->order->note = $values->note;
+			
+			$this->redirect('reviewPage');
 		} 
 	}
 	
 	// </editor-fold>	
+	
+	// <editor-fold defaultstate="collapsed" desc="Review page (last)">
+	
+	public function actionReviewPage() {
+		if(!$this->checkDeliveryPage()) $this->redirect('default');
+		if(!$this->checkCustomerPage()) $this->redirect('deliveryPage');
+		if(!$this->checkReviewPage()) $this->redirect('customerPage');
+	}
+	
+	protected function checkReviewPage() {
+		// TODO: adresa u parceldeliverymethod
+		return $this->order->customer != null;
+	}
+	
+	public function createComponentReviewForm() {
+		$form = new Form;
+		$form->onSuccess[] = callback($this, 'reviewFormSubmitted');
+		
+		$form->addSubmit('back', 'Zpět k zadání osobních údajů')->setValidationScope(false);
+		$form->addSubmit('next', 'Dokončit objednávku');
+		
+		return $form;
+	}
+	
+	public function reviewFormSubmitted(Form $form) {
+
+		if($form['back']->isSubmittedBy()) {
+			$this->redirect('customerPage');
+			
+		} elseif($form['next']->isSubmittedBy()) {
+			
+			$this->redirect('reviewPage');
+		} 
+	}
+	
+	// </editor-fold>
 	
 	
 }

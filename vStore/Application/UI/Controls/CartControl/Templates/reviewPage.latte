@@ -1,0 +1,21 @@
+{form reviewForm}
+
+<div id="shoppingCartReview" class="shoppingCart">	
+
+	<div class="delivery">Doprava zboží: <span class="value">{$order->delivery->name}</span></div>
+	<div class="payment">Způsob úhrady: <span class="value">{$order->payment->name}</span></div>
+	
+	<div class="customerInfo">
+		<div class="nameAndSurname"><span class="name">{$order->customer->name}</span> <span class="name">{$order->customer->surname}</span></div>
+		<div n:if="$order->customer->email" class="email">E-mail: <span class="value">{$order->customer->email}</span></div>
+		<div n:if="$order->customer->phone" class="phone">Telefon: <span class="value">{$order->customer->phone}</span></div>
+	</div>
+	
+	
+	<div class="buttonBlock">
+		{input back}
+		{input next}
+	</div>
+</div>
+
+{/form}
