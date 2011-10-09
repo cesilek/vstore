@@ -215,6 +215,12 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 				$values[] = (int) substr($name, 7); // strip the 'product' prefix
 			}
 		}
+		if($this->presenter->isAjax()) {
+			$this->presenter->payload->success = true;
+			$this->presenter->payload->values = $values;
+			$this->presenter->sendPayload();
+		}
+		
 		$this->presenter->redirect('addToCart', array ('product' => $values));
 	}
 
