@@ -98,7 +98,7 @@
 			if (productPrices.lastInput !== pageId) {
 				productPrices.total = productPrices.tempTotal;
 			}
-			var newTotal = Math.round(productPrices.total + (amount-1)*productPrices[pageId]);
+			var newTotal = productPrices.total + (amount-1)*productPrices[pageId];
 			productPrices.lastInput = pageId;
 			$('#productQuantity'+pageId).html(''+amount+' ks');
 			$('#productPrice'+pageId).html(currency(amount*productPrices[pageId]));
