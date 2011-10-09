@@ -93,17 +93,16 @@
 				amount = parseInt($this.val(), 10),
 				pageId = $this.attr('name').match(/\d+/)[0],
 				currency = function (arg) {
-					return arg.toLocaleString().replace(' ', '&nbsp;') + ' Kč';
+					return Math.round(arg).toLocaleString().replace(' ', '&nbsp;') + ' Kč';
 				};
 			if (productPrices.lastInput !== pageId) {
 				productPrices.total = productPrices.tempTotal;
 			}
-			var newTotal = Math.round(productPrices.total + (amount-1)*productPrices[pageId]);
+			var newTotal = productPrices.total + (amount-1)*productPrices[pageId];
 			productPrices.lastInput = pageId;
 			$('#productQuantity'+pageId).html(''+amount+' ks');
 			$('#productPrice'+pageId).html(currency(amount*productPrices[pageId]));
 			$('#totalPrice').html(currency(newTotal));
-			console.log(productPrices.total, amount, newTotal);
 			productPrices.tempTotal = newTotal;
 		});
 	});
