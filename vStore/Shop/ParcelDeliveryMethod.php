@@ -23,37 +23,46 @@
 
 namespace vStore\Shop;
 
-use vBuilder,
+use vStore,
+		vBuilder,
 		Nette;
 
 /**
- * Interface of shop delivery method data class
+ * Implementation of parce delivery method
  *
  * @author Adam Staněk (velbloud)
- * @since Oct 7, 2011
+ * @since Oct 8, 2011
  */
-interface IDeliveryMethod {
+class ParcelDeliveryMethod extends DeliveryMethod {
 	
-	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context);
-	
-	/**
-	 * @return string
-	 */
-	function getId();
-		
-	/**
-	 * @return string
-	 */
-	function getName();
+	protected $_countries;
 	
 	/**
-	 * @return string
+	 * Creates method from app configuration
+	 * 
+	 * @param string id
+	 * @param vBuilder\Config\ConfigDAO config
+	 * @param Nette\DI\IContainer DI context
 	 */
-	function getDescription();
+	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
+		$method = parent::fromConfig($id, $config, $context);
+		
+		$method->_countries = array();
+		foreach($config->get('countries')->getKeys() as $key) {
+			$country = $config->get('countries')->{$key};
+			$method->_countries[$key] = $country->get('name', $key);
+		}
+		
+		return $method;
+	}
 		
 	/**
-	 * @return bool
+	 * Returns array of all available countries
+	 * 
+	 * @return array of countries (code => name)
 	 */
-	function isSuitableWith($payment);
-		
+	function getAvailableCountries() {
+		return $this->_countries;
+	}	
+	
 }

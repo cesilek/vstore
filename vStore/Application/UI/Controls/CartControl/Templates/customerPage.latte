@@ -1,1 +1,57 @@
-CUSTOMER PAGE!
+{form customerForm}
+<div id="shoppingCartCustomer" class="shoppingCart">
+	
+	<h3 class="first">Osobní údaje</h3>
+	<table>
+		<tr>
+			<td class="label">{$form['name']->label}<span class="requiredStar" n:if="$form['email']->required">*</span></td>
+			<td class="control">{$form['name']->control}</td>
+			
+			<td class="label label2">{$form['surname']->label}<span class="requiredStar" n:if="$form['email']->required">*</span></td>
+			<td class="control control2">{$form['surname']->control}</td>
+		</tr>
+	</table>
+	
+	<h3>Kontaktní údaje</h3>
+	<table>
+		<tr>
+			<td class="label">{$form['email']->label}<span class="requiredStar" n:if="$form['email']->required">*</span></td>
+			<td class="control">{$form['email']->control}</td>
+			
+			<td class="label label2">{$form['phone']->label}<span class="requiredStar" n:if="$form['email']->required">*</span></td>
+			<td class="control control2">{$form['phone']->control}</td>
+		</tr>
+	</table>
+	
+	{if isset($form['street'])}
+		<h3>Dodací adresa</h3>
+		<table>
+			<tr>
+				<td class="label">{$form['street']->label}<span class="requiredStar" n:if="$form['street']->required">*</span></td>
+				<td class="control">{$form['street']->control}</td>
+
+				<td class="label label2">{$form['city']->label}<span class="requiredStar" n:if="$form['city']->required">*</span></td>
+				<td class="control control2">{$form['city']->control}</td>
+			</tr>
+			
+			<tr>
+				<td class="label">{$form['zip']->label}<span class="requiredStar" n:if="$form['zip']->required">*</span></td>
+				<td class="control">{$form['zip']->control}</td>
+
+				<td class="label label2">{$form['country']->label}<span class="requiredStar" n:if="$form['country']->required">*</span></td>
+				<td class="control control2">{$form['country']->control}</td>
+			</tr>
+		</table>
+	{/if}
+		
+	<h3>{$form['note']->label}</h3>
+	<div class="noteControlBlock">
+		{$form['note']->control}
+	</div>
+
+	<div class="buttonBlock">
+		{input back}
+		{input next}
+	</div>
+</div>	
+{/form}

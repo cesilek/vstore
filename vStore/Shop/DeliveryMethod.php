@@ -24,7 +24,8 @@
 namespace vStore\Shop;
 
 use vStore,
-		vBuilder;
+		vBuilder,
+		Nette;
 
 /**
  * Basic implementation of order delivery method
@@ -33,29 +34,36 @@ use vStore,
  * @since Oct 7, 2011
  */
 class DeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
-	
-	private $_id;
-	private $_name;
-	private $_description;
-	private $_charge;
-	private $_suitablePayments;
+		
+	protected $_id;
+	protected $_name;
+	protected $_description;
+	protected $_suitablePayments;
 	
 	/**
-	 * Constructor
+	 * Protected constructor
+	 */
+	protected function __construct() {
+	
+	}
+	
+	/**
+	 * Creates method from app configuration
 	 * 
 	 * @param string id
-	 * @param string name
-	 * @param string description
-	 * @param float charge for this method
-	 * @param array of suitable payments (payment method IDs)
+	 * @param vBuilder\Config\ConfigDAO config
+	 * @param Nette\DI\IContainer DI context
 	 */
-	function __construct($id, $name, $description = null, $charge = 0, array $suitablePayments = null) {
-		$this->_id = $id;
-		$this->_name = $name;
-		$this->_description = $description;
-		$this->_charge = $charge;
-		$this->_suitablePayments = $suitablePayments;
-	}	
+	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
+		$method = new static;
+		
+		$method->_id = $id;
+		$method->_name = $config->get('name', $id);
+		$method->_description = $config->get('description');
+		$method->_suitablePayments = $config->get('suitablePayments') ? $config->get('suitablePayments')->toArray() : null;
+		
+		return $method;
+	}
 	
 	/**
 	 * Returns method ID
@@ -92,7 +100,7 @@ class DeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 	function getDescription() {
 		return $this->_description;
 	}
-	
+		
 	/**
 	 * Returns true if this method is suitable with given payment
 	 * 

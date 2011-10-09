@@ -1,10 +1,10 @@
 {if $order->amount > 0}
-	<div>
+	<div id="shoppingCartDefault" class="shoppingCart">
 		{form cartForm}
 			<ul class="errors" n:if="$form->hasErrors()">
 				<li n:foreach="$form->errors as $error">{$error}</li>
 			</ul>
-			<table>
+			<table class="orderItems">
 				<thead>
 					<tr>
 						<td></td>

@@ -45,5 +45,9 @@ class CartRenderer extends vStore\Application\UI\ControlRenderer {
 		$this->template->paymentMethods = $this->shop->availablePaymentMethods;
 		$this->template->order = $this->shop->order;
 	}
+	
+	public function renderLastPage() {
+		
+	}
 		
 }

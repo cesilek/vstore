@@ -100,7 +100,12 @@ class Shop extends vBuilder\Object {
 			foreach($methodIds as $id) {
 				$m = $methods->$id;
 				
-				$this->_availableDeliveryMethods[$id] = new Shop\DeliveryMethod($id, $m->get('name', $id), $m->get('description'), $m->get('charge', 0), $m->get('suitablePayments') ? $m->get('suitablePayments')->toArray() : null);
+				if(($class = $m->get('type')) != null) {
+					$class = 'vStore\\Shop\\' . ucfirst($class) . 'DeliveryMethod';
+				} else
+					$class = 'vStore\\Shop\\DeliveryMethod';
+				
+				$this->_availableDeliveryMethods[$id] = $class::fromConfig($id, $m, $this->context);
 			}
 		}
 		

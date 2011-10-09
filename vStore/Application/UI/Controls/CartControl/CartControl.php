@@ -198,6 +198,69 @@ class CartControl extends vStore\Application\UI\Control {
 		return $this->order->delivery != null && $this->order->payment != null;
 	}
 	
+	public function createComponentCustomerForm() {
+		$form = new Form;
+		$form->onSuccess[] = callback($this, 'customerFormSubmitted');
+		$control = $this;
+		$form->onError[] = function () use ($control){
+			$control->changeView('customerPage');
+		};
+				
+		$form->addText('name', 'Jméno')
+					->addRule(Form::FILLED, 'Je nutné vyplnit Vaše jméno');
+		$form->addText('surname', 'Příjmení')
+					->addRule(Form::FILLED, 'Je nutné vyplnit Vaše příjmení');
+		
+		$form->addText('phone', 'Telefon')
+					->addRule(Form::FILLED);
+		
+		$form->addText('email', 'E-mail')
+					->addRule(Form::FILLED, 'Je nutné vyplnit e-mailovou adresu')
+					->addRule(Form::EMAIL);
+		
+		if($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
+			$form->addText('street', 'Ulice')
+						->addRule(Form::FILLED, 'Je nutné vyplnit adresu (Ulice).');
+
+			$form->addText('city', 'Město')
+						->addRule(Form::FILLED, 'Je nutné vyplnit adresu (Město).');
+
+			$form->addText('zip', 'PSČ')
+						->addRule(Form::FILLED, 'Je nutné vyplnit adresu (PSČ).');
+
+			$form->addSelect('country', 'Země', $this->order->delivery->availableCountries);
+		}
+		
+		$form->addTextArea('note', 'Poznámka');		
+		
+		
+		if($this->order->customer) {
+			$form['name']->setDefaultValue($this->order->customer->name);
+			$form['surname']->setDefaultValue($this->order->customer->surname);
+		}
+		
+		$form->addSubmit('back', 'Zpět k výběru dopravy')->setValidationScope(false);
+		$form->addSubmit('next', 'Pokračovat v objednávce');
+		
+		return $form;
+	}
+	
+	public function customerFormSubmitted(Form $form) {
+		$values = $form->values;
+		
+		if($form['back']->isSubmittedBy()) {
+			$this->redirect('deliveryPage');
+			
+		} elseif($form['next']->isSubmittedBy()) {
+			if($this->order->customer == null)
+				$this->order->customer = $this->order->repository->create('vStore\\Shop\\CustomerInfo');
+			
+			$this->order->customer->name = $values->name;
+			$this->order->customer->surname = $values->surname;
+
+		} 
+	}
+	
 	// </editor-fold>	
 	
 	
