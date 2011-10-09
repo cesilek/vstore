@@ -75,6 +75,8 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	 */
 	public $renderer;
 	
+	protected $_data;
+	
 
 	/**
 	 * Sets data source for product listing
@@ -190,6 +192,31 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 		$this->perPage = $values['perPage'];
 		$this->redirect('default!');
 	}
+	
+	/**
+	 * @param string $name
+	 * @return Form 
+	 */
+	public function createComponentQuickPickForm($name) {
+		$form = new Form;
+		$form->onSuccess[] = callback($this, $name.'Submitted');
+		
+		foreach ($this->getData() as $product) {
+			$form->addCheckbox('product'.$product->pageId);
+		}
+		$form->addSubmit('s', 'Add to cart!');
+		return $form;
+	}
+	
+	public function quickPickFormSubmitted(Form $form) {
+		$values = array();
+		foreach ($form->values as $name => $val) {
+			if ($val == true) {
+				$values[] = (int) substr($name, 7); // strip the 'product' prefix
+			}
+		}
+		$this->presenter->redirect('addToCart', array ('product' => $values));
+	}
 
 	/**
 	 * Need this public...
@@ -279,13 +306,17 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	/**
 	 * @return array
 	 */
-	public function getData() {
-		if ($this->perPage === static::LIST_ALL) {
-			return $this->getFluent()->fetchAll();
+	public function getData($refresh = false) {
+		if (!$this->_data || $refresh) {
+			if ($this->perPage === static::LIST_ALL) {
+				$this->_data = $this->getFluent()->fetchAll();
+			} else {
+				$this->_data = $this->getFluent()->fetchAll(
+					$this['paging']->getPaginator()->getOffset(),
+					$this['paging']->getPaginator()->itemsPerPage
+				);
+			}
 		}
-		return $this->getFluent()->fetchAll(
-			$this['paging']->getPaginator()->getOffset(),
-			$this['paging']->getPaginator()->itemsPerPage
-		);
+		return $this->_data;
 	}	
 }
