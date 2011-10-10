@@ -1,6 +1,10 @@
 {form customerForm}
 <div id="shoppingCartCustomer" class="shoppingCart">
 	
+	<ul class="formErrors" n:if="$form->hasErrors()">
+		<li n:foreach="$form->errors as $error">{$error}</li>
+	</ul>
+	
 	<h3 class="first">Osobní údaje</h3>
 	<table>
 		<tr>

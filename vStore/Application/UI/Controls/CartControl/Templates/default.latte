@@ -4,37 +4,8 @@
 			<ul class="errors" n:if="$form->hasErrors()">
 				<li n:foreach="$form->errors as $error">{$error}</li>
 			</ul>
-			<table class="orderItems">
-				<thead>
-					<tr>
-						<td></td>
-						<td>Název produktu</td>
-						<td>Množství</td>
-						<td>Cena/ks</td>
-						<td>Cena celkem</td>
-					</tr>
-				</thead>
-				<tbody>
-					<tr n:foreach="$order->items as $item">
-						<td>{input 'check'.$item->uniqueId}</td>
-						<td>{$item->name}</td>
-						<td>{input 'range'.$item->uniqueId}</td>
-
-						<td>{$item->price|currency}</td>
-						<td>{$item->price*$item->amount|currency}</td>
-					</tr>
-				</tbody>
-				<tfoot>
-					<tr>
-						<td></td>
-						<td>Celkem</td>
-						<td></td>
-						<td></td>
-
-						<td>{$order->getTotal(true)|currency}</td>
-					</tr>
-				</tfoot>
-			</table>
+			
+			{include 'cartTable.inc.latte', form => $form, onlyProducts => true}
 		
 			<div class="buttonBlock">
 			{input delete}

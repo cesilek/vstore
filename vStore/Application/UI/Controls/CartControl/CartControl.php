@@ -219,7 +219,7 @@ class CartControl extends vStore\Application\UI\Control {
 		
 		$form->addText('email', 'E-mail')
 					->addRule(Form::FILLED, 'Je nutné vyplnit e-mailovou adresu')
-					->addRule(Form::EMAIL);
+					->addRule(Form::EMAIL, 'Prosím vyplňte platnou e-mailovou adresu');
 		
 		if($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
 			$form->addText('street', 'Ulice')
@@ -320,7 +320,7 @@ class CartControl extends vStore\Application\UI\Control {
 			$this->redirect('customerPage');
 			
 		} elseif($form['next']->isSubmittedBy()) {
-			
+			$this->presenter->flashMessage('Vaše objednávka bude zpracována, hned jak to někdo implementuje.');
 			$this->redirect('reviewPage');
 		} 
 	}

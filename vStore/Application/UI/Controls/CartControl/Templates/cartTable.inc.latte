@@ -1,0 +1,32 @@
+
+<table class="orderItems">
+	<thead>
+		<tr>
+			<td class="checkbox" n:if="isset($form)"></td>
+			<td class="name">Název produktu</td>
+			<td class="amount">Množství</td>
+			<td class="unitPrice">Cena/ks</td>
+			<td class="price">Cena celkem</td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr n:class="$item->productId < 1 ? nonProductItem" n:foreach="$order->getItems($onlyProducts) as $item">
+			<td class="checkbox" n:if="isset($form)">{input 'check'.$item->uniqueId}</td>
+			<td class="name">{if $item->productId > 0}<a href="{rlink $item->productId}">{/if}{$item->name}{if $item->productId > 0}</a>{/if}</td>
+			<td class="amount">{if $item->productId > 0}{if isset($form)}{input 'range'.$item->uniqueId}{else}{$item->amount} ks{/if}{/if}</td>
+
+			<td class="unitPrice">{$item->price|currency}</td>
+			<td class="price">{$item->price*$item->amount|currency}</td>
+		</tr>
+	</tbody>
+	<tfoot>
+		<tr class="total">
+			<td class="checkbox" n:if="isset($form)"></td>
+			<td class="name">Celkem</td>
+			<td class="amount"></td>
+			<td class="unitPrice"></td>
+
+			<td class="price">{$order->getTotal($onlyProducts)|currency}</td>
+		</tr>
+	</tfoot>
+</table>

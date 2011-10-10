@@ -57,7 +57,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		
 		//$this->context->sessionRepository->clear();
 		
-		$this->items->onItemAdded[] = array($this, 'invalidateCartInfo');
+		$this->defaultGetter('items')->onItemAdded[] = array($this, 'invalidateCartInfo');
 	}
 	
 	/**
@@ -101,6 +101,18 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		
 		if(!isset($this->{$var})) $this->calculateCartInfo();
 		return $this->{$var};
+	}
+	
+	public function getItems($onlyProducts = false) {
+		$items = $this->defaultGetter('items');
+		
+		if($onlyProducts == false) return $items;
+		
+		return array_filter($items->toArray(), function($item) {
+			if($item->productId > 0) return true;
+			
+			return false;
+		});
 	}
 	
 	/**
