@@ -1,0 +1,52 @@
+#addToCartProcess TABLE.cartTable {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.9em;
+}
+
+#addToCartProcess TABLE.cartTable .name {
+	
+}
+
+#addToCartProcess TABLE.cartTable .amount {
+	width: 90px;
+}
+
+#addToCartProcess TABLE.cartTable .amount .integerPicker {
+	width: 50px;
+}
+
+#addToCartProcess TABLE.cartTable .price {
+	text-align: right;
+}
+
+#addToCartProcess .buttonBlock {
+	margin-top: 15px;
+	text-align: center;
+}
+
+#addToCartProcess TABLE.cartTable TR.currentTotal TD {
+	color: #999999;
+	padding: 0px 20px 4px 20px;
+}
+
+#addToCartProcess TABLE.cartTable TR.item TD {
+	color: #333333;
+	padding: 6px 20px;
+}
+
+#addToCartProcess TABLE.cartTable TR.lastItem TD {
+	padding: 6px 20px 10px 20px;
+}
+
+#addToCartProcess TABLE.cartTable TR.newTotal TD {
+	border-top: 1px solid #000000;
+	color: #000000;
+	font-weight: 600;
+	padding-top: 12px;
+	padding: 10px 15px 0px 20px;
+}
+
+#addToCartProcess TABLE.cartTable TR.newTotal TD.price {
+	color: #009900;
+}

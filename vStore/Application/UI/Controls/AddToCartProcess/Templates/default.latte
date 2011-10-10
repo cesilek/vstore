@@ -1,56 +1,60 @@
-<style type="text/css">
-	#cartDetails {
-		float: left;
-		margin: 1.5em 1.5em 0 2.5em;
-	}
-</style>
-<div id="cartConfirm" class="productListingBlock">
-	<div id="productPreview">
-		{* TODO *}
-	</div>
-	<div id="cartDetails">
-		{form adjustOrderForm}
-			<table>
-				<tr n:foreach="$products as $product">
-					<td>{$product->title}</td>
-					{var $tmp = 'amount' . $product->pageId}
-					<td>{input $tmp}</td>
-				</tr>
-			</table>
+{addCss LIBS_DIR . '/vStore/vStore/Application/UI/Controls/AddToCartProcess/Css/addtocart.default.css'}
 
-			{input s}
-		{/form}
-	</div>
-	<table>
+<div id="addToCartProcess" class="productListingBlock">
+{form adjustOrderForm}
+
+	{block beforeCartTable}{/block}
+	
+	<table class="cartTable">
 		<tbody>
-			<tr>
-				<td>Current price</td>
-				<td>&nbsp;</td>
-				<td>{$totalPrice|currency}</td>
-			</tr>
 			{var $addToTotal = 0}
-			<tr n:foreach="$products as $product">
-				<td>{$product->title}</td>
-				<td id="productQuantity{$product->pageId}">1 ks</td>
-				<td id="productPrice{$product->pageId}">{$product->price|currency}</td>
+			<tr n:class="item, $iterator->first ? firstItem, $iterator->last ? lastItem" n:foreach="$products as $product">
+				<td class="name">{$product->title}</td>
+				
+				<td class="amount" id="productQuantity{$product->pageId}">
+					{var $tmp = 'amount' . $product->pageId}
+					{input $tmp}
+				</td>
+				
+				<td class="price" id="productPrice{$product->pageId}">{$product->price|currency}</td>
 				{var $addToTotal += $product->price}
 			</tr>
 		</tbody>
+		<thead>
+			<tr class="currentTotal">
+				<td class="name">Současná hodnota zboží v košíku</td>
+				<td class="amount">&nbsp;</td>
+				<td class="price">{$totalPrice|currency}</td>
+			</tr>
+		</thead>
 		<tfoot>
-			<tr>
-				<td>The price of the purchase</td>
-				<td>&nbsp;</td>
-				<td id="totalPrice">{$totalPrice+$addToTotal|currency}</td>
+			<tr class="newTotal">
+				<td class="name">Nová cena nákupu</td>
+				<td class="amount">&nbsp;</td>
+				<td class="price" id="totalPrice">{$totalPrice+$addToTotal|currency}</td>
 			</tr>
 		</tfoot>
-	</table>
+	</table>	
+	
+	<div class="buttonBlock">
+	{block buttonBlock}
+		{input s}
+	{/block}
+	</div>
+	
+{/form}
 </div>
+
+{******************************************************************************}
 <div class="hidden">
 	<div id="cartError">
-		The content of this element will appear in the lightbox in case of an
+		{block cartError}The content of this element will appear in the lightbox in case of an
 		error.
+		{/block}
 	</div>
 </div>
+
+{******************************************************************************}
 <script type="text/javascript">
 	$(function () {
 		var productPrices = {
@@ -62,7 +66,7 @@
 			lastInput: 0
 		}
 		
-		$('#cartConfirm').find('form').submit(function (e) {
+		$('#addToCartProcess').find('form').submit(function (e) {
 			//error
 			$(this).ajaxSubmit(function (data, textStatus, jqXHR) {
 				if (data.success === true) {
@@ -100,7 +104,7 @@
 			}
 			var newTotal = productPrices.total + (amount-1)*productPrices[pageId];
 			productPrices.lastInput = pageId;
-			$('#productQuantity'+pageId).html(''+amount+' ks');
+			//$('#productQuantity'+pageId).html(''+amount+' ks');
 			$('#productPrice'+pageId).html(currency(amount*productPrices[pageId]));
 			$('#totalPrice').html(currency(newTotal));
 			productPrices.tempTotal = newTotal;
