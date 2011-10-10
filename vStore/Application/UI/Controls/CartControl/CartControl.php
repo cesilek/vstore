@@ -321,7 +321,7 @@ class CartControl extends vStore\Application\UI\Control {
 			
 		} elseif($form['next']->isSubmittedBy()) {
 			$this->presenter->flashMessage('Vaše objednávka bude zpracována, hned jak to někdo implementuje.');
-			$this->redirect('reviewPage');
+			$this->redirect('lastPage');
 		} 
 	}
 	

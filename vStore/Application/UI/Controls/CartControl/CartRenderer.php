@@ -49,5 +49,9 @@ class CartRenderer extends vStore\Application\UI\ControlRenderer {
 	public function renderReviewPage() {
 		$this->template->order = $this->shop->order;
 	}
+	
+	public function renderLastPage() {
+		
+	}
 		
 }
