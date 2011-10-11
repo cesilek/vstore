@@ -7,11 +7,13 @@
 
 		<tr n:foreach="$deliveryMethods as $method">
 			<td class="radioCol">
-				{? echo $form['delivery']->getControl($method->id)->offsetGet(0)}
+				{= $form['delivery']->getControl($method->id)->offsetGet(0)}
 			</td>
 			<td class="methodCol">
-				<div class="name">{$method->name}</div>
-				<div class="description" n:if="!empty($method->description)">{$method->description}</div>
+				{label delivery for => $form['delivery']->getControl($method->id)->offsetGet(0)->id}
+					<div class="name">{$method->name}</div>
+					<div class="description" n:if="!empty($method->description)">{$method->description}</div>
+				{/label}
 			</td>
 		</tr>
 
@@ -23,11 +25,13 @@
 
 		<tr n:foreach="$paymentMethods as $method">
 			<td class="radioCol">
-				{? echo $form['payment']->getControl($method->id)->offsetGet(0)}
+				{= $form['payment']->getControl($method->id)->offsetGet(0)}
 			</td>
 			<td class="methodCol">
-				<div class="name">{$method->name}</div>
-				<div class="description" n:if="!empty($method->description)">{$method->description}</div>
+				{label payment for => $form['payment']->getControl($method->id)->offsetGet(0)->id}
+					<div class="name">{$method->name}</div>
+					<div class="description" n:if="!empty($method->description)">{$method->description}</div>
+				{/label}
 			</td>
 		</tr>
 
@@ -40,4 +44,53 @@
 </div>
 
 {/form}
+<style type="text/css">
+	.rowDisabled {
+		/* the name of this class can be configured below. This is just some sample css */
+		text-decoration: line-through;
+		color: red;
+	}
+</style>
+<script type="text/javascript">
+	$(function () {
+		var methods = {},
+			pContainer = $('#shoppingCartPayment'),
+			pRadios = pContainer.find('input[type=radio]'),
+			radios = $('#shoppingCartDelivery input[type=radio]'),
+			trDisabledClass = 'rowDisabled',
+			reset = function () {
+				pRadios.each(function () {
+					$(this).prop('disabled', false).closest('tr').removeClass(trDisabledClass)
+				});
+			}
+		{foreach $deliveryMethods as $devMethod}
+			var t = {};
+			{foreach $paymentMethods as $payMethod}
+				t[{$payMethod->id}] = {$devMethod->isSuitableWith($payMethod)};
+			{/foreach}
+			methods[{$devMethod->id}] = t;
+		{/foreach}
+		radios.change(function () {
+			var $this = $(this),
+				data = methods[$this.val()];
+			reset();
+			for (var i in data) {
+				if (data[i] === false) {
+					var target = pContainer.find('input[value='+i+']');
+					target.prop('disabled', true).closest('tr').addClass(trDisabledClass);
+					if (target.is('input:checked')) {
+						pRadios.each(function () {
+							var $that = $(this);
+							if ($that.attr('disabled') !== 'disabled') {
+								$that.attr('checked', 'checked');
+								return false;
+							}
+						});
+					}
+				}
+			}
+		});
+		reset();
+	});
+</script>
 
