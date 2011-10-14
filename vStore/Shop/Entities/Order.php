@@ -73,7 +73,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		}
 		
 		foreach($this->items as $item) {
-			if($item->productId == $product->getPageId() && (($item->params === null && count($params) == 0) || ($item->params && $item->params->toArray() == $params))) {
+			if($item->productId == $product->getProductId() && (($item->params === null && count($params) == 0) || ($item->params && $item->params->toArray() == $params))) {
 				$item->amount += $amount;
 				$this->invalidateCartInfo();
 				return ;
@@ -82,8 +82,8 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		
 		$item = new OrderItem($this->context);
 		$item->name = $product->getTitle();
-		$item->price = $product->getPrice();
-		$item->productId = $product->getPageId();
+		$item->price = $product->getEffectivePrice();
+		$item->productId = $product->getProductId();
 		$item->amount = $amount;
 		$item->params = $params;
 		
@@ -103,9 +103,15 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		return $this->{$var};
 	}
 	
+	/**
+	 * Returns ordered items
+	 * 
+	 * @param bool true if only product items should be returned
+	 * @return array|EntityCollection depending on parameter 
+	 */
 	public function getItems($onlyProducts = false) {
 		$items = $this->defaultGetter('items');
-		
+				
 		if($onlyProducts == false) return $items;
 		
 		return array_filter($items->toArray(), function($item) {

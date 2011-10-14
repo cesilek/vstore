@@ -55,6 +55,22 @@ class OrderItem extends vBuilder\Orm\ActiveEntity {
 		}
 	}
 	
+	/**
+	 * Returns effective price of item
+	 * 
+	 * @return float 
+	 */
+	public function getPrice() {
+		// Pokud data jeste nejsou ulozena v databazi, nacitame VZDY aktualni cenu
+		if($this->repository instanceof vBuilder\Orm\SessionRepository && $this->productId > 0) {
+			$price = $this->context->redaction->get($this->productId)->getEffectivePrice();
+			if($this->defaultGetter('price') != $price) $this->data->price = $price;
+			return $price;
+		}
+		
+		return $this->defaultGetter('price');
+	}
+	
 
 		
 }

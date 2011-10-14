@@ -42,20 +42,22 @@ use vBuilder,
  * @since Aug 16, 2011
  */
 class Product extends Document implements vStore\Shop\IProduct {
-	
-	public function getId() {
-		return parent::getId();
+		
+	public function getProductId() {
+		return $this->pageId;
 	}
-	
-	public function getPageId() {
-		return parent::getPageId();
-	}
-	
+		
 	public function getTitle() {
 		return parent::getTitle();
 	}
 	
-	public function getPrice() {
-		return parent::getPrice();
+	/**
+	 * For optional dual pricing
+	 * 
+	 * @return float 
+	 */
+	public function getEffectivePrice() {
+		return $this->price;
 	}
+	
 }

@@ -35,10 +35,10 @@ use vStore,
  */
 interface IProduct {
 
-	public function getPageId();
-	
+	public function getProductId();
+		
 	public function getTitle();
 	
-	public function getPrice();
+	public function getEffectivePrice();
 	
 }
