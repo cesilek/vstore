@@ -66,26 +66,39 @@
 			lastInput: 0
 		}
 		
+		var ajaxError = false;
 		$('#addToCartProcess').find('form').submit(function (e) {
 			//error
-			$(this).ajaxSubmit(function (data, textStatus, jqXHR) {
-				if (data.success === true) {
-					$.colorbox({ 
-						href: {link success}
-					});
-				} else if (data.redirect) {
-					window.location.href = data.redirect;
-				} else {
-					$.colorbox({ 
-						inline: true,
-						href: '#cartError'
-					});
-				}
-			});			
-			
-			e.stopImmediatePropagation();
-			e.preventDefault();
-			return false; 
+			var $this = $(this),
+				ajaxFailed = function (jqXHR, textStatus, errorThrown) {
+					ajaxError = true;
+					$this.trigger('submit');
+				};
+			if (!ajaxError) {
+				$this.ajaxSubmit(function (data, textStatus, jqXHR) {
+					if (data.success === true) {
+						$.colorbox({ 
+							href: {link success},
+							onCleanup: function () {
+								v3cms.reloadCartPreview();
+							}
+						});
+					} else if (data.redirect) {
+						window.location.href = data.redirect;
+					} else {
+						/*$.colorbox({ 
+							inline: true,
+							href: '#cartError'
+						});*/
+						ajaxFailed();
+					}
+				}, {
+					error: ajaxFailed
+				});	
+				e.stopImmediatePropagation();
+				e.preventDefault();
+				return false;
+			}
 		});
 		$('#close').click(function (e) {
 			$.colorbox.close();
@@ -104,7 +117,6 @@
 			}
 			var newTotal = productPrices.total + (amount-1)*productPrices[pageId];
 			productPrices.lastInput = pageId;
-			//$('#productQuantity'+pageId).html(''+amount+' ks');
 			$('#productPrice'+pageId).html(currency(amount*productPrices[pageId]));
 			$('#totalPrice').html(currency(newTotal));
 			productPrices.tempTotal = newTotal;

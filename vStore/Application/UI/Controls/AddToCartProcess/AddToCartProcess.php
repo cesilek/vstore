@@ -143,6 +143,9 @@ class AddToCartProcess extends vStore\Application\UI\Control {
 	}
 	
 	public function adjustOrderFormSubmitted(Form $form) {
+		if ($this->presenter->isAjax()) {
+			throw new Nette\InvalidStateException('FACK!');
+		}
 		$values = $form->values;
 		
 		foreach($this->products as $product) {
