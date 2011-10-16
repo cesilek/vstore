@@ -33,7 +33,7 @@ use vStore,
  * @Column(id, pk, type="integer")
  * @Column(delivery)
  * @Column(payment)
- * @Column(items, type="OneToMany", entity="vStore\Shop\OrderItem", joinOn="id=order")
+ * @Column(items, type="OneToMany", entity="vStore\Shop\OrderItem", joinOn="id=orderId", processSubclasses="true")
  * @Column(customer, type="OneToOne", entity="vStore\Shop\CustomerInfo", joinOn="customer=id")
  * @Column(address, type="OneToOne", entity="vStore\Shop\ShippingAddress", joinOn="address=id")
  * @Column(note)
@@ -43,9 +43,15 @@ use vStore,
  */
 class Order extends vBuilder\Orm\ActiveEntity {
 	
+	const DELIVERY_ITEM_ID = -1;
+	const PAYMENT_ITEM_ID = -2;
+	
 	private $_total;
 	private $_totalProducts;
 	private $_amountProducts;
+	
+	private $_calculateCartInfoLock = false;
+	private $_calculateProductInfoLock = false;
 	
 	/**
 	 * Constructor
@@ -54,8 +60,6 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	 */
 	public function __construct($data = array()) {
 		call_user_func_array(array('parent', '__construct'), func_get_args()); 
-		
-		//$this->context->sessionRepository->clear();
 		
 		$this->defaultGetter('items')->onItemAdded[] = array($this, 'invalidateCartInfo');
 	}
@@ -80,7 +84,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 			}
 		}
 		
-		$item = new OrderItem($this->context);
+		$item = $this->repository->create('vStore\\Shop\\OrderItem');
 		$item->name = $product->getTitle();
 		$item->price = $product->getEffectivePrice();
 		$item->productId = $product->getProductId();
@@ -97,9 +101,14 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	 * @return float 
 	 */
 	public function getTotal($onlyProducts = false) {
-		$var = $onlyProducts ? '_totalProducts' : '_total';
-		
-		if(!isset($this->{$var})) $this->calculateCartInfo();
+		if($onlyProducts) {
+			$var = '_totalProducts';
+			if(!isset($this->{$var})) $this->calculateProductInfo();
+		} else {
+			$var = '_total';
+			if(!isset($this->{$var})) $this->calculateCartInfo();
+		}
+
 		return $this->{$var};
 	}
 	
@@ -122,12 +131,54 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	}
 	
 	/**
+	 * Inserts order item on product id position, if such item exists it is replaced.
+	 * 
+	 * @param OrderItem $newItem 
+	 */
+	protected function replaceItem(OrderItem $newItem) {
+		$items = $this->defaultGetter('items');
+		
+		foreach($items as $item) {
+			if($item->productId == $newItem->productId) {
+				if($newItem !== $item) {
+					$items->remove($item);
+					$items->add($newItem);
+					$this->invalidateCartInfo();
+				}
+				
+				return ;
+			}
+		}
+		
+		$items->add($newItem);
+		$this->invalidateCartInfo();
+	}
+	
+	/**
+	 * Removes order item with product id
+	 * 
+	 * @param int product id
+	 */
+	protected function removeItemWithId($productId) {
+		$items = $this->defaultGetter('items');
+		
+		foreach($items as $item) {
+			if($item->productId == $productId) {
+				$item->delete();
+				$this->invalidateCartInfo();
+				
+				return ;
+			}
+		}
+	}
+	
+	/**
 	 * Returns number of products in the cart
 	 * 
 	 * @return int
 	 */
 	public function getAmount() {
-		if(!isset($this->_amountProducts)) $this->calculateCartInfo();
+		if(!isset($this->_amountProducts)) $this->calculateProductInfo();
 		return $this->_amountProducts;
 	}
 	
@@ -142,23 +193,63 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	}
 	
 	/**
+	 * Calculates PRODUCT items in the cart
+	 * 
+	 * Calculation is separated from total cart info because postal charges and etc.
+	 * are often dynamic items calculated using of product total.
+	 */
+	protected function calculateProductInfo() {
+		
+		// Check pro dynamicke polozky, aby nemohly zaviset na vlastnim vypoctu
+		if($this->_calculateProductInfoLock)
+			throw new Nette\InvalidStateException(get_called_class() . "::calculateProductInfo() can't be called while calculation is already in progress. Infinite loop detected.");
+		
+		$this->_calculateProductInfoLock = true;
+		
+		// Aby pripadne volani externich metod nemohlo pristupovat
+		// k mezisouctum, musim si to ukladat vedle a az potom prenest do tridni promenne		
+		$totalProducts = 0.0;
+		$amountProducts = 0;
+		
+		foreach($this->items as $curr) {
+			
+			if($curr->productId > 0) {
+				$amountProducts += $curr->getAmount();
+				$totalProducts += $curr->getAmount() * $curr->getPrice();
+			}
+			
+		}
+		
+		$this->_totalProducts = $totalProducts;
+		$this->_amountProducts = $amountProducts;
+		$this->_calculateProductInfoLock = false;
+	}
+	
+	/**
 	 * Calculates items in the cart
 	 */
 	protected function calculateCartInfo() {
-		$this->_total = 0.0;
-		$this->_totalProducts = 0.0;
-		$this->_amountProducts = 0;
 		
+		// Check pro dynamicke polozky, aby nemohly zaviset na vlastnim vypoctu
+		if($this->_calculateCartInfoLock)
+			throw new Nette\InvalidStateException(get_called_class() . "::calculateCartInfo() can't be called while calculation is already in progress. Infinite loop detected.");
+		
+		$this->_calculateCartInfoLock = true;
+		
+		
+		$total = $this->getTotal(true);
+		
+		// Spocitam ne-produkty
 		foreach($this->items as $curr) {
-			//dd($curr->productId, $curr->name, $curr->amount, $curr->price);
 			
-			if($curr->productId > 0) {
-				$this->_amountProducts += $curr->amount;
-				$this->_totalProducts += $curr->amount * $curr->price;
+			if($curr->productId < 1) {
+				$total += $curr->getAmount() * $curr->getPrice();
 			}
-			
-			$this->_total += $curr->amount * $curr->price;
+						
 		}
+		
+		$this->_total = $total;
+		$this->_calculateCartInfoLock = false;
 	}
 	
 	// <editor-fold defaultstate="collapsed" desc="Payment / Delivery">
@@ -172,7 +263,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		if(($cached = $this->fieldCache("delivery")) !== null) return $cached;
  
 		$value = $this->context->shop->getDeliveryMethod($this->data->delivery);
- 
+		
 		return $this->fieldCache("delivery", $value);
 	}
 	
@@ -187,6 +278,10 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		$this->checkDeliveryPayment($method, $this->payment);
 		
 		$this->data->delivery = $method->getId();
+		
+		$deliveryItem = $method->createOrderItem($this);
+		if($deliveryItem) $this->replaceItem($deliveryItem);
+		else $this->removeItemWithId(self::DELIVERY_ITEM_ID);
 	}
 	
 	/**
@@ -228,6 +323,10 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		
 		$this->data->delivery = $delivery->getId();
 		$this->data->payment = $payment->getId();
+		
+		$deliveryItem = $delivery->createOrderItem($this);
+		if($deliveryItem) $this->replaceItem($deliveryItem);
+		else $this->removeItemWithId(self::DELIVERY_ITEM_ID);
 	}
 	
 	/**

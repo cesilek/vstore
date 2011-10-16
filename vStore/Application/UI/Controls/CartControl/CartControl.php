@@ -74,7 +74,7 @@ class CartControl extends vStore\Application\UI\Control {
 		$form = new Form;
 		$form->onSuccess[] = callback($this, 'cartFormSubmitted');
 		
-		foreach($this->order->items as $item) {
+		foreach($this->order->getItems(true) as $item) {
 			$form->addCheckbox('check'.$item->uniqueId);
 			$form->addIntegerPicker('range'.$item->uniqueId)
 					->setDefaultValue($item->amount)
@@ -93,13 +93,13 @@ class CartControl extends vStore\Application\UI\Control {
 	public function cartFormSubmitted(Form $form) {
 		$values = $form->values;
 		if ($form['delete']->isSubmittedBy()) {
-			foreach ($this->order->items as $item) {
+			foreach ($this->order->getItems(true) as $item) {
 				if($values['check'.$item->uniqueId] === true) {
 					$item->delete();
 				}
 			}
 		} else if ($form['reCount']->isSubmittedBy()) {
-			foreach ($this->order->items as $item) {
+			foreach ($this->order->getItems(true) as $item) {
 				if($values['range'.$item->uniqueId] !== $item->amount) {
 					$item->amount = $values['range'.$item->uniqueId];
 				}

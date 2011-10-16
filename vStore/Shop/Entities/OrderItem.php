@@ -30,7 +30,7 @@ use vStore,
 /**
  * Model for ordered items
  *
- * @Column(order, pk, type="integer")
+ * @Column(orderId, realname="order", pk, type="integer")
  * @Column(productId, pk, type="integer")
  * @Column(name)
  * @Column(amount, type="integer")

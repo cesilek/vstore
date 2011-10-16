@@ -74,14 +74,6 @@ class DeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 		return $this->_id;
 	}
 	
-	/**
-	 * Returns charge for this method
-	 * 
-	 * @return float 
-	 */
-	function getCharge() {
-		return $this->_charge;
-	}
 	
 	/**
 	 * Returns method name
@@ -117,6 +109,17 @@ class DeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Creates order item for this delivery method
+	 * 
+	 * @param Order order instance
+	 * 
+	 * @return OrderItem|null
+	 */
+	function createOrderItem(Order $order) {
+		return null;
 	}
 	
 }

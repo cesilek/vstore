@@ -36,6 +36,8 @@ use vStore,
 class ParcelDeliveryMethod extends DeliveryMethod {
 	
 	protected $_countries;
+	protected $_freeOfChargeLimit;
+	protected $_charge;
 	
 	/**
 	 * Creates method from app configuration
@@ -48,9 +50,13 @@ class ParcelDeliveryMethod extends DeliveryMethod {
 		$method = parent::fromConfig($id, $config, $context);
 		
 		$method->_countries = array();
+		$method->_freeOfChargeLimit = array();
+		$method->_charge = array();
 		foreach($config->get('countries')->getKeys() as $key) {
 			$country = $config->get('countries')->{$key};
 			$method->_countries[$key] = $country->get('name', $key);
+			$method->_freeOfChargeLimit[$key] = $country->get('freeOfChargeLimit');
+			$method->_charge[$key] = (float) $country->get('charge', 0);
 		}
 		
 		return $method;
@@ -63,6 +69,45 @@ class ParcelDeliveryMethod extends DeliveryMethod {
 	 */
 	function getAvailableCountries() {
 		return $this->_countries;
-	}	
+	}
+	
+	/**
+	 * Returns postal charge for a country
+	 * 
+	 * @param string country code
+	 * @return float
+	 */
+	function getCharge($countryCode) {
+		if(!isset($this->_charge[$countryCode]))
+				throw new Nette\InvalidArgumentException("Country with code '$countryCode' is not defined");
+		
+		return $this->_charge[$countryCode];
+	}
+	
+	/**
+	 * Returns free of charge limit for a country
+	 * 
+	 * @param string country code
+	 * @return null|float
+	 */
+	function getFreeOfChargeLimit($countryCode) {
+		if(!isset($this->_freeOfChargeLimit[$countryCode]))
+				throw new Nette\InvalidArgumentException("Country with code '$countryCode' is not defined");
+		
+		return $this->_freeOfChargeLimit[$countryCode];
+	}
+	
+	/**
+	 * Creates order item for this delivery method
+	 * 
+	 * @param Order order instance
+	 * 
+	 * @return OrderItem|null
+	 */
+	function createOrderItem(Order $order) {
+		$item = $order->repository->create('vStore\\Shop\\ParcelDeliveryOrderItem');
+		
+		return $item;
+	}
 	
 }

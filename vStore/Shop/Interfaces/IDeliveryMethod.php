@@ -55,5 +55,10 @@ interface IDeliveryMethod {
 	 * @return bool
 	 */
 	function isSuitableWith($payment);
-		
+	
+	/**
+	 * @return OrderItem|null
+	 */
+	function createOrderItem(Order $order);
+	
 }
