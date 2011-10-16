@@ -78,7 +78,10 @@
 				$this.ajaxSubmit(function (data, textStatus, jqXHR) {
 					if (data.success === true) {
 						$.colorbox({ 
-							href: {link success}
+							href: {link success},
+							onCleanup: function () {
+								v3cms.reloadCartPreview();
+							}
 						});
 					} else if (data.redirect) {
 						window.location.href = data.redirect;
