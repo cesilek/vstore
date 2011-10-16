@@ -90,7 +90,13 @@
 				}
 			}
 		});
-		reset();
+		radios.each(function () {
+			var $this = $(this);
+			if ($this.attr('checked') === 'checked') {
+				$this.trigger('change');
+				return false;
+			}
+		});
 	});
 </script>
 
