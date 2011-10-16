@@ -60,14 +60,22 @@ class ParcelDeliveryOrderItem extends DynamicOrderItem {
 	 * @return float
 	 */
 	protected function gatherPrice() {		
-		if($this->order->delivery == null) throw new Nette\InvalidStateException("Given order does not have delivery method set");
+		/* if($this->order->delivery == null) throw new Nette\InvalidStateException("Given order does not have delivery method set");
 		$delivery = $this->order->delivery;
 		
 		if(!($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod))
-			throw new Nette\InvalidStateException(get_called_class() . " can be only used with ParcelDeliveryMethod");
+			throw new Nette\InvalidStateException(get_called_class() . " can be only used with ParcelDeliveryMethod"); */
 		
-		if($this->order->address == null) throw new Nette\InvalidStateException("Given order does not have delivery address set");
-		$countryCode = $this->order->address->country;
+		$delivery = $this->context->shop->getDeliveryMethod('byPost');
+		
+		// Kvuli zobrazovani prubezneho postovneho jeste pred zadanim dorucovaci adresy
+		//if($this->order->address == null) throw new Nette\InvalidStateException("Given order does not have delivery address set");
+	
+		if($this->order->address != null) {
+			$countryCode = $this->order->address->country;
+		} else {
+			list($countryCode) = array_keys($delivery->availableCountries);
+		}
 		
 		$freeOfChargeLimit = $delivery->getFreeOfChargeLimit($countryCode);
 		$charge = $delivery->getCharge($countryCode);

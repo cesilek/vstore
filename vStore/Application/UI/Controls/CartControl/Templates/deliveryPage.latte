@@ -11,7 +11,12 @@
 			</td>
 			<td class="methodCol">
 				{label delivery for => $form['delivery']->getControl($method->id)->offsetGet(0)->id}
-					<div class="name">{$method->name}</div>
+					<div class="name">
+						{$method->name}
+						<span n:class="charge, $item->getPrice() > 0 ? freeOfCharge" n:if="($item = $method->createOrderItem($order)) !== null">
+							(<span class="value">{if $item->getPrice() > 0}{$item->getPrice()|currency}{else}zdarma{/if}</span>)
+						</span>
+					</div>
 					<div class="description" n:if="!empty($method->description)">{$method->description}</div>
 				{/label}
 			</td>
@@ -29,7 +34,12 @@
 			</td>
 			<td class="methodCol">
 				{label payment for => $form['payment']->getControl($method->id)->offsetGet(0)->id}
-					<div class="name">{$method->name}</div>
+					<div class="name">
+						{$method->name}
+						<span n:class="charge, $item->getPrice() > 0 ? freeOfCharge" n:if="($item = $method->createOrderItem($order)) !== null">
+							(<span class="value">{if $item->getPrice() > 0}{$item->getPrice()|currency}{else}zdarma{/if}</span>)
+						</span>
+					</div>
 					<div class="description" n:if="!empty($method->description)">{$method->description}</div>
 				{/label}
 			</td>

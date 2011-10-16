@@ -308,6 +308,10 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		$this->checkDeliveryPayment($this->delivery, $method);
 		
 		$this->data->payment = $method->getId();
+		
+		$paymentItem = $method->createOrderItem($this);
+		if($paymentItem) $this->replaceItem($paymentItem);
+		else $this->removeItemWithId(self::PAYMENT_ITEM_ID);
 	}
 	
 	/**
@@ -327,6 +331,10 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		$deliveryItem = $delivery->createOrderItem($this);
 		if($deliveryItem) $this->replaceItem($deliveryItem);
 		else $this->removeItemWithId(self::DELIVERY_ITEM_ID);
+		
+		$paymentItem = $payment->createOrderItem($this);
+		if($paymentItem) $this->replaceItem($paymentItem);
+		else $this->removeItemWithId(self::PAYMENT_ITEM_ID);
 	}
 	
 	/**

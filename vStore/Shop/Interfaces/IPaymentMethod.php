@@ -37,11 +37,6 @@ interface IPaymentMethod {
 	function getId();
 	
 	/**
-	 * @return float 
-	 */
-	function getCharge();
-	
-	/**
 	 * @return string
 	 */
 	function getName();
@@ -50,5 +45,10 @@ interface IPaymentMethod {
 	 * @return string
 	 */
 	function getDescription();
+	
+	/**
+	 * @return OrderItem|null
+	 */
+	function createOrderItem(Order $order);
 	
 }

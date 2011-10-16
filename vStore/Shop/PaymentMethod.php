@@ -90,4 +90,22 @@ class PaymentMethod extends vBuilder\Object implements IPaymentMethod {
 		return $this->_description;
 	}
 	
+	/**
+	 * @return OrderItem|null
+	 */
+	function createOrderItem(Order $order) {
+		if($this->charge) {
+			
+			$item = $order->repository->create('vStore\\Shop\\OrderItem');
+			$item->name = 'Dobírečné';
+			$item->price = $this->charge;
+			$item->productId = Order::PAYMENT_ITEM_ID;
+			$item->amount = 1;
+			return $item;
+			
+		}
+		
+		return null;
+	}
+	
 }
