@@ -63,7 +63,7 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	/**
 	 * @persistent
 	 */
-	public $sorting = 'price';
+	public $sorting = 'none';
 	
 	/**
 	 * @persistent
@@ -106,31 +106,39 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 				throw new Nette\InvalidStateException("Missing data source " . get_called_class() . "::setFluent not called?");		
 		
 				
-		$this->appliedFluent = new vBuilder\Orm\Fluent($this->fluent->getRowClass(), $this->getContext());
+		$this->appliedFluent = new vBuilder\Redaction\Fluent($this->fluent->getRowClass(), $this->getContext());
 		$this->appliedFluent->select('*')->from('('.(string) $this->fluent.')')->as('pl');
 
-
-		switch ($this->sorting) {
-
-			case 'cheapest':
-				$order = "price";
-				$method = 'ASC';
-				break;
-
-			case 'mostExpensive':
-				$order = "price";
-				$method = 'DESC';
-				break;				
-
-			case 'alphabet':				
-			default:
-				$order = 'title';
-				$method = 'ASC';
-				break;
-
-		}
 		
-		$this->appliedFluent->orderBy("[$order] $method");
+		if($this->sorting == 'none') {
+			
+		} elseif($this->sorting == 'structure') {
+			$this->appliedFluent->orderByStructure();
+		} else {
+
+			switch ($this->sorting) {
+
+				case 'cheapest':
+					$order = "price";
+					$method = 'ASC';
+					break;
+
+				case 'mostExpensive':
+					$order = "price";
+					$method = 'DESC';
+					break;				
+
+				case 'alphabet':				
+				default:
+					$order = 'title';
+					$method = 'ASC';
+					break;
+
+			}
+
+			$this->appliedFluent->orderBy("[$order] $method");
+			
+		}
 
 		return $this->appliedFluent;
 	}
@@ -303,6 +311,8 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	protected function getSortingOptions() {
 		// TODO: config or manual setting?
 		return array (
+			'none'		=> 'None',
+			'structure'		=> 'Pre-defined',
 			'alphabet'	=> 'Alphabet',
 			'cheapest'	=> 'Cheapest first',
 			'mostExpensive'	=> 'Most expensive first',
