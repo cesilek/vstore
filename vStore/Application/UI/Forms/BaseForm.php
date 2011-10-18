@@ -33,7 +33,7 @@ use vStore, Nette,
  * @author Jirka Vebr
  * @since Aug 16, 2011
  */
-class BaseForm extends vBuilder\Application\UI\Controls\RedactionControl {
+class BaseForm extends vStore\Application\UI\Control {
 	
 	/**
 	 * @var Nette\Application\UI\Form

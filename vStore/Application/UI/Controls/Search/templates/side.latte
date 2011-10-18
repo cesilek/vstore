@@ -1,0 +1,7 @@
+{form searchForm}
+	<div id="pgSearch">
+		<small n:foreach="$form->errors as $error">{$error}</small>
+		{* There should be a better way to display errors... *}
+		{input query data-autocomplete=>$control->link('//prompt!')}
+	</div>
+{/form}
