@@ -51,7 +51,7 @@ class CartRenderer extends vStore\Application\UI\ControlRenderer {
 	}
 	
 	public function renderLastPage() {
-		
+		$this->template->order = $this->shop->getOrder($this->control->getParam('orderId'));
 	}
 		
 }

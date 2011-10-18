@@ -30,6 +30,8 @@ use vStore,
 /**
  * Customer info data holder
  *
+ * @Table(name="shop_customers")
+ * 
  * @Column(id, pk, type="integer", generatedValue)
  * @Column(name)
  * @Column(surname)

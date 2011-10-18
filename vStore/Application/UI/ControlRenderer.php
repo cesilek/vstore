@@ -46,6 +46,7 @@ class ControlRenderer extends vBuilder\Application\UI\CmsControlRenderer {
 		$template = parent::createTemplate($class);
 		
 		$template->registerHelper('currency', 'vStore\Latte\Helpers\Shop::currency');
+		$template->registerHelper('formatOrderId', 'vStore\Latte\Helpers\Shop::formatOrderId');
 		
 		return $template;
 	}

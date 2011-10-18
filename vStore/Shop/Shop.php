@@ -49,7 +49,9 @@ class Shop extends vBuilder\Object {
 	}
 	
 	public function __destruct() {
-		if(isset($this->_order)) {
+		// Pokud mam rozpracovanou nejakou objednavku a nebyla prave ulozena do DB,
+		// tak si ji ulozim do session
+		if(isset($this->_order) && !$this->_order->orderSent()) {
 			$this->_order->save();
 		}
 	}
@@ -63,7 +65,7 @@ class Shop extends vBuilder\Object {
 	 */
 	public function getOrder($id = null) {
 		if($id !== null) {
-			$this->context->repository->get('vStore\\Shop\\Order', $id);
+			return $this->context->repository->get('vStore\\Shop\\Order', $id);
 		} else {
 			if(!isset($this->_order)) {
 				$this->_order = $this->context->sessionRepository->get('vStore\\Shop\\Order');

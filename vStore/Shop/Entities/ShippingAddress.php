@@ -30,8 +30,11 @@ use vStore,
 /**
  * Customer shipping address
  *
+ * @Table(name="shop_addresses")
+ * 
  * @Column(id, pk, type="integer", generatedValue)
  * @Column(street)
+ * @Column(houseNumber)
  * @Column(city)
  * @Column(zip)
  * @Column(country)

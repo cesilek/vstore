@@ -3,13 +3,21 @@
 <div id="shoppingCartReview" class="shoppingCart">	
 	
 	<div class="customerInfo">
-		<div class="nameAndSurname"><span class="name">{$order->customer->name}</span> <span class="name">{$order->customer->surname}</span></div>
+		<div class="nameAndSurname">
+			<span class="name">{$order->customer->name}</span>
+			<span class="name">{$order->customer->surname}</span>
+		</div>
+		
 		<div n:if="$order->customer->email" class="email">E-mail: <span class="value">{$order->customer->email}</span></div>
 		<div n:if="$order->customer->phone" class="phone">Telefon: <span class="value">{$order->customer->phone}</span></div>
 	</div>
 	
 	<div class="shippingAddress" n:if="$order->delivery instanceof vStore\Shop\ParcelDeliveryMethod">
-		<div class="street">{$order->address->street}</div>
+		<div class="streetAndHouseNumber">
+			<span class="street">{$order->address->street}</span>
+			<span class="houseNumber">{$order->address->houseNumber}</span>
+		</div>
+		
 		<div class="city">{$order->address->zip} {$order->address->city}</div>
 		<div class="country">{$order->delivery->availableCountries[$order->address->country]}</div>
 	</div>

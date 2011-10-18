@@ -30,6 +30,8 @@ use vStore,
 /**
  * Basic order implementation
  *
+ * @Table(name="shop_orders")
+ * 
  * @Column(id, pk, type="integer")
  * @Column(delivery)
  * @Column(payment)
@@ -37,6 +39,8 @@ use vStore,
  * @Column(customer, type="OneToOne", entity="vStore\Shop\CustomerInfo", joinOn="customer=id")
  * @Column(address, type="OneToOne", entity="vStore\Shop\ShippingAddress", joinOn="address=id")
  * @Column(note)
+ * @Column(timestamp, type="DateTime")
+ * @Column(state)
  * 
  * @author Adam Staněk (velbloud)
  * @since Oct 7, 2011
@@ -53,6 +57,8 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	private $_calculateCartInfoLock = false;
 	private $_calculateProductInfoLock = false;
 	
+	protected $_orderSent = false;
+	
 	/**
 	 * Constructor
 	 * 
@@ -62,6 +68,60 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		call_user_func_array(array('parent', '__construct'), func_get_args()); 
 		
 		$this->defaultGetter('items')->onItemAdded[] = array($this, 'invalidateCartInfo');
+	}
+	
+	/**
+	 * Stores this order in DB
+	 */
+	public function send() {
+		if($this->orderSent())
+				throw new Nette\InvalidStateException('Order has been already stored in DB');
+		
+		$this->_orderSent = true;
+		
+		$this->load();		
+		
+		$db = $this->context->connection;
+		$persistentRepo = Nette\Environment::getContext()->repository;
+		
+		$this->onPreSave[] = function ($e) use ($db, $persistentRepo) {
+			$table = $e->getMetadata()->getTableName();
+			$db->query("LOCK TABLES [" . $table . "] WRITE");
+			$db->begin();
+			
+			$date = new \DateTime;
+			$monthPrefix = $date->format('Ym');
+			$e->data->timestamp = $date->format('Y-m-d H:i:s');
+			
+			// Musim nacist polozky, protoze jakmile se zmeni ID, nemam je podle ceho svazat
+			$e->items->load();
+			
+			$id = $db->select('MAX(id)')->from($table)->where('SUBSTRING(id, 1, 6) = %s', $monthPrefix)->fetchSingle();			
+			$e->data->id = $monthPrefix . ($id == null ? 1 : substr($id, 6) + 1);
+
+		};
+		
+		$this->onPostSave[] = function ($e) use ($db) {			
+			$db->query("UNLOCK TABLES");
+		};
+		
+		$persistentRepo->save($this);		
+		
+		// Odstranim polozky ze session objednavky
+		$orderedProducts = $this->context->sessionRepository->findAll('vStore\\Shop\\OrderItem', true);
+		foreach($orderedProducts as $curr) $curr->delete();
+	}
+	
+	/**
+	 * Returns true, if order has been sent already
+	 * 
+	 * @return bool
+	 */
+	public function orderSent() {
+		if($this->repository instanceof vBuilder\Orm\SessionRepository)
+			return $this->_orderSent;
+		
+		return true;
 	}
 	
 	/**
