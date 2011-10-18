@@ -224,6 +224,9 @@ class CartControl extends vStore\Application\UI\Control {
 		if($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
 			$form->addText('street', 'Ulice')
 						->addRule(Form::FILLED, 'Je nutné vyplnit adresu (Ulice).');
+			
+			$form->addText('houseNumber', 'Číslo popisné')
+						->addRule(Form::FILLED, 'Je nutné vyplnit adresu (Č.P.).');
 
 			$form->addText('city', 'Město')
 						->addRule(Form::FILLED, 'Je nutné vyplnit adresu (Město).');
@@ -236,6 +239,7 @@ class CartControl extends vStore\Application\UI\Control {
 			if($this->order->address) {
 				$form['street']->setDefaultValue($this->order->address->street);
 				$form['city']->setDefaultValue($this->order->address->city);
+				$form['houseNumber']->setDefaultValue($this->order->address->houseNumber);
 				$form['zip']->setDefaultValue($this->order->address->zip);
 				$form['country']->setDefaultValue($this->order->address->country);
 			}
@@ -265,6 +269,8 @@ class CartControl extends vStore\Application\UI\Control {
 			$this->redirect('deliveryPage');
 			
 		} elseif($form['next']->isSubmittedBy()) {
+			
+			// TODO: Nemel by tvorit entitu pokazdy, mel by se podivat, pokud tam takova uz neni
 			if($this->order->customer == null)
 				$this->order->customer = $this->order->repository->create('vStore\\Shop\\CustomerInfo');
 			
@@ -276,10 +282,13 @@ class CartControl extends vStore\Application\UI\Control {
 			$this->order->note = $values->note;
 			
 			if($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
+				
+				// TODO: Nemel by tvorit entitu pokazdy, mel by se podivat, pokud tam takova uz neni
 				if($this->order->address == null)
 					$this->order->address = $this->order->repository->create('vStore\\Shop\\ShippingAddress');
 				
 				$this->order->address->street = $values->street;
+				$this->order->address->houseNumber = $values->houseNumber;
 				$this->order->address->city = $values->city;
 				$this->order->address->zip = $values->zip;
 				$this->order->address->country = $values->country;
@@ -320,12 +329,13 @@ class CartControl extends vStore\Application\UI\Control {
 			$this->redirect('customerPage');
 			
 		} elseif($form['next']->isSubmittedBy()) {
-			$this->presenter->flashMessage('Vaše objednávka bude zpracována, hned jak to někdo implementuje.');
-			$this->redirect('lastPage');
+			$this->order->send();
+			
+			$this->presenter->flashMessage('Vaše objednávka byla úspěšně odeslána.');
+			$this->redirect('lastPage', array('orderId' => $this->order->id));
 		} 
 	}
 	
 	// </editor-fold>
-	
 	
 }

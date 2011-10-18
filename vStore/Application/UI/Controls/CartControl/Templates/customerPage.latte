@@ -34,16 +34,24 @@
 				<td class="label">{$form['street']->label}<span class="requiredStar" n:if="$form['street']->required">*</span></td>
 				<td class="control">{$form['street']->control}</td>
 
-				<td class="label label2">{$form['city']->label}<span class="requiredStar" n:if="$form['city']->required">*</span></td>
-				<td class="control control2">{$form['city']->control}</td>
+				<td class="label label2">{$form['houseNumber']->label}<span class="requiredStar" n:if="$form['houseNumber']->required">*</span></td>
+				<td class="control control2">{$form['houseNumber']->control}</td>
 			</tr>
 			
 			<tr>
-				<td class="label">{$form['zip']->label}<span class="requiredStar" n:if="$form['zip']->required">*</span></td>
-				<td class="control">{$form['zip']->control}</td>
-
-				<td class="label label2">{$form['country']->label}<span class="requiredStar" n:if="$form['country']->required">*</span></td>
-				<td class="control control2">{$form['country']->control}</td>
+				<td class="label">{$form['city']->label}<span class="requiredStar" n:if="$form['city']->required">*</span></td>
+				<td class="control">{$form['city']->control}</td>
+				
+				<td class="label label2">{$form['zip']->label}<span class="requiredStar" n:if="$form['zip']->required">*</span></td>
+				<td class="control control2">{$form['zip']->control}</td>
+			</tr>
+			
+			<tr>
+				<td class="label">{$form['country']->label}<span class="requiredStar" n:if="$form['country']->required">*</span></td>
+				<td class="control">{$form['country']->control}</td>
+				
+				<!-- <td class="label label2">&nbsp;</td>
+				<td class="control control2">&nbsp;</td> -->
 			</tr>
 		</table>
 	{/if}

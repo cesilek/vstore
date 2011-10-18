@@ -35,4 +35,8 @@ class Shop {
 		return str_replace(" ", "\xc2\xa0", number_format($value, $decimals ? 2 : 0, ",", " "))."\xc2\xa0Kč";
 	}
 
+	public static function formatOrderId($value) {
+		return mb_substr($value, 0, 6) . '/' . mb_substr($value, 6);
+	}
+	
 }
