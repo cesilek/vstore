@@ -1,0 +1,13 @@
+.searchAutocompleteItem DIV {
+	display: block;
+	clear: both;
+	height: 40px;
+	line-height: 40px;
+	overflow: hidden;
+	
+	font-size: 11px;
+	
+	padding-left: 50px;
+	background-repeat: no-repeat;
+	background-position: center left;
+}

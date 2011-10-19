@@ -22,23 +22,22 @@
 
 namespace vStore\Application\UI\Controls;
 
-use vStore, Nette,
-	vBuilder,
-	Nette\Application\UI\Form,
-	vBuilder\Orm\Repository;
+use vStore,
+		Nette,
+		vBuilder,
+		Nette\Application\UI\Form,
+		vBuilder\Orm\Repository;
+
 /**
  *
  * @author Jirka
  */
-class Search extends Nette\Application\UI\Control {
+class Search extends vStore\Application\UI\Control {
 
-	
-	public function render($what = null) {
-		$template = $this->createTemplate();
-		$template->setFile(__DIR__.'/templates/'.($what ?: 'full').'.latte');
-		echo $template;
+	protected function createRenderer() {
+		return new SearchRenderer($this);
 	}
-	
+		
 	public function createComponentSearchForm($name) {
 		$form = new Form($this, $name);
 		$form->onSuccess[] = callback($this, $name.'Submitted');
@@ -59,6 +58,7 @@ class Search extends Nette\Application\UI\Control {
 		foreach ($search as $page) {
 			$temp = (object) null;
 			$temp->title = $page->title;
+			$temp->imageUrl = $page->image ? $page->image->getUrl(32, 32) : null;
 			$temp->link = $this->presenter->link('//Redaction:', array (
 				'id'=>$page->pageId
 			));
