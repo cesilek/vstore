@@ -99,6 +99,7 @@ CREATE TABLE `shop_orders` (
   `id` int(10) unsigned NOT NULL,
   `delivery` varchar(64) NOT NULL DEFAULT '',
   `payment` varchar(64) NOT NULL DEFAULT '',
+  `user` smallint(5) unsigned DEFAULT NULL,
   `customer` smallint(5) unsigned NOT NULL,
   `address` smallint(5) unsigned DEFAULT NULL,
   `note` text NOT NULL,
@@ -106,6 +107,7 @@ CREATE TABLE `shop_orders` (
   `state` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

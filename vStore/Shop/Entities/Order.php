@@ -36,6 +36,7 @@ use vStore,
  * @Column(delivery)
  * @Column(payment)
  * @Column(items, type="OneToMany", entity="vStore\Shop\OrderItem", joinOn="id=orderId", processSubclasses="true")
+ * @Column(user, type="OneToOne", entity="vBuilder\Security\User", joinOn="user=id")
  * @Column(customer, type="OneToOne", entity="vStore\Shop\CustomerInfo", joinOn="customer=id")
  * @Column(address, type="OneToOne", entity="vStore\Shop\ShippingAddress", joinOn="address=id")
  * @Column(note)
@@ -83,8 +84,9 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		
 		$db = $this->context->connection;
 		$persistentRepo = Nette\Environment::getContext()->repository;
+		$user = $this->context->user;
 		
-		$this->onPreSave[] = function ($e) use ($db, $persistentRepo) {
+		$this->onPreSave[] = function ($e) use ($db, $persistentRepo, $user) {
 			$table = $e->getMetadata()->getTableName();
 			$db->query("LOCK TABLES [" . $table . "] WRITE");
 			$db->begin();
@@ -98,6 +100,10 @@ class Order extends vBuilder\Orm\ActiveEntity {
 			
 			$id = $db->select('MAX(id)')->from($table)->where('SUBSTRING(id, 1, 6) = %s', $monthPrefix)->fetchSingle();			
 			$e->data->id = $monthPrefix . ($id == null ? 1 : substr($id, 6) + 1);
+			
+			$e->user = $user->isLoggedIn()
+				? $user->getIdentity()
+				: null;
 
 		};
 		

@@ -60,6 +60,15 @@ class Shop extends vBuilder\Object {
 	}
 	
 	/**
+	 * Returns name of order entity class
+	 * 
+	 * @return string class name 
+	 */
+	public function getOrderEntityClass() {
+		return 'vStore\\Shop\\Order';
+	}
+	
+	/**
 	 * Returns order. If ID is null, then current (session) order is returned.
 	 * 
 	 * @param int id
@@ -68,15 +77,29 @@ class Shop extends vBuilder\Object {
 	 */
 	public function getOrder($id = null) {
 		if($id !== null) {
-			return $this->context->repository->get('vStore\\Shop\\Order', $id);
+			return $this->context->repository->get($this->getOrderEntityClass(), $id);
 		} else {
 			if(!isset($this->_order)) {
-				$this->_order = $this->context->sessionRepository->get('vStore\\Shop\\Order');
+				$this->_order = $this->context->sessionRepository->get($this->getOrderEntityClass());
 			}
 
 			return $this->_order;
 		}
 	}
+	
+	/**
+	 * Returns fluent to user's order query
+	 * 
+	 * @param vBuilder\Security\User|int|null user id (or user instance), if null current logged user is used
+	 * 
+	 * @throws Nette\InvalidStateException if no user is logged but current user is requested
+	 */
+	public function getUserOrders($user) {
+		$userId = $this->getUserId($user);
+		
+		return $this->context->repository->findAll($this->getOrderEntityClass())->where('[user] = %i', $userId);
+	}
+	
 	
 	/**
 	 * Returns delivery method object
@@ -155,6 +178,24 @@ class Shop extends vBuilder\Object {
 		
 		return $this->_availablePaymentMethods;
 	}
-	
+
+	/**
+	 * Helper for getting user id from parameter
+	 * 
+	 * @param vBuilder\Security\User|int|null user id (or user instance), if null current logged user is used
+	 * 
+	 * @throws Nette\InvalidStateException if no user is logged but current user is requested
+	 */
+	protected function getUserId($user) {
+		if($userId instanceof vBuilder\Security\User) $userId = $userId->id;
+		elseif($userId === null) {
+			if(!$this->context->user->isLoggedId())
+				throw new Nette\InvalidStateException("Current user requested but no user is logged in");
+			
+			$userId = $this->context->user->getId();
+		}
+		
+		return $userId;
+	}
 	
 }
