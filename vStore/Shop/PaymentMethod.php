@@ -24,7 +24,8 @@
 namespace vStore\Shop;
 
 use vStore,
-		vBuilder;
+		vBuilder,
+		Nette;
 
 /**
  * Basic implementation of order payment method
@@ -38,20 +39,30 @@ class PaymentMethod extends vBuilder\Object implements IPaymentMethod {
 	private $_name;
 	private $_description;
 	private $_charge;
+		
+	/**
+	 * Protected constructor
+	 */
+	protected function __construct() {
+	
+	}
 	
 	/**
-	 * Constructor
+	 * Creates method from app configuration
 	 * 
 	 * @param string id
-	 * @param string name
-	 * @param string description
-	 * @param float charge for this method
+	 * @param vBuilder\Config\ConfigDAO config
+	 * @param Nette\DI\IContainer DI context
 	 */
-	function __construct($id, $name, $description = null, $charge = 0) {
-		$this->_id = $id;
-		$this->_name = $name;
-		$this->_description = $description;
-		$this->_charge = $charge;
+	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
+		$method = new static;
+		
+		$method->_id = $id;
+		$method->_name = $config->get('name', $id);
+		$method->_description = $config->get('description');
+		$method->_charge = $config->get('charge');
+		
+		return $method;
 	}
 	
 	/**

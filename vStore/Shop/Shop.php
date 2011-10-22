@@ -144,7 +144,12 @@ class Shop extends vBuilder\Object {
 			foreach($methodIds as $id) {
 				$m = $methods->$id;
 				
-				$this->_availablePaymentMethods[$id] = new Shop\PaymentMethod($id, $m->get('name', $id), $m->get('description'), $m->get('charge', 0));
+				if(($class = $m->get('type')) != null) {
+					$class = 'vStore\\Shop\\' . ucfirst($class) . 'PaymentMethod';
+				} else
+					$class = 'vStore\\Shop\\PaymentMethod';
+				
+				$this->_availablePaymentMethods[$id] = $class::fromConfig($id, $m, $this->context);
 			}
 		}
 		

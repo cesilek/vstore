@@ -61,18 +61,18 @@ class XmlInvoice extends Invoice {
 		return new self($xml);
 	}
         
-        /**
-         * Creates invoice from XML string
-         * 
-         * @param string XML data 
-         */
-        static function fromString($xmldata) {
-            $xml = simplexml_load_string($xmldata);
-            if($xml === false) 
-                throw new \InvalidArgumentException(get_called_class() . "::fromString() didn't get well-formed data.");
-        
-            return new self($xml);
-        }
+  /**
+	 * Creates invoice from XML string
+	 * 
+	 * @param string XML data 
+	 */
+	static function fromString($xmldata) {
+		$xml = simplexml_load_string($xmldata);
+		if ($xml === false)
+			throw new \InvalidArgumentException(get_called_class() . "::fromString() didn't get well-formed data.");
+
+		return new self($xml);
+	}
 	
 	/**
 	 * @return string 
