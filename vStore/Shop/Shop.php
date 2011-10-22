@@ -52,10 +52,19 @@ class Shop extends vBuilder\Object {
 	}
 	
 	public function __destruct() {
+		
 		// Pokud mam rozpracovanou nejakou objednavku a nebyla prave ulozena do DB,
 		// tak si ji ulozim do session
 		if(isset($this->_order) && !$this->_order->orderSent()) {
-			$this->_order->save();
+			
+			// Musim zachytavat vyjimky a logovat je, protoze pri destructu uz je stranka
+			// vyrenderovana a nelze zobrazit chybove hlaseni
+			try {
+				$this->_order->save();
+			} catch(\Exception $e) {
+				Nette\Diagnostics\Debugger::log($e);
+				Nette\Diagnostics\Debugger::log('Error saving shop order into session because of ' . get_class($e) .': ' . md5($e), Nette\Diagnostics\Debugger::CRITICAL);
+			}
 		}
 	}
 	
