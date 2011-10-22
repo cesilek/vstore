@@ -44,6 +44,9 @@ class Shop extends vBuilder\Object {
 	private $_availableDeliveryMethods;
 	private $_availablePaymentMethods;
 	
+	/** @var array of order listeners */
+	public $onOrderCreated = array();
+	
 	public function __construct(Nette\DI\IContainer $context) {
 		$this->context = $context;	
 	}

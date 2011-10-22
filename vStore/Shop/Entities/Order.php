@@ -110,6 +110,9 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		// Odstranim polozky ze session objednavky
 		$orderedProducts = $this->context->sessionRepository->findAll('vStore\\Shop\\OrderItem', true);
 		foreach($orderedProducts as $curr) $curr->delete();
+		
+		// Zavolam vsechny listenery (pouziju pro jistotu jiz ulozenou objednavku)
+		$this->context->shop->onOrderCreated($this->context->shop->getOrder($this->id));
 	}
 	
 	/**
