@@ -34,6 +34,9 @@ use vStore,
  */
 class Search extends vStore\Application\UI\Control {
 
+	protected $query;
+
+
 	protected function createRenderer() {
 		return new SearchRenderer($this);
 	}
@@ -42,18 +45,20 @@ class Search extends vStore\Application\UI\Control {
 		$form = new Form($this, $name);
 		$form->onSuccess[] = callback($this, $name.'Submitted');
 		$form->addText('query')
-			->setRequired('Please fill in your query')
-			->setDefaultValue('Hledat...')
-			->addRule(Form::MIN_LENGTH, 'Please make your query at least %d characters long', 3);
+			->setDefaultValue($this->query ?: 'Hledat...');
 		$form->addSubmit('s', 'Search!');
 	}
 	
 	public function searchFormSubmitted(Form $form) {
-		dd($form->values);
+		$this->presenter->redirect('search', array(
+			'id'=>2,
+			'query'=>$form->values->query
+		));
 	}
 	
 	public function handlePrompt($query) {
-		$search = $this->search($query);
+		//sleep(3); // 'loading' simulation
+		$search = $this->search($query)->fetchAll();
 		$result = array ();
 		foreach ($search as $page) {
 			$temp = (object) null;
@@ -69,18 +74,31 @@ class Search extends vStore\Application\UI\Control {
 	}
 	
 	protected function search($query) {
-		/*
-		 *	I'm not quite sure how exactly to improve this very silly algorythm.
-		 *  I am not referring to the LIKE operator but to the argument passed
-		 *	to the findAll method. The thing is that we might have to search
-		 *	through various columns of various entities. I don't really thing
-		 *	that our ORM and Branch are ready for this. There might be some
-		 *	very significant revisions necessary...
-		 */
 		$query = '%'.$query.'%';
 		return $this->presenter->getContext()->redaction->branch->findAll('vStore\Redaction\Documents\Product')
 				->where('([perex] LIKE %s',$query, ') OR ([content] LIKE %s', $query, ') OR ([title] LIKE %s', $query, ')')
-				->limit(10)
-				->fetchAll();
+				->limit(10);
+	}
+	
+	public function setQuery($query) {
+		$this->query = (string) $query;
+		return $this;
+	}
+	
+	public function createComponentResultListing($name) {
+		$listing = new vStore\Application\UI\Controls\ProductsListing($this, $name);
+
+		$fluent = $this->search($this->query);
+		$listing->setFluent($fluent->orderByStructure());
+		
+		$listing->setDefaultRenderer(new CatalogueRenderer);
+		$listing->getRenderer()->setFile(APP_DIR . '/vBuilderFrontModule/templates/ProductListing/catalogueRenderer.latte');
+		
+		return $listing;
+	}
+	
+	
+	public function actionFull() {
+		
 	}
 }

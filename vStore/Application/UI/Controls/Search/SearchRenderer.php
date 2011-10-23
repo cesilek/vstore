@@ -37,6 +37,9 @@ class SearchRenderer extends vStore\Application\UI\ControlRenderer {
 		
 	public function renderDefault() {
 		
-	}	
-		
+	}
+	
+	public function renderFull() {
+		$this->template->setFile(__DIR__.'/Templates/full.latte');
+	}
 }

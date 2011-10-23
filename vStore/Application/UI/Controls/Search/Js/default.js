@@ -2,7 +2,7 @@ $(function() {
 
 	var initVal = 'Hledat...',
 		emptyVal = '',
-		searchInput = $("#pgSearch input[type=text]"),
+		searchInput = $("input[type=text].search"),
 		queryCache = [];
 	searchInput.focus(function() {
 		var $this = $(this);
@@ -14,7 +14,9 @@ $(function() {
 			$this.val(initVal);
 	});
 	searchInput.autocomplete({
-		minLength: 3,
+		search: function (event, ui) {
+			console.log(ui);
+		},
 		source: function(request, response) {
 			$.ajax({
 				url: searchInput.attr('data-autocomplete'),

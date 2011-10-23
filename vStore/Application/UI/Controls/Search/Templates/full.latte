@@ -1,0 +1,9 @@
+{include 'includes.inc.latte'}
+
+<div>
+	{form searchForm}
+		{input query data-autocomplete=>$control->link('//prompt!'), class=>'search'}
+		{input s value=>'Hledat!'}
+	{/form}
+</div>
+{control resultListing}
