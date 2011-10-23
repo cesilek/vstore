@@ -49,7 +49,7 @@ class InvoiceAddress extends vBuilder\Object implements IInvoiceAddress {
 	/** @var string country */
 	protected $country;
 	
-	function __construct($name, $street, $city, $zip, $country = 'Česká republika') {
+	function __construct($name, $street = null, $city = null, $zip = null, $country = 'Česká republika') {
 		$this->name = $name;	
 		$this->street = $street;
 		$this->city = $city;

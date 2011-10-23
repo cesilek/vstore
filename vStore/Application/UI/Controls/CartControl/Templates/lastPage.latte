@@ -1,5 +1,14 @@
-<p>Vaše objednávka je evidována pod číslem <strong>{$order->id|formatOrderId}</strong>.</p>
+{block shoppingCartLast}
 
-<p>E-mail o potvrzení objednávky bude doručen na e-mail <strong>{$order->customer->email}</strong></p>
-
-<p>Děkujeme za Váš nákup.</p>
+<div id="shoppingCartLast" class="shoppingCart">	
+	
+	{block perex}
+		<div class="cmsContent perex">
+			{msg perex-orderDone, parse => true,
+						orderId => $order->id,
+						formatedOrderId => $order->id|formatOrderId,
+						customerEmail => $order->customer->email}
+		</div>
+	{/block}
+		
+</div>

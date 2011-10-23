@@ -21,30 +21,31 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Shop;
+namespace vStore\Shop\Listeners;
 
 use vStore,
 		vBuilder,
 		Nette;
 
 /**
- * Customer info data holder
+ * E-mail notificator for new orders
  *
- * @Table(name="shop_customers")
- * 
- * @Column(id, pk, type="integer", generatedValue)
- * @Column(name)
- * @Column(surname)
- * @Column(email)
- * @Column(phone)
- * 
  * @author Adam Staněk (velbloud)
- * @since Oct 8, 2011
+ * @since Oct 22, 2011
  */
-class CustomerInfo extends vBuilder\Orm\ActiveEntity {
-	
-	public function getDisplayName() {
-		return $this->name . ' ' . $this->surname;
+class MailNotificator extends vBuilder\Mail\MailNotificator {
+		
+	public function onOrderCreated(vStore\Shop\Order $order) {
+		$this->template->order = $order;
+		
+		if($this->template->getFile() == "")
+			$this->template->setFile(__DIR__ . '/Templates/email.orderConfirmation.latte');		
+
+		$this->message->addTo($order->customer->email, $order->customer->displayName);
+		$this->message->setSubject('Potvrzeni objednavky c. ' . vStore\Latte\Helpers\Shop::formatOrderId($order->id));
+		$this->message->setHtmlBody($this->template);
+		$this->message->send();
 	}
 	
 }
+

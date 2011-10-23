@@ -23,6 +23,9 @@
 
 namespace vStore\Shop;
 
+use vBuilder,
+		Nette;
+
 /**
  * Interface of shop payment method data class
  *
@@ -30,6 +33,8 @@ namespace vStore\Shop;
  * @since Oct 7, 2011
  */
 interface IPaymentMethod {
+	
+	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context);
 	
 	/**
 	 * @return string

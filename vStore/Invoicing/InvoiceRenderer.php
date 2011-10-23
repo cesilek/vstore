@@ -118,5 +118,3 @@ abstract class InvoiceRenderer extends vBuilder\Object {
 	}
 	
 }
-
-?>

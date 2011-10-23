@@ -36,6 +36,7 @@ use vStore,
  * @Column(delivery)
  * @Column(payment)
  * @Column(items, type="OneToMany", entity="vStore\Shop\OrderItem", joinOn="id=orderId", processSubclasses="true")
+ * @Column(user, type="OneToOne", entity="vBuilder\Security\User", joinOn="user=id")
  * @Column(customer, type="OneToOne", entity="vStore\Shop\CustomerInfo", joinOn="customer=id")
  * @Column(address, type="OneToOne", entity="vStore\Shop\ShippingAddress", joinOn="address=id")
  * @Column(note)
@@ -49,6 +50,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	
 	const DELIVERY_ITEM_ID = -1;
 	const PAYMENT_ITEM_ID = -2;
+	const DISCOUNT_ITEM_ID = -3;
 	
 	private $_total;
 	private $_totalProducts;
@@ -58,6 +60,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	private $_calculateProductInfoLock = false;
 	
 	protected $_orderSent = false;
+	protected $_itemsAltered = false;
 	
 	/**
 	 * Constructor
@@ -67,6 +70,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	public function __construct($data = array()) {
 		call_user_func_array(array('parent', '__construct'), func_get_args()); 
 		
+		// TODO: Remove? Zmena mnozstvi? Je to vubec potreba (redirect)?
 		$this->defaultGetter('items')->onItemAdded[] = array($this, 'invalidateCartInfo');
 	}
 	
@@ -83,8 +87,9 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		
 		$db = $this->context->connection;
 		$persistentRepo = Nette\Environment::getContext()->repository;
+		$user = $this->context->user;
 		
-		$this->onPreSave[] = function ($e) use ($db, $persistentRepo) {
+		$this->onPreSave[] = function ($e) use ($db, $persistentRepo, $user) {
 			$table = $e->getMetadata()->getTableName();
 			$db->query("LOCK TABLES [" . $table . "] WRITE");
 			$db->begin();
@@ -93,11 +98,21 @@ class Order extends vBuilder\Orm\ActiveEntity {
 			$monthPrefix = $date->format('Ym');
 			$e->data->timestamp = $date->format('Y-m-d H:i:s');
 			
-			// Musim nacist polozky, protoze jakmile se zmeni ID, nemam je podle ceho svazat
-			$e->items->load();
+			// Pred ulozenim odstranim schovane nulove polozky (nulove slevy atd.)
+			// Zaroven to vyvola load => musim nacist polozky,
+			// protoze jakmile se zmeni ID, nemam je podle ceho svazat
+			foreach($e->items as $curr) {
+				if(!$curr->isVisible() && $curr->getPrice() == 0) {
+					$e->items->remove($curr);
+				}
+			}
 			
 			$id = $db->select('MAX(id)')->from($table)->where('SUBSTRING(id, 1, 6) = %s', $monthPrefix)->fetchSingle();			
 			$e->data->id = $monthPrefix . ($id == null ? 1 : substr($id, 6) + 1);
+			
+			$e->user = $user->isLoggedIn()
+				? $user->getIdentity()
+				: null;
 
 		};
 		
@@ -110,6 +125,9 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		// Odstranim polozky ze session objednavky
 		$orderedProducts = $this->context->sessionRepository->findAll('vStore\\Shop\\OrderItem', true);
 		foreach($orderedProducts as $curr) $curr->delete();
+		
+		// Zavolam vsechny listenery (pouziju pro jistotu jiz ulozenou objednavku)
+		$this->context->shop->onOrderCreated($this->context->shop->getOrder($this->id));
 	}
 	
 	/**
@@ -180,7 +198,18 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	 */
 	public function getItems($onlyProducts = false) {
 		$items = $this->defaultGetter('items');
-				
+		
+		// Nesmim polozku pridat vice jak jednou, kvuli pripadnym deletum
+		if(!$this->_itemsAltered && $this->repository instanceof vBuilder\Orm\SessionRepository) {
+			$this->_itemsAltered = true;
+			
+			if($this->context->config->get('shop.scheduledDiscounts.enabled', false)) {
+				if($this->getItemWithId(self::DISCOUNT_ITEM_ID) === null) {
+					$items->add($this->repository->create('vStore\\Shop\\ScheduledDiscountOrderItem'));
+				}
+			}
+		}
+		
 		if($onlyProducts == false) return $items;
 		
 		return array_filter($items->toArray(), function($item) {
@@ -220,16 +249,30 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	 * @param int product id
 	 */
 	protected function removeItemWithId($productId) {
+		$item = $this->getItemWithId($productId);
+		if($item) {
+			$item->delete();
+			$this->invalidateCartInfo();
+		}
+	}
+	
+	/**
+	 * Finds order item with product id
+	 * 
+	 * @param int product id
+	 * 
+	 * @return OrderItem|null
+	 */
+	public function getItemWithId($productId) {
 		$items = $this->defaultGetter('items');
 		
 		foreach($items as $item) {
 			if($item->productId == $productId) {
-				$item->delete();
-				$this->invalidateCartInfo();
-				
-				return ;
+				return $item;
 			}
 		}
+		
+		return null;
 	}
 	
 	/**

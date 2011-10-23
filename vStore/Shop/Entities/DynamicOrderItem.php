@@ -41,10 +41,10 @@ abstract class DynamicOrderItem extends OrderItem {
 		
 		// Merge z getteru pri ukladani
 		$this->onPreSave[] = function($e) {
-			$e->data->productId = $e->productId;
-			$e->data->price = $e->price;
-			$e->data->amount = $e->amount;
-			$e->data->name = $e->name;
+			$e->data->productId = $e->getProductId();
+			$e->data->price = $e->getPrice();
+			$e->data->amount = $e->getAmount();
+			$e->data->name = $e->getName();
 		};
 		
 	}
