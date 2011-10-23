@@ -18,7 +18,7 @@
 				preview = $('#cartPreview');
 			if (data.count) {
 				empty.hide();
-				preview.show();
+				preview.removeClass('hidden');
 				$('#cartPreviewCount').html(data.count);
 				$('#cartPreviewPrice').html(data.totalPrice);
 			} else {
