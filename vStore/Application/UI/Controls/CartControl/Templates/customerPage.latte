@@ -1,5 +1,11 @@
+{block shoppingCartCustomer}
+
 {form customerForm}
 <div id="shoppingCartCustomer" class="shoppingCart">
+	
+	{block perex}
+		<div class="cmsContent perex">{msg perex-customerForm, parse => true}</div>
+	{/block}
 	
 	<ul class="formErrors" n:if="$form->hasErrors()">
 		<li n:foreach="$form->errors as $error">{$error}</li>

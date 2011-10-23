@@ -1,6 +1,12 @@
+{block shoppingCartReview}
+
 {form reviewForm}
 
 <div id="shoppingCartReview" class="shoppingCart">	
+	
+	{block perex}
+		<div class="cmsContent perex">{msg perex-reviewOrder, parse => true}</div>
+	{/block}
 	
 	<div class="customerInfo">
 		<div class="nameAndSurname">

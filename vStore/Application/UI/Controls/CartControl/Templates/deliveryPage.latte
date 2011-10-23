@@ -1,6 +1,12 @@
+{block shoppingCartDAP}
+
 {form deliveryPaymentForm}
 
 <div id="shoppingCartDAP" class="shoppingCart">
+	
+	{block perex}
+		<div class="cmsContent perex">{msg perex-deliveryAndPayment, parse => true}</div>
+	{/block}
 	
 	<h3 class="first">Způsob dopravy</h3>
 	<table id="shoppingCartDelivery">

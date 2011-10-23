@@ -1,19 +1,29 @@
-{if $order->amount > 0}
-	<div id="shoppingCartDefault" class="shoppingCart">
+{block shoppingCartDefault
+
+<div id="shoppingCartDefault" class="shoppingCart">
+	{if $order->amount > 0}
+	
+		{block perex}
+			<div class="cmsContent perex">{msg perex-shoppingCart, parse => true}</div>
+		{/block}
+
 		{form cartForm}
 			<ul class="errors" n:if="$form->hasErrors()">
 				<li n:foreach="$form->errors as $error">{$error}</li>
 			</ul>
-			
+
 			{include 'cartTable.inc.latte', form => $form, onlyProducts => true}
-		
+
 			<div class="buttonBlock">
 			{input delete value=>'Smazat vybrané'}
 			{input reCount value=>'Přepočítat'}
 			{input buy value=> 'Pokračovat v nákupu'}
 			</div>
 		{/form}
-	</div>
-{else}
-	V košíku nejsou žádné položky. <a href="#">Jak nakupovat?</a>
-{/if}
+
+	{else}
+		{block noItemsText}
+			<div class="plainContent perex">{msg perex-shoppingCart-noitems, parse => true}</div>
+		{/block}
+	{/if}
+</div>
