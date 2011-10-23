@@ -21,38 +21,30 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Application\UI;
+namespace vStore\Application\UI\Controls;
 
-use vBuilder, Nette;
+use vStore,
+		Nette,
+		vBuilder;
 
 /**
- * Overloaded renderer for global registration of template helpers
+ * Search form renderer
  *
- * @author Adam Staněk (velbloud)
- * @since Oct 7, 2011
+ * @author Jirka
  */
-class ControlRenderer extends vBuilder\Application\UI\CmsControlRenderer {
-	
-	/**
-	 * Returns shop instance (shortcut)
-	 * 
-	 * @return vStore\Shop
-	 */
-	final public function getShop() {
-		return $this->context->shop;
+class LoginControlRenderer extends vStore\Application\UI\ControlRenderer {
+		
+	public function renderDefault() {
+		
 	}
 	
-	public function createTemplate($class = NULL) {
-		$template = parent::createTemplate($class);
-		
-		$template->registerHelper('currency', 'vStore\Latte\Helpers\Shop::currency');
-		$template->registerHelper('formatOrderId', 'vStore\Latte\Helpers\Shop::formatOrderId');
-		
-		$template->user = $this->context->user;
-		
-		return $template;
+	public function renderLogin() {
+		/**
+		 * Na ControlRenderer#111 ta podminka neprojde, protoze, nemam poneti
+		 * jak, uz tam je predem nahrany soubor default.latte a v dusledku toho
+		 * se tam neda nase kyzene view. Vubec nevim, kde  se tam vzal. 
+		 * Tohle je jen jako docasne reseni.
+		 */
+		$this->template->setFile(__DIR__.'/Templates/login.latte');
 	}
-	
-	
 }
-

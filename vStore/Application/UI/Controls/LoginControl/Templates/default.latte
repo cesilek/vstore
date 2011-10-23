@@ -1,0 +1,9 @@
+{addJs LIBS_DIR . '/vStore/vStore/Application/UI/Controls/LoginControl/Js/default.js'}
+
+<span n:class="!$user->isLoggedIn() ? hidden" id="userLoggedIn">
+	<a href="#">{$user->identity->name} {$user->identity->surname}</a>
+	<a n:href="logout!" id="logoutLink">Odhlásit se</a>
+</span>
+<span n:class="$user->isLoggedIn() ? hidden" id="userLoggedOut">
+	<a href="{rlink 8}" id="loginLink">Přihlásit se</a>
+</span>
