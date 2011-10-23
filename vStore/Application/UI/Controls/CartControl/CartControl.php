@@ -236,27 +236,46 @@ class CartControl extends vStore\Application\UI\Control {
 
 			$form->addSelect('country', 'Země', $this->order->delivery->availableCountries);
 			
+			$address = null;
 			if($this->order->address) {
-				$form['street']->setDefaultValue($this->order->address->street);
-				$form['city']->setDefaultValue($this->order->address->city);
-				$form['houseNumber']->setDefaultValue($this->order->address->houseNumber);
-				$form['zip']->setDefaultValue($this->order->address->zip);
-				$form['country']->setDefaultValue($this->order->address->country);
+				$address = $this->order->address;
 			} elseif($this->context->user->isLoggedIn()) {
-				//$lastUserOrder = $this->shop->getUserOrders()->where('[address] IS NOT NULL')->orderBy('[timestamp]')
+				$lastUserOrder = $this->shop->getUserOrders()->where('[address] IS NOT NULL')->orderBy('[timestamp]')->fetch();
+				if($lastUserOrder && $lastUserOrder->address)
+					$address = $lastUserOrder->address;
+			}
+			
+			if($address) {
+				$form['street']->setDefaultValue($address->street);
+				$form['city']->setDefaultValue($address->city);
+				$form['houseNumber']->setDefaultValue($address->houseNumber);
+				$form['zip']->setDefaultValue($address->zip);
+				$form['country']->setDefaultValue($address->country);
 			}
 			
 		}
 		
 		$form->addTextArea('note', 'Poznámka');		
 		
+		$customer = null;
 		if($this->order->customer) {
-			$form['name']->setDefaultValue($this->order->customer->name);
-			$form['surname']->setDefaultValue($this->order->customer->surname);
-			$form['email']->setDefaultValue($this->order->customer->email);
-			$form['phone']->setDefaultValue($this->order->customer->phone);
-			$form['note']->setDefaultValue($this->order->note);
+			$customer = $this->order->customer;
+		} elseif($this->context->user->isLoggedIn()) {
+			if(!$lastUserOrder)
+				$lastUserOrder = $this->shop->getUserOrders()->orderBy('[timestamp]')->fetch();
+			
+			if($lastUserOrder && $lastUserOrder->customer)
+				$customer = $lastUserOrder->customer;
 		}
+		
+		if($customer) {
+			$form['name']->setDefaultValue($customer->name);
+			$form['surname']->setDefaultValue($customer->surname);
+			$form['email']->setDefaultValue($customer->email);
+			$form['phone']->setDefaultValue($customer->phone);
+		}
+		
+		$form['note']->setDefaultValue($this->order->note);
 		
 		$form->addSubmit('back', 'Zpět k výběru dopravy')->setValidationScope(false);
 		$form->addSubmit('next', 'Pokračovat v objednávce');

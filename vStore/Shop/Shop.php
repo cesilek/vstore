@@ -103,7 +103,7 @@ class Shop extends vBuilder\Object {
 	 * 
 	 * @throws Nette\InvalidStateException if no user is logged but current user is requested
 	 */
-	public function getUserOrders($user) {
+	public function getUserOrders($user = null) {
 		$userId = $this->getUserId($user);
 		
 		return $this->context->repository->findAll($this->getOrderEntityClass())->where('[user] = %i', $userId);
@@ -195,10 +195,10 @@ class Shop extends vBuilder\Object {
 	 * 
 	 * @throws Nette\InvalidStateException if no user is logged but current user is requested
 	 */
-	protected function getUserId($user) {
+	protected function getUserId($user = null) {
 		if($user instanceof vBuilder\Security\User) $user = $user->id;
 		elseif($user === null) {
-			if(!$this->context->user->isLoggedId())
+			if(!$this->context->user->isLoggedIn())
 				throw new Nette\InvalidStateException("Current user requested but no user is logged in");
 			
 			$user = $this->context->user->getId();
