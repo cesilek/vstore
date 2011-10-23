@@ -50,6 +50,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	
 	const DELIVERY_ITEM_ID = -1;
 	const PAYMENT_ITEM_ID = -2;
+	const DISCOUNT_ITEM_ID = -3;
 	
 	private $_total;
 	private $_totalProducts;
@@ -68,6 +69,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	public function __construct($data = array()) {
 		call_user_func_array(array('parent', '__construct'), func_get_args()); 
 		
+		// TODO: Remove? Zmena mnozstvi? Je to vubec potreba (redirect)?
 		$this->defaultGetter('items')->onItemAdded[] = array($this, 'invalidateCartInfo');
 	}
 	
@@ -97,6 +99,13 @@ class Order extends vBuilder\Orm\ActiveEntity {
 			
 			// Musim nacist polozky, protoze jakmile se zmeni ID, nemam je podle ceho svazat
 			$e->items->load();
+			
+			// Pred ulozenim odstranim schovane nulove polozky (nulove slevy atd.)
+			foreach($e->items as $curr) {
+				if(!$curr->isVisible() && $curr->getPrice() == 0) {
+					$curr->delete();
+				}
+			}
 			
 			$id = $db->select('MAX(id)')->from($table)->where('SUBSTRING(id, 1, 6) = %s', $monthPrefix)->fetchSingle();			
 			$e->data->id = $monthPrefix . ($id == null ? 1 : substr($id, 6) + 1);
@@ -189,7 +198,13 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	 */
 	public function getItems($onlyProducts = false) {
 		$items = $this->defaultGetter('items');
-				
+		
+		if($this->context->config->get('shop.scheduledDiscounts.enabled', false)) {
+			if($this->getItemWithId(self::DISCOUNT_ITEM_ID) === null) {
+				$items->add($this->repository->create('vStore\\Shop\\ScheduledDiscountOrderItem'));
+			}
+		}
+		
 		if($onlyProducts == false) return $items;
 		
 		return array_filter($items->toArray(), function($item) {
@@ -229,16 +244,30 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	 * @param int product id
 	 */
 	protected function removeItemWithId($productId) {
+		$item = $this->getItemWithId($productId);
+		if($item) {
+			$item->delete();
+			$this->invalidateCartInfo();
+		}
+	}
+	
+	/**
+	 * Finds order item with product id
+	 * 
+	 * @param int product id
+	 * 
+	 * @return OrderItem|null
+	 */
+	public function getItemWithId($productId) {
 		$items = $this->defaultGetter('items');
 		
 		foreach($items as $item) {
 			if($item->productId == $productId) {
-				$item->delete();
-				$this->invalidateCartInfo();
-				
-				return ;
+				return $item;
 			}
 		}
+		
+		return null;
 	}
 	
 	/**

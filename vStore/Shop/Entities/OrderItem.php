@@ -74,5 +74,13 @@ class OrderItem extends vBuilder\Orm\ActiveEntity {
 	}
 	
 
+	/**
+	 * Returns true if item should be displayed in order item tables
+	 * 
+	 * @return bool 
+	 */
+	public function isVisible() {
+		return true;
+	}
 		
 }

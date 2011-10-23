@@ -50,7 +50,7 @@ class ParcelDeliveryOrderItem extends DynamicOrderItem {
 	 * 
 	 * @return type 
 	 */
-	protected function getName() {
+	public function getName() {
 		return "Poštovné";
 	}
 	

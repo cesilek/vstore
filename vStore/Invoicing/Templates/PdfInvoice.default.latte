@@ -135,9 +135,11 @@
 	<tr>
 		<td>
 			<strong>{$invoice->supplier->invoiceAddress->name}</strong><br />
-			{$invoice->supplier->invoiceAddress->street}<br />
-			{$invoice->supplier->invoiceAddress->zip} {$invoice->supplier->invoiceAddress->city}<br />
-			{$invoice->supplier->invoiceAddress->country}<br />
+			{if $invoice->supplier->invoiceAddress->street != ""}
+				{$invoice->supplier->invoiceAddress->street}<br />
+				{$invoice->supplier->invoiceAddress->zip} {$invoice->supplier->invoiceAddress->city}<br />
+				{$invoice->supplier->invoiceAddress->country}<br />
+			{/if}
 			<br />
 			IČ: {$invoice->supplier->in}
 			{if $invoice->supplier->tin}&nbsp;&nbsp;&nbsp;DIČ: {$invoice->supplier->tin}{/if}
@@ -145,9 +147,11 @@
 		
 		<td>
 			<strong>{$invoice->customer->contactAddress->name}</strong><br />
-			{$invoice->customer->contactAddress->street}<br />
-			{$invoice->customer->contactAddress->zip} {$invoice->customer->contactAddress->city}<br />
-			{$invoice->customer->contactAddress->country}
+			{if $invoice->customer->contactAddress->street != ""}
+				{$invoice->customer->contactAddress->street}<br />
+				{$invoice->customer->contactAddress->zip} {$invoice->customer->contactAddress->city}<br />
+				{$invoice->customer->contactAddress->country}
+			{/if}
 		</td>
 	</tr>
 	
@@ -163,10 +167,12 @@
 		<td>
 			<div style="height: 9mm; font-size: 8pt; font-style: italic;">Fakturační adresa</div>
 			<strong>{$invoice->customer->invoiceAddress->name}</strong><br />
-			{$invoice->customer->invoiceAddress->street}<br />
-			{$invoice->customer->invoiceAddress->zip} {$invoice->customer->invoiceAddress->city}<br />
-			{$invoice->customer->invoiceAddress->country}
-			<br />
+			{if $invoice->customer->invoiceAddress->street != ""}
+				{$invoice->customer->invoiceAddress->street}<br />
+				{$invoice->customer->invoiceAddress->zip} {$invoice->customer->invoiceAddress->city}<br />
+				{$invoice->customer->invoiceAddress->country}
+				<br />
+			{/if}
 			<strong>
 				{if $invoice->customer->in}IČ: {$invoice->customer->in}&nbsp;&nbsp;&nbsp;{/if}
 				{if $invoice->customer->tin}DIČ: {$invoice->customer->tin}{/if}

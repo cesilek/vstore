@@ -119,7 +119,7 @@ class ShopOrderInvoice extends Invoice {
 	 */
 	function getCustomer() {
 		if(!isset($this->_customer)) {
-			if($this->order->address) {
+			if($this->order->address && $this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
 					$addr = new InvoiceAddress(
 						$this->order->customer->displayName,
 						$this->order->address->street . ' ' . $this->order->address->houseNumber,
