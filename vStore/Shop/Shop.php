@@ -196,15 +196,15 @@ class Shop extends vBuilder\Object {
 	 * @throws Nette\InvalidStateException if no user is logged but current user is requested
 	 */
 	protected function getUserId($user) {
-		if($userId instanceof vBuilder\Security\User) $userId = $userId->id;
-		elseif($userId === null) {
+		if($user instanceof vBuilder\Security\User) $user = $user->id;
+		elseif($user === null) {
 			if(!$this->context->user->isLoggedId())
 				throw new Nette\InvalidStateException("Current user requested but no user is logged in");
 			
-			$userId = $this->context->user->getId();
+			$user = $this->context->user->getId();
 		}
 		
-		return $userId;
+		return $user;
 	}
 	
 }

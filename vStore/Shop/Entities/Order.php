@@ -60,6 +60,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	private $_calculateProductInfoLock = false;
 	
 	protected $_orderSent = false;
+	protected $_itemsAltered = false;
 	
 	/**
 	 * Constructor
@@ -97,13 +98,12 @@ class Order extends vBuilder\Orm\ActiveEntity {
 			$monthPrefix = $date->format('Ym');
 			$e->data->timestamp = $date->format('Y-m-d H:i:s');
 			
-			// Musim nacist polozky, protoze jakmile se zmeni ID, nemam je podle ceho svazat
-			$e->items->load();
-			
 			// Pred ulozenim odstranim schovane nulove polozky (nulove slevy atd.)
+			// Zaroven to vyvola load => musim nacist polozky,
+			// protoze jakmile se zmeni ID, nemam je podle ceho svazat
 			foreach($e->items as $curr) {
 				if(!$curr->isVisible() && $curr->getPrice() == 0) {
-					$curr->delete();
+					$e->items->remove($curr);
 				}
 			}
 			
@@ -199,9 +199,14 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	public function getItems($onlyProducts = false) {
 		$items = $this->defaultGetter('items');
 		
-		if($this->context->config->get('shop.scheduledDiscounts.enabled', false)) {
-			if($this->getItemWithId(self::DISCOUNT_ITEM_ID) === null) {
-				$items->add($this->repository->create('vStore\\Shop\\ScheduledDiscountOrderItem'));
+		// Nesmim polozku pridat vice jak jednou, kvuli pripadnym deletum
+		if(!$this->_itemsAltered && $this->repository instanceof vBuilder\Orm\SessionRepository) {
+			$this->_itemsAltered = true;
+			
+			if($this->context->config->get('shop.scheduledDiscounts.enabled', false)) {
+				if($this->getItemWithId(self::DISCOUNT_ITEM_ID) === null) {
+					$items->add($this->repository->create('vStore\\Shop\\ScheduledDiscountOrderItem'));
+				}
 			}
 		}
 		

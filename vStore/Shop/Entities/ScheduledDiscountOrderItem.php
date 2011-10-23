@@ -102,9 +102,9 @@ class ScheduledDiscountOrderItem extends DynamicOrderItem {
 		$ds = $db->select('[percentageDiscount]')->from(self::TABLE_NAME)->where('[until] >= NOW()');
 		
 		if($this->context->user->isLoggedIn()) {
-			$ds->where('([user] IS NULL OR [user] = %i)', $this->context->user->getId());
+			$ds->where('([user] = 0 OR [user] = %i)', $this->context->user->getId());
 		} else
-			$ds->where('[user] IS NULL');
+			$ds->where('[user] = 0');
 		
 		$ds->orderBy('[percentageDiscount] DESC');
 		
