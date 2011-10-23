@@ -242,6 +242,8 @@ class CartControl extends vStore\Application\UI\Control {
 				$form['houseNumber']->setDefaultValue($this->order->address->houseNumber);
 				$form['zip']->setDefaultValue($this->order->address->zip);
 				$form['country']->setDefaultValue($this->order->address->country);
+			} elseif($this->context->user->isLoggedIn()) {
+				//$lastUserOrder = $this->shop->getUserOrders()->where('[address] IS NOT NULL')->orderBy('[timestamp]')
 			}
 			
 		}

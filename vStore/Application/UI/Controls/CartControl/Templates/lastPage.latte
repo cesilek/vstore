@@ -6,7 +6,7 @@
 		<div class="cmsContent perex">
 			{msg perex-orderDone, parse => true,
 						orderId => $order->id,
-						formatedOrderId => $order->id|formatOrderId,
+						formatedOrderId => vStore\Latte\Helpers\Shop::formatOrderId($order->id),
 						customerEmail => $order->customer->email}
 		</div>
 	{/block}
