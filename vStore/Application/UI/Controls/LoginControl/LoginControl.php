@@ -34,6 +34,9 @@ use vStore, Nette,
  */
 class LoginControl extends BaseForm {
 	
+	/** @var array */
+	public $onRedirect = array ();
+	
 	public function createComponentLoginForm($name) {
 		$form = new Form;
 
@@ -87,31 +90,26 @@ class LoginControl extends BaseForm {
 			if(isset($values->backlink) && !empty($values->backlink)) {
 				$this->getPresenter()->getApplication()->restoreRequest($values->backlink);
 			} else {
-				// TODO: Melo by to bejt konfigurovatelny
-				//$this->presenter->redirect('this');
+				if ($this->presenter->isAjax()) {
+					$this->presenter->payload->success = true;
+					$this->presenter->sendPayload();
+				}
+				$this->onRedirect($this);
 				$this->presenter->redirectUrl($this->context->httpRequest->headers['referer']);
 			}
 			
 		} catch(Nette\Security\AuthenticationException $e) {
+			if ($this->presenter->isAjax()) {
+				$this->presenter->payload->error = true;
+				$this->presenter->payload->message = $e->getMessage();
+				$this->presenter->sendPayload();
+			}
 			$form->addError($e->getMessage());
 		}
 	}
 	
-	/*public function handleLogin() {
-		if ($this->presenter->isAjax()) {
-			$this->presenter->setLayout(false);
-		}
-	}*/
-	
-	public function actionDefault() {
-		
-	}
-	
-	public function actionLogin() {
-		//dd($this->view);
-	}
-
-
+	public function actionDefault() { }
+	public function actionLogin() { }
 
 	public function createRenderer() {
 		return new LoginControlRenderer($this);

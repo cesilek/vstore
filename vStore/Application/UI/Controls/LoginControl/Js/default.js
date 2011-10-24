@@ -1,10 +1,16 @@
 $(function () {
-	var loginLink = $('#loginLink'),
+	var loginLink = $('.loginLink'),
 		logoutLink = $('#logoutLink'),
 		userLoggedOut = $('#userLoggedOut'),
 		userLoggedIn = $('#userLoggedIn');
 		
-	loginLink.colorbox();
+	loginLink.live('click', function (e) {
+		$.colorbox({
+			href: $(this).attr('href'),
+			innerHeight: '240px'
+		});
+		e.preventDefault();
+	});
 	logoutLink.click(function (e) {
 		var href = logoutLink.attr('href');
 		$.ajax({
@@ -14,6 +20,7 @@ $(function () {
 				userLoggedIn.slideUp(1000, function () {
 					userLoggedOut.removeClass('hidden');
 				});
+				window.location.reload(false);
 			},
 			error: function (jqXHR, textStatus, errorThrown) {
 				window.location.href = href;
