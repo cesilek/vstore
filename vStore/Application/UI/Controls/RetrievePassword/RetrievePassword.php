@@ -34,28 +34,26 @@ use vStore, Nette,
  * @author Jirka Vebr
  * @since Aug 16, 2011
  */
-class RetrievePasswordForm extends BaseForm {
-
-	public function render($what = null) {
-		$template = $this->createTemplate();
-		$template->setFile(__DIR__.'/templates/'.($what ?: 'full').'.latte');
-		echo $template;
-	}
+class RetrievePassword extends BaseForm {
 	
-	public function createComponentRetrievePasswordForm() {
+	protected $hash;
+	
+	public function createComponentRetrievePasswordForm($name) {
 		$form = new Form;
 
 		$form->addHidden('backlink', $this->presenter->getParam('backlink'));
 
-		$form->addText('username', 'Username:');
-
-		if(($username = $this->getContext()->httpRequest->getCookie('vStoreLastLoggedUser')) !== NULL)
-			$form['username']->setValue($username);
-		
+		$login = $this->getContext()->config->get('user.login');
+		if ($login === 'username') {
+			$form->addText('username', 'Username:');
+			if(($username = $this->getContext()->httpRequest->getCookie('vStoreLastLoggedUser')) !== NULL)
+				$form['username']->setValue($username);
+		}
 		$form->addText('email', 'E-mail:')
 				  ->setEmptyValue('@')
 				  ->addCondition(Form::FILLED)
 				  ->addRule(Form::EMAIL, 'E-mail is not valid');
+
 
 		\PavelMaca\Captcha\CaptchaControl::register();
 		$form['captcha'] = new \PavelMaca\Captcha\CaptchaControl;
@@ -65,17 +63,18 @@ class RetrievePasswordForm extends BaseForm {
 		$form['captcha']->addRule(Form::FILLED, 'Rewrite text from image.');
 		$form['captcha']->addRule($form["captcha"]->getValidator(), 'Security code is incorrect. Read it carefuly from the image above.');
 
-		$form['username']
+		if ($login === 'username') {
+			$form['username']
 				  ->addConditionOn($form['email'], Form::EQUAL, '')
 				  ->addRule(Form::FILLED, 'Please provide your username or e-mail.');
-		$form['email']
-				  ->addConditionOn($form['username'], Form::EQUAL, '')
-				  ->addRule(Form::FILLED, 'Please provide your username or e-mail.');
+			$form['email']
+					  ->addConditionOn($form['username'], Form::EQUAL, '')
+					  ->addRule(Form::FILLED, 'Please provide your username or e-mail.');
+		}
 		
-		$form->addSubmit('back', 'Back');
 		$form->addSubmit('send', 'Send new password');
 
-		$form->onSuccess[] = callback($this, 'retrievePasswordFormSubmitted');
+		$form->onSuccess[] = callback($this, $name.'Submitted');
 		return $form;
 	}
 	
@@ -84,7 +83,6 @@ class RetrievePasswordForm extends BaseForm {
 			$values = $form->getValues();
 			$username = $values->username;
 			$email = $values->email;
-			$newPassword = Nette\Utils\Strings::random(8);
 
 			if(!isset($email) || $email == '') {
 				$user = $this->getContext()->repository->findAll('vBuilder\Security\User')->where('[username] = %s', $username)->fetch();
@@ -95,30 +93,73 @@ class RetrievePasswordForm extends BaseForm {
 				return;
 			}
 			
-			// ten vManageri mailer mi prijde nejaky pochybny. Udelame novy?
-			/*if($user != false && $user->email != '') {
-				$user->setPassword($newPassword);
-
-				$tpl = Mailer::createMailTemplate(__DIR__ . '/../Templates/Emails/pwdReset.latte');
-				$tpl->username = $user->username;
-				$tpl->newPassword = $newPassword;
-		
-				$mail = Mailer::createMail();
-				$mail->setSubject('vManager - new password');
-				$mail->addTo($user->email);
-				$mail->setHtmlBody($tpl);
-
-				Mailer::getMailer()->send($mail);
+			if($user != false && $user->email != '') {
 				
-				$user->save();
+				//$user->setPassword($newPassword);
+				$randomHash = Nette\Utils\Strings::random(48);
+				$section = $this->context->session->getSection('retrievePassword');
+				$section->passwordHash = $randomHash;
 
-				$this->flashMessage('A new password has been sent to your e-mail address.');
-				$this->redirect('Sign:in');
+				$template = $this->template;
+				$template->setFile(__DIR__.'/Templates/_mail.latte');
+				$template->hash = $randomHash;
+				$template->username = $user->username;
+		
+				$mail = new Nette\Mail\Message;
+				$mail->setFrom('Admin <mirek@mladej.com>');
+				$mail->setSubject($_SERVER['SERVER_NAME'].' - reset your password');
+				$mail->addTo($user->email);
+				echo($template->__toString());die;
+				$mail->setHtmlBody($template);
+				$mail->send();
+
+
+				$this->flashMessage('A link has been sent to your e-mail address. Pleas click on it.');
+				$this->redirect('this');
 			} else {
 				$form->addError('User not found.');
-			}*/
+			}
 		} catch(Nette\Security\AuthenticationException $e) {
 			$form->addError($e->getMessage());
 		}
+	}
+	
+	public function createComponentNewPasswordForm($name) {
+		$form = new Form;
+		$form->onSuccess[] = callback($this, $name.'Submitted');
+		$form->addProtection();
+		$form->addHidden('hash')
+				->setValue($this->getHash());
+		$form->addPassword('pass', 'Fill in your new password:')
+				->setRequired('You have to fill in your password')
+				->addRule(Form::MIN_LENGTH, 'Your password has to be at least %d characters long', 9);
+		$form->addPassword('pass2', 'And now again:')
+				->addRule(Form::EQUAL, 'Your passwords have to match', $form['pass']);
+		$form->addSubmit('s', 'Change!');
+		return $form;
+	}
+	
+	public function newPasswordFormSubmitted(Form $form) {
+		dd('?.)');
+	}
+
+
+	public function getHash() {
+		return $this->hash;
+	}
+	
+	public function actionNewPassword($hash) {
+		$section = $this->context->session->getSection('retrievePassword');
+		if (isset($hash) && $hash === $section->passwordHash) {
+			$this->hash = $hash;
+		} else {
+			$this->flashMessage('Invalid hash');
+			$this->redirect('default');
+		}
+	}
+
+
+	public function createRenderer() {
+		return new RetrievePasswordRenderer($this);
 	}
 }
