@@ -15,7 +15,7 @@ $(function() {
 	});
 	searchInput.autocomplete({
 		search: function (event, ui) {
-			console.log(ui);
+			console.log('loading');
 		},
 		source: function(request, response) {
 			$.ajax({
@@ -25,18 +25,22 @@ $(function() {
 					'search-query': request.term
 				},
 				success: function(data) {
-					if (!queryCache[request.term]) {
-						var result = $.map(data.prompt, function(item) {
-							return {
-								label: item.title,
-								image: item.imageUrl,
-								value: item.title,
-								link: item.link
-							};
-						});
-						queryCache[request.term] = result;
+					if (data.emptyResult === true) {
+						response(['nothing found']);
+					} else {
+						if (!queryCache[request.term]) {
+							var result = $.map(data.prompt, function(item) {
+								return {
+									label: item.title,
+									image: item.imageUrl,
+									value: item.title,
+									link: item.link
+								};
+							});
+							queryCache[request.term] = result;
+						}
+						response(queryCache[request.term]);
 					}
-					response(queryCache[request.term]);
 				}
 			});
 		},

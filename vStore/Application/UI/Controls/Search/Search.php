@@ -59,22 +59,26 @@ class Search extends vStore\Application\UI\Control {
 	public function handlePrompt($query) {
 		//sleep(3); // 'loading' simulation
 		$search = $this->search($query)->fetchAll();
-		$result = array ();
-		foreach ($search as $page) {
-			$temp = (object) null;
-			$temp->title = $page->title;
-			$temp->imageUrl = $page->image ? $page->image->getUrl(32, 32) : null;
-			$temp->link = $this->presenter->link('//Redaction:', array (
-				'id'=>$page->pageId
-			));
-			$result[] = $temp;
+		if (empty ($search)) {
+			$this->presenter->payload->emptyResult = true;
+		} else {
+			$result = array ();
+			foreach ($search as $page) {
+				$temp = (object) null;
+				$temp->title = $page->title;
+				$temp->imageUrl = $page->image ? $page->image->getUrl(32, 32) : null;
+				$temp->link = $this->presenter->link('//Redaction:', array (
+					'id'=>$page->pageId
+				));
+				$result[] = $temp;
+			}
+			$this->presenter->payload->prompt = $result;
 		}
-		$this->presenter->payload->prompt = $result;
 		$this->presenter->sendPayload();
 	}
 	
 	protected function search($query) {
-		$query = '%'.$query.'%';
+		$query = '%fdfdfd'.$query.'fdfdfd%';
 		return $this->presenter->getContext()->redaction->branch->findAll('vStore\Redaction\Documents\Product')
 				->where('([perex] LIKE %s',$query, ') OR ([content] LIKE %s', $query, ') OR ([title] LIKE %s', $query, ')')
 				->limit(10);
