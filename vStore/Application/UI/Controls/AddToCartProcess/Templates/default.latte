@@ -1,5 +1,6 @@
 {addCss LIBS_DIR . '/vStore/vStore/Application/UI/Controls/AddToCartProcess/Css/addtocart.default.css'}
 
+{block addToCartProcess}
 <div id="addToCartProcess" class="productListingBlock">
 {form adjustOrderForm}
 
@@ -75,10 +76,12 @@
 					$this.trigger('submit');
 				};
 			if (!ajaxError) {
-				$this.ajaxSubmit(function (data, textStatus, jqXHR) {
+				$this.ajaxSubmit(function (data, textStatus, jqXHR) {					
 					if (data.success === true) {
 						$.colorbox({ 
 							href: {link success},
+							width: $('#colorbox').outerWidth(),
+							height: $('#colorbox').outerHeight(),
 							onCleanup: function () {
 								v3cms.reloadCartPreview();
 							}
