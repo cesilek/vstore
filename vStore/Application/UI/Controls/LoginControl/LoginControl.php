@@ -88,7 +88,8 @@ class LoginControl extends BaseForm {
 				$this->getPresenter()->getApplication()->restoreRequest($values->backlink);
 			} else {
 				// TODO: Melo by to bejt konfigurovatelny
-				$this->presenter->redirect('this', array ('id'=> 2 ));
+				//$this->presenter->redirect('this');
+				$this->presenter->redirectUrl($this->context->httpRequest->headers['referer']);
 			}
 			
 		} catch(Nette\Security\AuthenticationException $e) {

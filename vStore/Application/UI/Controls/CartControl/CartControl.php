@@ -261,7 +261,7 @@ class CartControl extends vStore\Application\UI\Control {
 		if($this->order->customer) {
 			$customer = $this->order->customer;
 		} elseif($this->context->user->isLoggedIn()) {
-			if(!$lastUserOrder)
+			if(!isset($lastUserOrder))
 				$lastUserOrder = $this->shop->getUserOrders()->orderBy('[timestamp]')->fetch();
 			
 			if($lastUserOrder && $lastUserOrder->customer)
