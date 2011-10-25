@@ -37,6 +37,8 @@ use vStore, Nette,
 class RetrievePassword extends BaseForm {
 	
 	protected $hash;
+			
+	public $onPasswordChange;
 	
 	public function createComponentRetrievePasswordForm($name) {
 		$form = new Form;
@@ -94,11 +96,10 @@ class RetrievePassword extends BaseForm {
 			}
 			
 			if($user != false && $user->email != '') {
-				
-				//$user->setPassword($newPassword);
 				$randomHash = Nette\Utils\Strings::random(48);
 				$section = $this->context->session->getSection('retrievePassword');
 				$section->passwordHash = $randomHash;
+				$section->mail = $user->email;
 
 				$template = $this->template;
 				$template->setFile(__DIR__.'/Templates/_mail.latte');
@@ -109,7 +110,9 @@ class RetrievePassword extends BaseForm {
 				$mail->setFrom('Admin <mirek@mladej.com>');
 				$mail->setSubject($_SERVER['SERVER_NAME'].' - reset your password');
 				$mail->addTo($user->email);
-				echo($template->__toString());die;
+				echo($template->__toString());die;/* delete this line, it exists only for testing
+				 * purposes. However, before doing so, chceck out the _mail.latte template.
+				 */
 				$mail->setHtmlBody($template);
 				$mail->send();
 
@@ -127,20 +130,44 @@ class RetrievePassword extends BaseForm {
 	public function createComponentNewPasswordForm($name) {
 		$form = new Form;
 		$form->onSuccess[] = callback($this, $name.'Submitted');
+		$form->onError[] = callback($this, $name.'Error');
 		$form->addProtection();
 		$form->addHidden('hash')
 				->setValue($this->getHash());
-		$form->addPassword('pass', 'Fill in your new password:')
+		$form->addPassword('password', 'Fill in your new password:')
 				->setRequired('You have to fill in your password')
 				->addRule(Form::MIN_LENGTH, 'Your password has to be at least %d characters long', 9);
-		$form->addPassword('pass2', 'And now again:')
-				->addRule(Form::EQUAL, 'Your passwords have to match', $form['pass']);
+		$form->addPassword('passwordCheck', 'And now again:')
+				->setRequired('Please fill in the password again.')
+				->addRule(Form::EQUAL, 'Your passwords have to match', $form['password']);
 		$form->addSubmit('s', 'Change!');
 		return $form;
 	}
 	
 	public function newPasswordFormSubmitted(Form $form) {
-		dd('?.)');
+		$values = $form->values;
+		$section = $this->context->session->getSection('retrievePassword');
+		try {
+			if ($values->hash === $section->passwordHash) {
+				$user = $this->getContext()->repository->findAll('vBuilder\Security\User')->where('[email] = %s', $section->mail)->fetch();
+				$user->setPassword($values->password);
+				$user->save();
+				$this->presenter->getUser()->login($values->username, $values->password);
+				$this->onPasswordChange($this);
+				$this->presenter->redirect('Redaction', array(
+					'id' => 2
+				));
+			} else {
+				$form->addError('An error has occured. Please try again.');
+			}
+		} catch (Nette\Security\AuthenticationException $e) {
+			$form->addError($e->getMessage());
+		}
+	}
+	
+	public function newPasswordFormError(Form $form) {
+		$this->hash = $form->values->hash;
+		$this->changeView('newPassword');
 	}
 
 
@@ -150,6 +177,7 @@ class RetrievePassword extends BaseForm {
 	
 	public function actionNewPassword($hash) {
 		$section = $this->context->session->getSection('retrievePassword');
+		$hash = $hash ?: $this->hash;
 		if (isset($hash) && $hash === $section->passwordHash) {
 			$this->hash = $hash;
 		} else {
