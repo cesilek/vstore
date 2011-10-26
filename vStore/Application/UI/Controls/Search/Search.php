@@ -78,8 +78,9 @@ class Search extends vStore\Application\UI\Control {
 	}
 	
 	protected function search($query) {
-		$query = '%fdfdfd'.$query.'fdfdfd%';
-		return $this->presenter->getContext()->redaction->branch->findAll('vStore\Redaction\Documents\Product')
+		$query = mb_strlen($query) > 2 ? "%$query%" : "$query%";
+		
+				return $this->presenter->getContext()->redaction->branch->findAll('vStore\Redaction\Documents\Product')
 				->where('([perex] LIKE %s',$query, ') OR ([content] LIKE %s', $query, ') OR ([title] LIKE %s', $query, ')')
 				->limit(10);
 	}

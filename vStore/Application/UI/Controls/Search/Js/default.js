@@ -26,7 +26,7 @@ $(function() {
 				},
 				success: function(data) {
 					if (data.emptyResult === true) {
-						response(['nothing found']);
+						response(['Na zadané klíčové slovo nebyl nalezen žádný výsledek']);
 					} else {
 						if (!queryCache[request.term]) {
 							var result = $.map(data.prompt, function(item) {
@@ -50,7 +50,7 @@ $(function() {
 	}).data( "autocomplete" )._renderItem = function( ul, item ) {
 		return $( "<li></li>" )
 			.data( "item.autocomplete", item )
-			.append( "<a class=\"searchAutocompleteItem\"><div style=\"background: url('" + item.image + "') no-repeat 6px center;\">" + item.label + "</div></a>" )
+			.append( "<a class=\"searchAutocompleteItem\"><div style=\"background: url('" + item.image + "') no-repeat 6px center;" + (item.image == undefined ? " padding: 0 !important;" : "") + "\">" + item.label + "</div></a>" )
 			.appendTo( ul );
 	};
 	
