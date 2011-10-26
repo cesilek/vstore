@@ -39,12 +39,11 @@ class LoginControlRenderer extends vStore\Application\UI\ControlRenderer {
 	}
 	
 	public function renderLogin() {
-		/**
-		 * Na ControlRenderer#111 ta podminka neprojde, protoze, nemam poneti
-		 * jak, uz tam je predem nahrany soubor default.latte a v dusledku toho
-		 * se tam neda nase kyzene view. Vubec nevim, kde  se tam vzal. 
-		 * Tohle je jen jako docasne reseni.
-		 */
-		$this->template->setFile(__DIR__.'/Templates/login.latte');
+
 	}
+	
+	public function retrievePassword() {
+
+	}
+	
 }

@@ -44,20 +44,20 @@ class LoginControl extends BaseForm {
 		
 		$login = $this->getContext()->config->get('user.login');
 		if ($login === 'username') {
-			$form->addText('username','Username:')
-				  ->setRequired('Please provide a username.');
+			$form->addText('username','Přihlašovací jméno:')
+				  ->setRequired('Prosím zadejte Vaše přihlašovací jméno');
 		} elseif ($login === 'mail') {
 			$form->addText('username','E-mail:')
-				  ->addRule(Form::EMAIL, 'Please provide a valid e-mail.')
-				  ->setRequired('Please provide a valid e-mail.');
+				  ->addRule(Form::EMAIL, 'Prosím zadejte Váš e-mail')
+				  ->setRequired('Prosím zadejte Váš e-mail');
 		}
 
-		$form->addPassword('password', 'Password:')
-				  ->setRequired('Please provide a password.');
+		$form->addPassword('password', 'Heslo:')
+				  ->setRequired('Prosím zadejte heslo');
 
-		$form->addCheckbox('remember', 'Auto-login in future.');
+		//$form->addCheckbox('remember', 'Auto-login in future.');
 
-		$form->addSubmit('send', 'Sign in');
+		$form->addSubmit('send', 'Přihlásit se');
 
 		$form->onSuccess[] = callback($this, $name.'Submitted');
 
@@ -78,7 +78,7 @@ class LoginControl extends BaseForm {
 	public function loginFormSubmitted($form) {
 		try {
 			$values = $form->getValues();
-			if($values->remember) {
+			if(isset($values->remember) && $values->remember) {
 				$this->presenter->getUser()->setExpiration('+ 14 days', FALSE);
 			} else {
 				$this->presenter->getUser()->setExpiration('+ 20 minutes', TRUE);
@@ -101,15 +101,17 @@ class LoginControl extends BaseForm {
 		} catch(Nette\Security\AuthenticationException $e) {
 			if ($this->presenter->isAjax()) {
 				$this->presenter->payload->error = true;
-				$this->presenter->payload->message = $e->getMessage();
+				$this->presenter->payload->message = 'Zadané jméno nebo heslo není platné'; //$e->getMessage();
 				$this->presenter->sendPayload();
+			} else {
+				$form->addError('Zadané jméno nebo heslo není platné' /* $e->getMessage() */ );
 			}
-			$form->addError($e->getMessage());
 		}
 	}
 	
 	public function actionDefault() { }
 	public function actionLogin() { }
+	public function actionRetrievePassword() { }
 
 	public function createRenderer() {
 		return new LoginControlRenderer($this);

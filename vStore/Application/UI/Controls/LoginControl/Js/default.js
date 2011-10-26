@@ -7,7 +7,7 @@ $(function () {
 	loginLink.live('click', function (e) {
 		$.colorbox({
 			href: $(this).attr('href'),
-			innerHeight: '240px'
+			innerHeight: '255px'
 		});
 		e.preventDefault();
 	});
@@ -28,4 +28,5 @@ $(function () {
 		});
 		e.preventDefault();
 	});
+	
 });
