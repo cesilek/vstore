@@ -14,21 +14,24 @@ $(function() {
 			$this.val(initVal);
 	});
 	searchInput.autocomplete({
-		search: function (event, ui) {
-			console.log('loading');
-		},
 		source: function(request, response) {
-			$.ajax({
-				url: searchInput.attr('data-autocomplete'),
-				dataType: "json",
-				data: {
-					'search-query': request.term
-				},
-				success: function(data) {
-					if (data.emptyResult === true) {
-						response(['Na zadané klíčové slovo nebyl nalezen žádný výsledek']);
-					} else {
-						if (!queryCache[request.term]) {
+			if (queryCache[request.term]) {
+				response(queryCache[request.term]);
+			} else {
+				$.ajax({
+					url: searchInput.attr('data-autocomplete'),
+					dataType: "json",
+					data: {
+						'search-query': request.term
+					},
+					success: function(data) {
+						if (data.emptyResult === true) {
+							response([{
+								label: 'Na zadané klíčové slovo nebyl nalezen žádný výsledek',
+								value: '',
+								emptyResult: true
+							}]);
+						} else {
 							var result = $.map(data.prompt, function(item) {
 								return {
 									label: item.title,
@@ -38,13 +41,16 @@ $(function() {
 								};
 							});
 							queryCache[request.term] = result;
+							response(queryCache[request.term]);
 						}
-						response(queryCache[request.term]);
 					}
-				}
-			});
+				});
+			}
 		},
 		select: function (e, ui) {
+			if (ui.item.emptyResult) {
+				return;
+			}
 			window.location.href = ui.item.link;
 		}
 	}).data( "autocomplete" )._renderItem = function( ul, item ) {
@@ -53,5 +59,14 @@ $(function() {
 			.append( "<a class=\"searchAutocompleteItem\"><div style=\"background: url('" + item.image + "') no-repeat 6px center;" + (item.image == undefined ? " padding: 0 !important;" : "") + "\">" + item.label + "</div></a>" )
 			.appendTo( ul );
 	};
+	
+	searchInput.focus(function (e) {
+		$(this).autocomplete('search');
+	});
+	searchInput.closest('form').submit(function (e) {
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		return false;
+	});
 	
 });
