@@ -28,17 +28,13 @@ use vStore, Nette,
 	Nette\Application\UI\Form;
 
 /**
- * Retrieve password renderer
+ * Register renderer
  *
  * @author Jirka Vebr
  */
-class RetrievePasswordRenderer extends vStore\Application\UI\ControlRenderer {
+class RegisterRenderer extends vStore\Application\UI\ControlRenderer {
 	
 	public function renderDefault() {
 		
-	}
-
-	public function renderNewPassword() {
-		$this->template->hash = $this->control->getHash();
 	}
 }
