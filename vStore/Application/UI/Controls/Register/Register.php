@@ -43,24 +43,74 @@ class Register extends BaseForm {
 		
 		$login = $this->getContext()->config->get('user.login');
 		if ($login === 'username') {
-			$form->addText('username','Username:')
-				  ->setRequired('Please provide a username.');
+			$form->addText('username','Uživatelské jméno:')
+				  ->setRequired('Prosím vyplňte své uživatelské jméno.');
 		}
 		// we want the email anyway...
 		$form->addText('email','E-mail:')
-			  ->addRule(Form::EMAIL, 'Please provide a valid e-mail.')
-			  ->setRequired('Please provide a valid e-mail.');
-		$form->addPassword('password', 'Fill in your new password:')
-				->setRequired('You have to fill in your password')
-				->addRule(Form::MIN_LENGTH, 'Your password has to be at least %d characters long', 9);
-		$form->addPassword('passwordCheck', 'And now again:')
-				->setRequired('Please fill in the password again.')
-				->addRule(Form::EQUAL, 'Your passwords have to match', $form['password']);
-		$form->addSubmit('s', 'Register!');
+			  ->addRule(Form::EMAIL, 'Prosím vyplňte validní emailovou adresu.')
+			  ->setRequired('Prosím vyplňte svou emailovou adresu.');
+		$form->addPassword('password', 'Heslo:')
+				->setRequired('Prosím vyplňte své heslo')
+				->addRule(Form::MIN_LENGTH, 'Vaše heslo musí být dlouhé nejméně %d znaků.', 9);
+		$form->addPassword('passwordCheck', 'Heslo znovu pro kontrolu:')
+				->setRequired('Prosím vyplňte své druhé helso pro kontrolu.')
+				->addRule(Form::EQUAL, 'Vyplněná hesla se neshodují', $form['password']);
+		
+		$form->addText('name', 'Jméno')
+				->setRequired('Prosím vyplňte své jméno');
+		$form->addText('surname', 'Přijímení')
+				->setRequired('Prosím vyplňte své přijímení');
+		
+		$form->addCheckbox('newsletter', 'Mám zájem o pravidelné zasílání novinek');
+		
+		\PavelMaca\Captcha\CaptchaControl::register();
+		$form['captcha'] = new \PavelMaca\Captcha\CaptchaControl;
+		$form['captcha']->caption = ('Security code:');
+		$form['captcha']->setTextColor(Nette\Image::rgb(48, 48, 48));
+		$form['captcha']->setBackgroundColor(Nette\Image::rgb(232, 234, 236));
+		$form['captcha']->setRequired('Prosím opište bezpečnostní kód z obrázku');
+		$form['captcha']->addRule($form["captcha"]->getValidator(), 'Bezpečnostní kód se neshoduje. Prosím zkuste to znovu.');
+
+		
+		
+		$form->addSubmit('s', 'Registrovat!');
 	}
 	
 	public function registerFormSubmitted(Form $form) {
 		$values = $form->values;
+		$entityName = vBuilder\Security::getUserClassName();
+		
+		$potentialUser = $this->getContext()->repository->findAll($entityName)->where('[email] = %s', $values->email)->fetch();
+		if($potentialUser) {
+			$form->addError('Uživatel se zadanou emailovou adresou je již registrován.');
+			return;
+		}
+		
+		$login = $this->getContext()->config->get('user.login');
+		
+		if ($login === 'username') {
+			$potentialUser = $this->getContext()->repository->findAll($entityName)->where('[username] = %s', $values->username)->fetch();
+			if($potentialUser) {
+				$form->addError('Uživatel se zadaným uživatelským jménem je již registrován.');
+				return;
+			}
+		}
+		
+		$user = new $entityName($this->context);
+		
+		$user->setEmail($values->email);
+		$user->setPassword($values->password);
+		$user->setName($values->name);
+		$user->setSurname($values->surname);
+
+		if ($login === 'username') {
+			$user->setUsername($values->username);
+		}
+		$user->setBypassSecurityCheck(true);
+		$user->save();
+		$this->flashMessage('Registrace proběhla úspěšně. Nyní se můžete přihlásit');
+		$this->presenter->redirect('this', array('id'=>2));
 	}
 
 	public function createRenderer() {
