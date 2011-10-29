@@ -107,10 +107,13 @@ class Register extends BaseForm {
 		if ($login === 'username') {
 			$user->setUsername($values->username);
 		}
+		
+		$user->setNewsletter((int) $values->newsletter);
+		
 		$user->setBypassSecurityCheck(true);
 		$user->save();
-		$this->flashMessage('Registrace proběhla úspěšně. Nyní se můžete přihlásit');
-		$this->presenter->redirect('this', array('id'=>2));
+		$this->presenter->flashMessage('Registrace proběhla úspěšně. Nyní se můžete přihlásit');
+		$this->presenter->redirect('this', array ('id' => 2));
 	}
 
 	public function createRenderer() {
