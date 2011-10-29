@@ -129,6 +129,7 @@ class LoginControl extends BaseForm {
 		$form->addSubmit('send', 'Continue');
 
 		$form->onSuccess[] = callback($this, $name.'Submitted');
+		$form->onError[] = callback($this, 'sendNewCaptcha');
 		$form->onError[] = callback($this, 'ajaxFormErrors');
 		return $form;
 	}
@@ -138,12 +139,11 @@ class LoginControl extends BaseForm {
 		$email = $values->email;
 
 		$user = $this->getContext()->repository->findAll('vBuilder\Security\User')->where('[email] = %s', $email)->fetch();
-		
 		if ($user) {
 			$this->newSecurityToken($user);
 
-			$this->flashMessage('Na Váš email byl zaslán bezpečnostní kód.'); // TODO - nezobrzuje se
-			$this->presenter->redirect('Redaction:resetPassword');
+			//$this->flashMessage('Na Váš email byl zaslán bezpečnostní kód.'); // TODO - nezobrzuje se
+			$this->redirect('resetPassword');
 		} else {
 			$form->addError('User not found.');
 		}
@@ -180,11 +180,11 @@ class LoginControl extends BaseForm {
 		} else {
 			try {
 				if ($values->token === $section->token) {
-					/*$user = $this->getContext()->repository->findAll('vBuilder\Security\User')->where('[email] = %s', $section->email)->fetch();
+					$user = $this->getContext()->repository->findAll('vBuilder\Security\User')->where('[email] = %s', $section->email)->fetch();
 					$user->setPassword($values->password);
+					$user->setBypassSecurityCheck(true);
 					$user->save();
-					$this->presenter->getUser()->login($values->username, $values->password);*/
-					// you totally just logged in...
+					$this->presenter->getUser()->login($user->username, $values->password);
 
 					if ($this->presenter->isAjax()) {
 						$this->presenter->payload->success = true;
@@ -213,6 +213,13 @@ class LoginControl extends BaseForm {
 			$this->presenter->payload->error = true;
 			$this->presenter->payload->message = $error; //$e->getMessage();
 			$this->presenter->sendPayload();
+		}
+	}
+	
+	public function sendNewCaptcha(Form $form) {
+		if ($this->presenter->isAjax()) {
+			$this->presenter->payload->captchaSrc = $form['captcha']->getLabel()->src;
+			$this->presenter->payload->captchaUid = $form['captcha']->getUid();
 		}
 	}
 
