@@ -55,11 +55,15 @@ class AutoRegistrator extends vBuilder\Mail\MailNotificator {
 		
 		$user = new $entityName($this->context);
 		
+		
+		$password = Nette\Utils\Strings::random(8);
+		
 		$user->setEmail($customer->email);
-		$user->setPassword(Nette\Utils\Strings::random(8));
+		$user->setPassword($password);
 		$user->setName($customer->name);
 		$user->setSurname($customer->surname);
 
+		
 		if ($login === 'username') {
 			$user->setUsername($newUsername);
 		}
@@ -69,6 +73,8 @@ class AutoRegistrator extends vBuilder\Mail\MailNotificator {
 		$user->save();
 		
 		$this->template->user = $user;
+		$this->template->password = $password;
+		
 		
 		if($this->template->getFile() == "")
 			$this->template->setFile(__DIR__ . '/Templates/email.autoRegistration.latte');		
