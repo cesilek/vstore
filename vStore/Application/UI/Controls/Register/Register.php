@@ -23,10 +23,12 @@
 
 namespace vStore\Application\UI\Controls;
 
-use vStore, Nette,
-	vBuilder,
-	Nette\Application\UI\Form,
-	vBuilder\Orm\Repository;
+use vStore,
+		Nette,
+		vBuilder,
+		Nette\Application\UI\Form,
+		vBuilder\Orm\Repository,
+		vBuilder\Application\UI\Link;
 
 /**
  * Shop products listing
@@ -36,12 +38,49 @@ use vStore, Nette,
  */
 class Register extends BaseForm {
 
+	/** @var null|Link */
+	private $_targetLink;
+	
+	/**
+	 * Returns target link if set (or null)
+	 * 
+	 * @return null|Link
+	 */
+	public function getTargetLink() {
+		return $this->_targetLink;
+	}
+	
+	/**
+	 * Sets link of target page
+	 * (page to which will user be redirected after succesful registration)
+	 * 
+	 * @param Link|string link
+	 * @return Register fluent
+	 */
+	public function setTargetLink($link) {
+		if (is_string($link)) {
+			$this->_targetLink = new Link($this->getParent(), $link, array ());
+		} else if (is_object ($link) && $link instanceof Link) {
+			$this->_targetLink = $link;
+		} else {
+			throw new Nette\InvalidArgumentException('A link must be a string or an instance of vBuilder\Application\UI\Link! "'.  gettype($link).'" given.');
+		}
+		return $this;
+	}
+	
 	public function createComponentRegisterForm($name) {
 		$form = new Form($this, $name);
 		
 		$form->onSuccess[] = callback($this, $name.'Submitted');
 		
 		$login = $this->getContext()->config->get('user.login');
+		
+		$form->addText('name', 'Jméno')
+				->setRequired('Prosím vyplňte své jméno');
+		$form->addText('surname', 'Přijímení')
+				->setRequired('Prosím vyplňte své přijímení');
+		
+		
 		if ($login === 'username') {
 			$form->addText('username','Uživatelské jméno:')
 				  ->setRequired('Prosím vyplňte své uživatelské jméno.');
@@ -50,17 +89,14 @@ class Register extends BaseForm {
 		$form->addText('email','E-mail:')
 			  ->addRule(Form::EMAIL, 'Prosím vyplňte validní emailovou adresu.')
 			  ->setRequired('Prosím vyplňte svou emailovou adresu.');
+		
+		
 		$form->addPassword('password', 'Heslo:')
 				->setRequired('Prosím vyplňte své heslo')
-				->addRule(Form::MIN_LENGTH, 'Vaše heslo musí být dlouhé nejméně %d znaků.', 9);
+				->addRule(Form::MIN_LENGTH, 'Vaše heslo musí být dlouhé nejméně %d znaků.', $this->context->config->get('security.password.minLength', 6));
 		$form->addPassword('passwordCheck', 'Heslo znovu pro kontrolu:')
 				->setRequired('Prosím vyplňte své druhé helso pro kontrolu.')
 				->addRule(Form::EQUAL, 'Vyplněná hesla se neshodují', $form['password']);
-		
-		$form->addText('name', 'Jméno')
-				->setRequired('Prosím vyplňte své jméno');
-		$form->addText('surname', 'Přijímení')
-				->setRequired('Prosím vyplňte své přijímení');
 		
 		$form->addCheckbox('newsletter', 'Mám zájem o pravidelné zasílání novinek');
 		
@@ -83,7 +119,7 @@ class Register extends BaseForm {
 		
 		$potentialUser = $this->getContext()->repository->findAll($entityName)->where('[email] = %s', $values->email)->fetch();
 		if($potentialUser) {
-			$form->addError('Uživatel se zadanou emailovou adresou je již registrován.');
+			$form->addError('Uživatel se zadanou emailovou adresou je již registrován. Pokud jste se již registrovali a zapomněli jste heslo, využijte prosím volby "Zapomněl jsem heslo" u přihlašovacího formuláře.');
 			return;
 		}
 		
@@ -108,12 +144,19 @@ class Register extends BaseForm {
 			$user->setUsername($values->username);
 		}
 		
-		$user->setNewsletter((int) $values->newsletter);
+		$user->newsletter = (int) $values->newsletter;
 		
 		$user->setBypassSecurityCheck(true);
 		$user->save();
-		$this->presenter->flashMessage('Registrace proběhla úspěšně. Nyní se můžete přihlásit');
-		$this->presenter->redirect('this', array ('id' => 2));
+		
+		$this->context->user->login($user->username, $values->password);
+		
+		$this->presenter->flashMessage(sprintf('Registrace proběhla úspěšně. Byl/a jste přihlášen jako uživatel %s. Nyní můžete naplno využívat výhod registrovaných uživatelů.', $user->username));
+				
+		if(isset($this->targetLink))
+			$this->redirect($this->targetLink);
+		else
+			$this->redirect('this');
 	}
 
 	public function createRenderer() {
