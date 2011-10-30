@@ -45,10 +45,10 @@ class QuickPick extends BaseForm {
 		$form = new Form;
 		$form->onSuccess[] = callback($this, $name.'Submitted');
 		
-		foreach ($this->getData() as $id) {
+		foreach ($this->getProductIds() as $id) {
 			$form->addCheckbox('product'.$id);
 		}
-		$form->addSubmit('s', 'Add to cart!');
+		$form->addSubmit('s', 'Přidat do košíku');
 		return $form;
 	}
 	
@@ -73,13 +73,14 @@ class QuickPick extends BaseForm {
 		return new QuickPickRenderer($this);
 	}
 	
-	public function getData() {
+	public function getProductIds() {
 		if (!$this->data) {
 			$structure = $this->context->redaction->getStructure();
 			$result = array ();
 			foreach ($structure->topLevelItemIds() as $item) {
 				foreach ($structure->getChildrenIds($item) as $id) {
-					if ($structure->pageType($id) === 'DrStanek\\Redaction\\Documents\\Product') {
+					
+					if($structure->pageType($id) === 'vStore\Redaction\Documents\Product' || is_subclass_of($structure->pageType($id), 'vStore\Redaction\Documents\Product')) {
 						$result[] = $id;
 					}
 				}

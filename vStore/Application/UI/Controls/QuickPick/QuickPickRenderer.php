@@ -36,8 +36,21 @@ use vStore, Nette,
 class QuickPickRenderer extends vStore\Application\UI\ControlRenderer {
 	
 	public function renderDefault() {
-		$this->template->documentTitles = $this->context->redaction->getDocumentTitles();
-		$this->template->structure = $this->context->redaction->getStructure();
-		$this->template->data = $this->control->getData();
+		/* $this->template->documentTitles = $titles = $this->context->redaction->getDocumentTitles();
+		$this->template->structure =  */
+		
+		$structure = $this->redaction->getStructure();
+		
+		$productIds = $this->control->getProductIds();
+		$byParent = array();
+		
+		// Roztridim produkty podle kategorie (rodicovske stranky)
+		foreach($productIds as $id)
+			$byParent[$structure->pageParent($id)][$id] = $this->redaction->pageMenuTitle($id);
+		
+		// Seradim produkty podle jmena v ramci kategorie
+		foreach($byParent as &$array)	asort($array, SORT_LOCALE_STRING);		
+		
+		$this->template->data = $byParent;
 	}
 }

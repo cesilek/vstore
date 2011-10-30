@@ -1,34 +1,40 @@
 {block quickPick}
 <div id="quickPickContainer">
 	{form quickPickForm}
-	{* je 3:37 noveho casu!!! *}
-	{define #tree}
-		<ul>
-			{foreach $data as $id}
-				<li>
-					<span>
-						{if isset($form['product'.$id])}
-							{input 'product'.$id}
+	
+	{default numCol = 3}
+	{default productsPerCategory = 5}
+	
+	<div>
+		<ul class="quickPickListing">
+			<li class="col{(($iterator->counter - 1) % $numCol) + 1}" n:foreach="$data as $parentId => $children">
+				<h2>{$redaction->pageMenuTitle($parentId)}</h2>
+				<ul>
+					<li n:foreach="$children as $productId => $productName">
+						{if $iterator->counter <= $productsPerCategory}
+							{if isset($form['product'.$productId])}{input 'product'.$productId}{/if}
+							<a href="{rlink $productId}">{$productName}</a>
+						{else}
+							{var $moreCount = count($children) - $iterator->counter + 1}
+							<a href="{rlink $parentId}">... a {$moreCount} {if $moreCount > 4}dalších{else}další{/if}</a>
+							
+							{breakIf true}
 						{/if}
-						<a href="{rlink $id}">{$documentTitles->pageTitle($id, 'cs')}</a>
-						{var $children = $structure->getDirectChildrenIds($id)}
-						{if !empty($children) && $structure->pageType($id) !== 'DrStanek\Redaction\Documents\Product'} 
-							{include #tree, 'data' => $children, 'form'=>$form}
-						{/if}
-
-					</span>
-				</li>
-			{/foreach}
+					</li>		
+				</ul>
+			</li>
 		</ul>
-	{/define}
-	{var $temp = array();}
-	{foreach $data as $id}
-		{if !in_array($structure->pageParent($id), $temp)}
-			{include #tree 'data' => array($structure->pageParent($id)), 'form'=>$form}
-			{var $temp[] = $structure->pageParent($id)}
-		{/if}
-	{/foreach}
-	{input s value=>"Koupit vybrané"}
+		
+		<div class="cleaner">&nbsp</div>
+		
+		<div class="buttonBlock">
+		{block buttonBlock}
+			{input s}
+		{/block}
+		</div>
+
+	</div>
+
 	{/form}
 </div>
 {/block}
@@ -52,8 +58,11 @@
 						return outputStr;
 					})(data.values);
 					$.colorbox({ 
-						width: '80%',
-						height: '80%',
+						width: "680",
+						minHeight: "475",
+						initialWidth: "680",
+						initialHeight: "475",
+						
 						href: {$presenter->link('addToCart')} + dataUrl
 					});
 				} else if (data.redirect) {
