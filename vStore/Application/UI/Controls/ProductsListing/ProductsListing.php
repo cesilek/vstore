@@ -200,37 +200,6 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 		$this->perPage = $values['perPage'];
 		$this->redirect('default!');
 	}
-	
-	/**
-	 * @param string $name
-	 * @return Form 
-	 */
-	public function createComponentQuickPickForm($name) {
-		$form = new Form;
-		$form->onSuccess[] = callback($this, $name.'Submitted');
-		
-		foreach ($this->getData() as $product) {
-			$form->addCheckbox('product'.$product->pageId);
-		}
-		$form->addSubmit('s', 'Add to cart!');
-		return $form;
-	}
-	
-	public function quickPickFormSubmitted(Form $form) {
-		$values = array();
-		foreach ($form->values as $name => $val) {
-			if ($val == true) {
-				$values[] = (int) substr($name, 7); // strip the 'product' prefix
-			}
-		}
-		if($this->presenter->isAjax()) {
-			$this->presenter->payload->success = true;
-			$this->presenter->payload->values = $values;
-			$this->presenter->sendPayload();
-		}
-		
-		$this->presenter->redirect('addToCart', array ('product' => $values));
-	}
 
 	/**
 	 * Need this public...

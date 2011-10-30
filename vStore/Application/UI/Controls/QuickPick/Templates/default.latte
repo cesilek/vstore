@@ -1,0 +1,74 @@
+{block quickPick}
+<div id="quickPickContainer">
+	{form quickPickForm}
+	{* je 3:37 noveho casu!!! *}
+	{define #tree}
+		<ul>
+			{foreach $data as $id}
+				<li>
+					<span>
+						{if isset($form['product'.$id])}
+							{input 'product'.$id}
+						{/if}
+						<a href="{rlink $id}">{$documentTitles->pageTitle($id, 'cs')}</a>
+						{var $children = $structure->getDirectChildrenIds($id)}
+						{if !empty($children) && $structure->pageType($id) !== 'DrStanek\Redaction\Documents\Product'} 
+							{include #tree, 'data' => $children, 'form'=>$form}
+						{/if}
+
+					</span>
+				</li>
+			{/foreach}
+		</ul>
+	{/define}
+	{var $temp = array();}
+	{foreach $data as $id}
+		{if !in_array($structure->pageParent($id), $temp)}
+			{include #tree 'data' => array($structure->pageParent($id)), 'form'=>$form}
+			{var $temp[] = $structure->pageParent($id)}
+		{/if}
+	{/foreach}
+	{input s value=>"Koupit vybrané"}
+	{/form}
+</div>
+{/block}
+<div id="quickPickError" class="hidden">
+	Error!
+</div>
+<script type="text/javascript">
+	$(function () {
+		$('#quickPickContainer').find('form').submit(function (e) {
+			//error
+			$(this).ajaxSubmit(function (data, textStatus, jqXHR) {
+				if (data.success === true) {
+					var dataUrl = (function (vals) {
+						var outputStr = '?';
+						for (var i=0; i<vals.length; i++) {
+							outputStr += 'product['+i+']='+vals[i];
+							if (i+1 !== vals.length) {
+								outputStr += '&';
+							}
+						}
+						return outputStr;
+					})(data.values);
+					$.colorbox({ 
+						width: '80%',
+						height: '80%',
+						href: {$presenter->link('addToCart')} + dataUrl
+					});
+				} else if (data.redirect) {
+					window.location.href = data.redirect;
+				} else {
+					$.colorbox({ 
+						inline: true,
+						href: '#quickPickError'
+					});
+				}
+			});	
+			
+			e.stopImmediatePropagation();
+			e.preventDefault();
+			return false; 
+		});
+	});
+</script>
