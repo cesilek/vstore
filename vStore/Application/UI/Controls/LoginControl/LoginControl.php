@@ -113,20 +113,20 @@ class LoginControl extends BaseForm {
 		$form->addProtection();
 		$form->addText('email', 'E-mail:')
 				->setEmptyValue('@')
-				->addRule(Form::EMAIL, 'E-mail is not valid')
-				->setRequired('You have to fill in a valid email');
+				->addRule(Form::EMAIL, 'Zadaná e-mailová adresa není platná')
+				->setRequired('Prosím vyplňte e-mail zadaný při registraci');
 
 
 		\PavelMaca\Captcha\CaptchaControl::register();
 		$form['captcha'] = new \PavelMaca\Captcha\CaptchaControl;
-		$form['captcha']->caption = ('Security code:');
+		$form['captcha']->caption = ('Bezpečnosntí kód:');
 		$form['captcha']->setTextColor(Nette\Image::rgb(48, 48, 48));
 		$form['captcha']->setBackgroundColor(Nette\Image::rgb(232, 234, 236));
-		$form['captcha']->addRule(Form::FILLED, 'Rewrite text from image.');
-		$form['captcha']->addRule($form["captcha"]->getValidator(), 'Security code is incorrect. Read it carefuly from the image above.');
+		$form['captcha']->addRule(Form::FILLED, 'Přepište prosím bezpečnosntí kód');
+		$form['captcha']->addRule($form["captcha"]->getValidator(), 'Zadaný bezpečnostní kód není správný. Přepište jej prosím pečlivě z obrázku vlevo.');
 
 			
-		$form->addSubmit('send', 'Continue');
+		$form->addSubmit('send', 'Zaslat heslo');
 
 		$form->onSuccess[] = callback($this, $name.'Submitted');
 		$form->onError[] = callback($this, 'sendNewCaptcha');
@@ -163,7 +163,7 @@ class LoginControl extends BaseForm {
 				->setRequired('Prosím vyplňte své heslo znovu pro kontrolu.')
 				->addRule(Form::EQUAL, 'Hesla se neshodují', $form['password']);
 		
-		$form->addSubmit('send', 'Odeslat!');
+		$form->addSubmit('send', 'Změnit heslo');
 		
 		$form->onSuccess[] = callback($this, $name.'Submitted');
 		$form->onError[] = callback($this, 'ajaxFormErrors');
