@@ -1,7 +1,8 @@
 {block quickPick}
 <div id="quickPickContainer">
 	{form quickPickForm}
-	
+	<ul class="errorBlock">
+	</ul>
 	{default numCol = 3}
 	{default productsPerCategory = 5}
 	
@@ -43,41 +44,27 @@
 </div>
 <script type="text/javascript">
 	$(function () {
-		$('#quickPickContainer').find('form').submit(function (e) {
-			//error
-			$(this).ajaxSubmit(function (data, textStatus, jqXHR) {
-				if (data.success === true) {
-					var dataUrl = (function (vals) {
-						var outputStr = '?';
-						for (var i=0; i<vals.length; i++) {
-							outputStr += 'product['+i+']='+vals[i];
-							if (i+1 !== vals.length) {
-								outputStr += '&';
-							}
+		$('#quickPickContainer').find('form').colorboxForm({
+			onSuccess: function (data, config) {
+				var dataUrl = (function (vals) {
+					var outputStr = '?';
+					for (var i=0; i<vals.length; i++) {
+						outputStr += 'product['+i+']='+vals[i];
+						if (i+1 !== vals.length) {
+							outputStr += '&';
 						}
-						return outputStr;
-					})(data.values);
-					$.colorbox({ 
-						width: "680",
-						minHeight: "475",
-						initialWidth: "680",
-						initialHeight: "475",
-						
-						href: {$presenter->link('addToCart')} + dataUrl
-					});
-				} else if (data.redirect) {
-					window.location.href = data.redirect;
-				} else {
-					$.colorbox({ 
-						inline: true,
-						href: '#quickPickError'
-					});
-				}
-			});	
-			
-			e.stopImmediatePropagation();
-			e.preventDefault();
-			return false; 
+					}
+					return outputStr;
+				})(data.values);
+				$.colorbox({ 
+					width: "680",
+					minHeight: "475",
+					initialWidth: "680",
+					initialHeight: "475",
+
+					href: {$presenter->link('addToCart')} + dataUrl
+				});
+			}
 		});
 	});
 </script>

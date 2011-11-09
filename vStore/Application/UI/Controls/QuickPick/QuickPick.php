@@ -44,7 +44,9 @@ class QuickPick extends BaseForm {
 	public function createComponentQuickPickForm($name) {
 		$form = new Form;
 		$form->onSuccess[] = callback($this, $name.'Submitted');
+		$form->onError[] = callback($this, $name.'Error');
 		
+		$form->addHidden('foo')->setValue('bar');
 		foreach ($this->getProductIds() as $id) {
 			$form->addCheckbox('product'.$id);
 		}
@@ -54,10 +56,17 @@ class QuickPick extends BaseForm {
 	
 	public function quickPickFormSubmitted(Form $form) {
 		$values = array();
-		foreach ($form->values as $name => $val) {
+		$formValues = $form->values;
+		unset($formValues['foo']);
+		foreach ($formValues as $name => $val) {
 			if ($val == true) {
 				$values[] = (int) substr($name, 7); // strip the 'product' prefix
 			}
+		}
+		if (empty($values)) {
+			$form->addError('Vyberte prosím alespoň jednu položku');
+			$this->quickPickFormError($form);
+			return;
 		}
 		if($this->presenter->isAjax()) {
 			$this->presenter->payload->success = true;
@@ -66,6 +75,16 @@ class QuickPick extends BaseForm {
 		}
 		
 		$this->presenter->redirect('addToCart', array ('product' => $values));
+	}
+	
+	public function quickPickFormError(Form $form) {
+		if ($form->hasErrors() && $this->presenter->isAjax()) {
+			$errors = $form->getErrors();
+			$error = array_shift($errors);
+			$this->presenter->payload->error = true;
+			$this->presenter->payload->message = $error;
+			$this->presenter->sendPayload();
+		}
 	}
 	
 
