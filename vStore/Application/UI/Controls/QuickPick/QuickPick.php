@@ -75,18 +75,31 @@ class QuickPick extends BaseForm {
 	
 	public function getProductIds() {
 		if (!$this->data) {
-			$structure = $this->context->redaction->getStructure();
 			$result = array ();
+		
+			$docs = $this->context->redaction->findAll('vStore\Redaction\Documents\Product')
+				->where('[showOnQuickPick] = 1');
+				//->orderByStructure();
+				
+			foreach($docs as $doc) {
+				$result[] = $doc->pageId;
+			}
+		
+			/*
+			$structure = $this->context->redaction->getStructure();
 			foreach ($structure->topLevelItemIds() as $item) {
 				foreach ($structure->getChildrenIds($item) as $id) {
 					
 					if($structure->pageType($id) === 'vStore\Redaction\Documents\Product' || is_subclass_of($structure->pageType($id), 'vStore\Redaction\Documents\Product')) {
+						
 						$result[] = $id;
 					}
 				}
-			}
+			} */
+			
 			$this->data = $result;
 		}
+		
 		return $this->data;
 	}
 }

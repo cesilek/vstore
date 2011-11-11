@@ -48,9 +48,14 @@ class QuickPickRenderer extends vStore\Application\UI\ControlRenderer {
 		foreach($productIds as $id)
 			$byParent[$structure->pageParent($id)][$id] = $this->redaction->pageMenuTitle($id);
 		
-		// Seradim produkty podle jmena v ramci kategorie
-		foreach($byParent as &$array)	asort($array, SORT_LOCALE_STRING);		
+		// Seradim kategorie podle struktury
+		$byParent2 = array();
+		$categories = $structure->pagesOrder(array_keys($byParent));
+		foreach($categories as $curr) $byParent2[$curr] = $byParent[$curr];
 		
-		$this->template->data = $byParent;
+		// Seradim produkty podle jmena v ramci kategorie
+		foreach($byParent2 as &$array)	asort($array, SORT_LOCALE_STRING);		
+		
+		$this->template->data = $byParent2;
 	}
 }
