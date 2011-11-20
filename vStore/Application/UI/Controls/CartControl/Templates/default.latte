@@ -8,7 +8,7 @@
 		{/block}
 
 		{form cartForm}
-			<ul class="errors" n:if="$form->hasErrors()">
+			<ul class="error" n:if="$form->hasErrors()">
 				<li n:foreach="$form->errors as $error">{$error}</li>
 			</ul>
 
