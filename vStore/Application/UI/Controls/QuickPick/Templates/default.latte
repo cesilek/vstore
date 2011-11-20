@@ -11,7 +11,7 @@
 			<li class="col{(($iterator->counter - 1) % $numCol) + 1}" n:foreach="$data as $parentId => $children">
 				<h2>{$redaction->pageMenuTitle($parentId)}</h2>
 				<ul>
-					<li n:foreach="$children as $productId => $productName">
+					<li n:class="$control->isInCart($productId) ? alreadyInCart" n:foreach="$children as $productId => $productName">
 						{if $iterator->counter <= $productsPerCategory}
 							{if isset($form['product'.$productId])}{input 'product'.$productId}{/if}
 							<a href="{rlink $productId}">{$productName}</a>

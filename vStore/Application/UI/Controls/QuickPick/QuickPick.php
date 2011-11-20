@@ -121,4 +121,9 @@ class QuickPick extends BaseForm {
 		
 		return $this->data;
 	}
+	
+	public function isInCart($productId) {
+		return $this->context->shop->order->getItemWithId($productId) !== null;
+	}
+	
 }
