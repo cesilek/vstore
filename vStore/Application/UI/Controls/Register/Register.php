@@ -38,6 +38,8 @@ use vStore,
  */
 class Register extends BaseForm {
 
+	public $onUserRegistred = array();
+
 	/** @var null|Link */
 	private $_targetLink;
 	
@@ -148,6 +150,8 @@ class Register extends BaseForm {
 		
 		$user->setBypassSecurityCheck(true);
 		$user->save();
+		
+		$this->onUserRegistred($user, $values->password);
 		
 		$this->context->user->login($user->username, $values->password);
 		
