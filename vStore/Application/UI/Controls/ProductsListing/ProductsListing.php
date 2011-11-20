@@ -106,9 +106,7 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 				throw new Nette\InvalidStateException("Missing data source " . get_called_class() . "::setFluent not called?");		
 		
 				
-		$this->appliedFluent = new vBuilder\Redaction\Fluent($this->fluent->getRowClass(), $this->getContext());
-		$this->appliedFluent->select('*')->from('('.(string) $this->fluent.')')->as('pl');
-
+		$this->appliedFluent = $this->fluent->createWrappingFluent('*', 'p1');
 		
 		if($this->sorting == 'none') {
 			
@@ -137,7 +135,6 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 			}
 
 			$this->appliedFluent->orderBy("[$order] $method");
-			
 		}
 
 		return $this->appliedFluent;
