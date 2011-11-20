@@ -38,12 +38,6 @@ class CartControl extends vStore\Application\UI\Control {
 	
 	// <editor-fold defaultstate="collapsed" desc="General">
 	
-	public function __construct($parent = null, $name = null) {
-		parent::__construct($parent, $name);
-
-		IntegerPicker::register();
-	}
-	
 	/**
 	 * Returns current order
 	 * 
@@ -70,8 +64,12 @@ class CartControl extends vStore\Application\UI\Control {
 		$this->redirect('this');
 	}
 	
-	public function createComponentCartForm() {
-		$form = new Form;
+	public function createComponentCartForm($name) {
+		// Nevolat v konstruktoru, protoze, pokud se jedna o handling akce (?do=cartControl-default), tak je konstruktor
+		// zavolan jeste pred sablonou a nema tudiz nastavene potrebne vazby (resilo by to attached()?)
+		IntegerPicker::register();
+	
+		$form = new Form($this, $name);
 		$form->onSuccess[] = callback($this, 'cartFormSubmitted');
 		
 		foreach($this->order->getItems(true) as $item) {
