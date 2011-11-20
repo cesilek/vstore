@@ -24,8 +24,9 @@
 namespace vStore\Shop\Listeners;
 
 use vStore,
-		vBuilder,
-		Nette;
+	vBuilder,
+	Nette,
+	Nette\Utils\Strings;
 
 /**
  *
@@ -48,14 +49,13 @@ class AutoRegistrator extends vBuilder\Mail\MailNotificator {
 		$login = $this->context->config->get('user.login');
 		$i = '';
 		do {
-			$newUsername = $customer->name.'.'.$customer->surname.$i;
+			$newUsername = Strings::webalize($customer->name).'.'.Strings::webalize($customer->surname).$i;
 			$i++;
 			$usernameTaken = $this->context->repository->findAll($entityName)->where('[username] = %s', $newUsername)->fetch();
 		} while ($usernameTaken);
 		
 		$user = new $entityName($this->context);
-		
-		
+			
 		$password = Nette\Utils\Strings::random(8);
 		
 		$user->setEmail($customer->email);
@@ -80,7 +80,7 @@ class AutoRegistrator extends vBuilder\Mail\MailNotificator {
 			$this->template->setFile(__DIR__ . '/Templates/email.autoRegistration.latte');		
 
 		$this->message->addTo($customer->email, $customer->displayName);
-		$this->message->setSubject('Novy uzivatel');
+		$this->message->setSubject('Vase registrace');
 		$this->message->setHtmlBody($this->template);
 		$this->message->send();
 	}
