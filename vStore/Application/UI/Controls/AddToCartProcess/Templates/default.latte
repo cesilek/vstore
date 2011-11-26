@@ -3,9 +3,9 @@
 {block addToCartProcess}
 <div id="addToCartProcess" class="productListingBlock">
 {form adjustOrderForm}
-
 	{block beforeCartTable}{/block}
-	
+	<ul class="errorBlock">
+	</ul>
 	<table class="cartTable">
 		<tbody>
 			{var $addToTotal = 0}
@@ -67,40 +67,16 @@
 			lastInput: 0
 		}
 		
-		var ajaxError = false;
-		$('#addToCartProcess').find('form').submit(function (e) {
-			//error
-			var $this = $(this),
-				ajaxFailed = function (jqXHR, textStatus, errorThrown) {
-					ajaxError = true;
-					$this.trigger('submit');
-				};
-			if (!ajaxError) {
-				$this.ajaxSubmit(function (data, textStatus, jqXHR) {					
-					if (data.success === true) {
-						$.colorbox({ 
-							href: {link success},
-							width: $('#colorbox').outerWidth(),
-							height: $('#colorbox').outerHeight(),
-							onCleanup: function () {
-								v3cms.reloadCartPreview();
-							}
-						});
-					} else if (data.redirect) {
-						window.location.href = data.redirect;
-					} else {
-						/*$.colorbox({ 
-							inline: true,
-							href: '#cartError'
-						});*/
-						ajaxFailed();
+		$('#addToCartProcess').find('form').colorboxForm({
+			onSuccess: function (data, config) {
+				$.colorbox({ 
+					href: {link success},
+					width: $('#colorbox').outerWidth(),
+					height: $('#colorbox').outerHeight(),
+					onCleanup: function () {
+						v3cms.reloadCartPreview();
 					}
-				}, {
-					error: ajaxFailed
-				});	
-				e.stopImmediatePropagation();
-				e.preventDefault();
-				return false;
+				});
 			}
 		});
 		$('#close').click(function (e) {

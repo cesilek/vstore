@@ -131,32 +131,57 @@ class AddToCartProcess extends vStore\Application\UI\Control {
 		foreach($this->products as $product) {
 			$form->addIntegerPicker('amount' . $product->pageId)
 				->setDefaultValue(1)
-				->addRule(vBuilder\Application\UI\Form\IntegerPicker::POSITIVE, 'The number has to be positive!');
-				//->addRule(Form::INTEGER, 'The amount must be a number!');
+				->addRule(function ($control) {
+					return ctype_digit($control->value);
+				}, 'The amount must be a number!');
 		}
 		
-		$form->onSuccess[] = callback($this, 'adjustOrderFormSubmitted');
+		$form->onSuccess[] = callback($this, $name.'Submitted');
+		$form->onError[] = callback($this, $name.'Error');
 		$form->addProtection();
 		$form->addSubmit('s', 'Přidat do košíku');
 	
 		return $form;
 	}
 	
+	public function adjustOrderFormError(Form $form) {
+		if ($form->hasErrors() && $this->presenter->isAjax()) {
+			$errors = $form->getErrors();
+			$error = array_shift($errors);
+			$this->presenter->payload->error = true;
+			$this->presenter->payload->message = $error;
+			$this->presenter->sendPayload();
+		}
+	}
+	
 	public function adjustOrderFormSubmitted(Form $form) {
 		$values = $form->values;
+		$totalAmount = 0;
 		
 		foreach($this->products as $product) {
 			$amountKey = 'amount' . $product->getPageId();
 			$amount = (int) $values->{$amountKey};
 			
 			if($amount > 0) {
+				$totalAmount += $amount;
 				$this->shop->order->addProduct($product, $amount);
 			}
 		}
+		$amountFail = $totalAmount === 0;
+		$amountFailMsg = 'Vyberte prosím alespoň jednu položku';
 		
 		if($this->presenter->isAjax()) {
-			$this->presenter->payload->success = true;
+			if ($amountFail) {
+				$this->presenter->payload->error = true;
+				$this->presenter->payload->message = $amountFailMsg;
+			} else {
+				$this->presenter->payload->success = true;
+			}
 			$this->presenter->sendPayload();
+		}
+		if ($amountFail) {
+			$form->addError($amountFailMsg);
+			return;
 		}
 		
 		$this->redirect('success');

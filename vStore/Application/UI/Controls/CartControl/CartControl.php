@@ -76,8 +76,10 @@ class CartControl extends vStore\Application\UI\Control {
 			$form->addCheckbox('check'.$item->uniqueId);
 			$form->addIntegerPicker('range'.$item->uniqueId)
 					->setDefaultValue($item->amount)
-					->addRule(IntegerPicker::POSITIVE, 'The amount must be greater than zero...')
-					->addRule(Form::FILLED, 'The number must be filled!');
+					->addRule(function ($control) {
+						return $control->value >= 0;
+					}, 'Zadané číslo musí byt nula či vyšší')
+					->addRule(Form::FILLED, 'Vyplňte prosím počet produktů');
 		}
 
 		$form->addSubmit('delete', 'Delete selected');
@@ -90,16 +92,15 @@ class CartControl extends vStore\Application\UI\Control {
 	
 	public function cartFormSubmitted(Form $form) {
 		$values = $form->values;
+		foreach ($this->order->getItems(true) as $item) {
+			if($values['range'.$item->uniqueId] !== $item->amount) {
+				$item->amount = $values['range'.$item->uniqueId];
+			}
+		}		
 		if ($form['delete']->isSubmittedBy()) {
 			foreach ($this->order->getItems(true) as $item) {
 				if($values['check'.$item->uniqueId] === true) {
 					$item->delete();
-				}
-			}
-		} else if ($form['reCount']->isSubmittedBy()) {
-			foreach ($this->order->getItems(true) as $item) {
-				if($values['range'.$item->uniqueId] !== $item->amount) {
-					$item->amount = $values['range'.$item->uniqueId];
 				}
 			}
 		} else if ($form['buy']->isSubmittedBy()) {

@@ -27,3 +27,56 @@
 		{/block}
 	{/if}
 </div>
+<script>
+	{var $addToTotal = 0}
+	var productPrices = {
+			perOne: {
+				{foreach $order->getItems(true) as $product}
+					{$product->uniqueId}: {$product->price},
+					{var $addToTotal += $product->price}
+				{/foreach}
+			},
+			soFar: {
+				{foreach $order->getItems(true) as $product}
+					{$product->uniqueId}: {$product->price*$product->amount},
+				{/foreach}
+			},
+			total: {$order->getTotal(true)+$addToTotal}
+		},
+		reCountButton = $('#frmcartForm-reCount'),
+		totalPriceEl = $('#totalPrice'),
+		integerPickers = $('.integerPicker'),
+		reCountDelay = null,
+		parsePageId = function (name) {
+			return name.match(/\d+/)[0];
+		},
+		refreshPrices = function () {
+			var currency = function (arg) {
+					return Math.round(arg).toLocaleString().replace(' ', '&nbsp;') + ' Kč';
+				},
+				total = 0;
+			integerPickers.each(function () {
+				var $this = $(this),
+					pageId = $this.attr('name').match(/\d+/)[0],
+					amount = parseInt($this.val(), 10),
+					product = productPrices.soFar[pageId] = productPrices.perOne[pageId] * amount;
+				total += product;
+				$('#productPrice'+pageId).html(currency(product));
+			});
+			totalPriceEl.html(currency(total));
+		};
+	
+	reCountButton.hide();
+	integerPickers.change(function () {
+		var pageId = parsePageId($(this).attr('name'));
+		if (reCountDelay) {
+			clearTimeout(reCountDelay);
+		}
+		reCountDelay = setTimeout(function () {
+			reCountButton.ajaxSubmit(function () {
+				refreshPrices();
+			});
+			reCountDelay = null;
+		}, 400);
+	});
+</script>
