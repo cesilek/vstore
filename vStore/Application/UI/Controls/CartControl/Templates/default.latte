@@ -74,13 +74,13 @@
 		}
 		reCountDelay = setTimeout(function () {
 			totalPriceEl.add($('#productPrice'+pageId)).spin({
-				lines: 9, // The number of lines to draw
-				length: 5, // The length of each line
-				width: 3, // The line thickness
+				lines: 6, // The number of lines to draw
+				length: 3, // The length of each line
+				width: 2, // The line thickness
 				radius: 4, // The radius of the inner circle
-				color: '#000', // #rgb or #rrggbb
-				speed: 0.9, // Rounds per second
-				trail: 80, // Afterglow percentage
+				color: '#666', // #rgb or #rrggbb
+				speed: 1, // Rounds per second
+				trail: 60, // Afterglow percentage
 				shadow: false // Whether to render a shadow
 			});
 			reCountButton.ajaxSubmit(function () {
