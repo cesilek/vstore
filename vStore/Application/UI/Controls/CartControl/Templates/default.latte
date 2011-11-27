@@ -73,8 +73,7 @@
 			clearTimeout(reCountDelay);
 		}
 		reCountDelay = setTimeout(function () {
-			var spinners = totalPriceEl.add($('#productPrice'+pageId));
-			spinners.spin({
+			totalPriceEl.add($('#productPrice'+pageId)).spin({
 				lines: 9, // The number of lines to draw
 				length: 5, // The length of each line
 				width: 3, // The line thickness
@@ -85,7 +84,6 @@
 				shadow: false // Whether to render a shadow
 			});
 			reCountButton.ajaxSubmit(function () {
-				//spinners.data().spinner.stop();
 				refreshPrices();
 			});
 			reCountDelay = null;
