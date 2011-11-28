@@ -100,7 +100,8 @@ class Register extends BaseForm {
 				->setRequired('Prosím vyplňte své druhé helso pro kontrolu.')
 				->addRule(Form::EQUAL, 'Vyplněná hesla se neshodují', $form['password']);
 		
-		$form->addCheckbox('newsletter', 'Mám zájem o pravidelné zasílání novinek');
+		$form->addCheckbox('newsletter', 'Mám zájem o pravidelné zasílání novinek')
+			->setDefaultValue(true);
 		
 		\PavelMaca\Captcha\CaptchaControl::register();
 		$form['captcha'] = new \PavelMaca\Captcha\CaptchaControl;

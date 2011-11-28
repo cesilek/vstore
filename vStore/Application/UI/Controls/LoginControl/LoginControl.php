@@ -34,6 +34,8 @@ use vStore, Nette,
  */
 class LoginControl extends BaseForm {
 	
+	private $_mailer;
+	
 	/** @var array */
 	public $onRedirect = array ();
 	
@@ -268,6 +270,17 @@ class LoginControl extends BaseForm {
 		return $s;
 	}
 	
+	public function getSecurityTokenMailer() {
+		if(!isset($this->_mailer)) {
+			$this->_mailer = new vBuilder\Mail\MailNotificator($this->context);
+			
+			
+			$this->_mailer->message->setSubject('Password reset request');
+			$this->_mailer->template->setFile(__DIR__.'/Templates/_mail.latte');
+		}
+		
+		return $this->_mailer;
+	}
 	
 	public function newSecurityToken($user) {
 		$randomToken = $this->getRandomToken();
@@ -277,14 +290,10 @@ class LoginControl extends BaseForm {
 		$section->token = $randomToken;
 		$section->email = $user->email;
 
-		$mail = new vBuilder\Mail\MailNotificator($this->context);
-		$template = $mail->getTemplate();
-		$message = $mail->getMessage();
-
-		$message->setSubject('Shop - reset your password');
+		$message = $this->securityTokenMailer->message;
 		$message->addTo($user->email);
 
-		$template->setFile(__DIR__.'/Templates/_mail.latte');
+		$template = $this->securityTokenMailer->template;
 		$template->token = $randomToken;
 		$template->username = $user->username;
 
