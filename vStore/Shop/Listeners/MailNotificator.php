@@ -38,6 +38,7 @@ class MailNotificator extends vBuilder\Mail\MailNotificator {
 	public function onOrderCreated(vStore\Shop\Order $order) {
 		$this->template->order = $order;
 		
+		
 		if($this->template->getFile() == "")
 			$this->template->setFile(__DIR__ . '/Templates/email.orderConfirmation.latte');		
 
@@ -45,6 +46,25 @@ class MailNotificator extends vBuilder\Mail\MailNotificator {
 		$this->message->setSubject('Potvrzeni objednavky c. ' . vStore\Latte\Helpers\Shop::formatOrderId($order->id));
 		$this->message->setHtmlBody($this->template);
 		$this->message->send();
+	}
+	
+	// --------------------
+	
+	public function createTemplate($class = NULL) {
+		$template = parent::createTemplate($class);
+		
+		$template->redaction = $this->context->redaction;
+		
+		$template->registerHelper('currency', 'vStore\Latte\Helpers\Shop::currency');
+		$template->registerHelper('formatOrderId', 'vStore\Latte\Helpers\Shop::formatOrderId');
+		
+		return $template;
+	}
+	
+	public function templatePrepareFilters($template, &$engine = null) {
+		parent::templatePrepareFilters($template, $engine);		
+	
+		vBuilder\Latte\Macros\RedactionMacros::install($engine->parser);
 	}
 	
 }

@@ -56,5 +56,22 @@ class ProformaInvoiceSender extends vBuilder\Mail\MailNotificator {
 		$this->message->send();
 	}
 	
+	// --------------------
+	
+	public function createTemplate($class = NULL) {
+		$template = parent::createTemplate($class);
+		
+		$template->registerHelper('currency', 'vStore\Latte\Helpers\Shop::currency');
+		$template->registerHelper('formatOrderId', 'vStore\Latte\Helpers\Shop::formatOrderId');
+		
+		return $template;
+	}
+	
+	public function templatePrepareFilters($template, &$engine = null) {
+		parent::templatePrepareFilters($template, $engine);		
+	
+		vBuilder\Latte\Macros\RedactionMacros::install($engine->parser);
+	}
+	
 }
 
