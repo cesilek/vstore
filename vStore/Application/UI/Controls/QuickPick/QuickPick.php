@@ -97,7 +97,8 @@ class QuickPick extends BaseForm {
 			$result = array ();
 		
 			$docs = $this->context->redaction->findAll('vStore\Redaction\Documents\Product')
-				->where('[showOnQuickPick] = 1');
+				->where('[showOnQuickPick] = 1')
+				->foInvisible();
 				//->orderByStructure();
 				
 			foreach($docs as $doc) {
