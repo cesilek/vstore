@@ -72,6 +72,16 @@ class AutoRegistrator extends vBuilder\Mail\MailNotificator {
 		$user->setBypassSecurityCheck(true);
 		$user->save();
 		
+		// Ulozi to znovu i produkty :-(
+		//$order->user = $user;
+		//$order->save();
+		
+		// Docasny fix
+		$orderEntity = $this->context->shop->getOrderEntityClass();
+		$this->context->connection->update($orderEntity::getMetadata()->getTableName(), array(
+			'user' => $user->id
+		))->execute();
+		
 		$this->template->user = $user;
 		$this->template->password = $password;
 		
