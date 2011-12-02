@@ -40,8 +40,10 @@ use vStore,
  * @Column(customer, type="OneToOne", entity="vStore\Shop\CustomerInfo", joinOn="customer=id")
  * @Column(address, type="OneToOne", entity="vStore\Shop\ShippingAddress", joinOn="address=id")
  * @Column(note)
- * @Column(timestamp, type="DateTime")
+ * @Column(timestamp, type="CreatedDateTime")
  * @Column(state)
+ * @Column(lastStateAuthor, type="OneToOne", entity="vBuilder\Security\User", joinOn="lastStateAuthor=id")
+ * @Column(lastStateTime, type="DateTime")
  * 
  * @author Adam Staněk (velbloud)
  * @since Oct 7, 2011
@@ -51,6 +53,11 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	const DELIVERY_ITEM_ID = -1;
 	const PAYMENT_ITEM_ID = -2;
 	const DISCOUNT_ITEM_ID = -3;
+	
+	const STATE_NEW = 0;
+	const STATE_DONE = 1;
+	const STATE_CANCELED = 2;
+	const STATE_MARKED = 3;
 	
 	private $_total;
 	private $_totalProducts;

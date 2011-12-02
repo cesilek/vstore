@@ -7,7 +7,7 @@
 #
 # Host: 127.0.0.1 (MySQL 5.5.15-log)
 # Database: vbuilder_drstanek_cz
-# Generation Time: 2011-10-23 13:14:56 +0000
+# Generation Time: 2011-12-02 12:03:30 +0000
 # ************************************************************
 
 
@@ -83,8 +83,10 @@ CREATE TABLE `shop_orders` (
   `customer` smallint(5) unsigned NOT NULL,
   `address` smallint(5) unsigned DEFAULT NULL,
   `note` text NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `timestamp` datetime NOT NULL,
   `state` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `lastStateAuthor` smallint(5) unsigned DEFAULT NULL,
+  `lastStateTime` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user` (`user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
