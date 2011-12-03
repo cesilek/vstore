@@ -99,7 +99,7 @@ class ScheduledDiscountOrderItem extends DynamicOrderItem {
 		$this->isLoaded = true;
 		$db = $this->context->connection;
 		
-		$ds = $db->select('[percentageDiscount]')->from(self::TABLE_NAME)->where('[until] >= NOW()');
+		$ds = $db->select('[percentageDiscount]')->from(self::TABLE_NAME)->where('[until] >= NOW() OR [until] IS NULL');
 		
 		if($this->context->user->isLoggedIn()) {
 			$ds->where('([user] = 0 OR [user] = %i)', $this->context->user->getId());

@@ -101,7 +101,7 @@ DROP TABLE IF EXISTS `shop_scheduledDiscounts`;
 CREATE TABLE `shop_scheduledDiscounts` (
   `user` smallint(5) unsigned NOT NULL DEFAULT '0',
   `percentageDiscount` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `until` date NOT NULL,
+  `until` date DEFAULT NULL,
   PRIMARY KEY (`user`,`percentageDiscount`),
   KEY `user` (`user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
