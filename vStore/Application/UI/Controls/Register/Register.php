@@ -122,7 +122,7 @@ class Register extends BaseForm {
 		
 		$potentialUser = $this->getContext()->repository->findAll($entityName)->where('[email] = %s', $values->email)->fetch();
 		if($potentialUser) {
-			$form->addError('Uživatel se zadanou emailovou adresou je již registrován. Pokud jste se již registrovali a zapomněli jste heslo, využijte prosím volby "Zapomněl jsem heslo" u přihlašovacího formuláře.');
+			$form->addError('Uživatel se zadanou emailovou adresou je již registrován. Prosím zvolte nabídku "Přihlašte se" (uprostřed nahoře).');
 			return;
 		}
 		
