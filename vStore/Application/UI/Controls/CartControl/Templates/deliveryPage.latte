@@ -19,7 +19,7 @@
 				{label delivery for => $form['delivery']->getControl($method->id)->offsetGet(0)->id}
 					<div class="name">
 						{$method->name}
-						<span n:class="charge, $item->getPrice() > 0 ? freeOfCharge" n:if="($item = $method->createOrderItem($order)) !== null">
+						<span n:class="charge, $item->getPrice() == 0 ? freeOfCharge" n:if="($item = $method->createOrderItem($order)) !== null">
 							(<span class="value">{if $item->getPrice() > 0}{$item->getPrice()|currency}{else}zdarma{/if}</span>)
 						</span>
 					</div>
@@ -42,7 +42,7 @@
 				{label payment for => $form['payment']->getControl($method->id)->offsetGet(0)->id}
 					<div class="name">
 						{$method->name}
-						<span n:class="charge, $item->getPrice() > 0 ? freeOfCharge" n:if="($item = $method->createOrderItem($order)) !== null">
+						<span n:class="charge, $item->getPrice() == 0 ? freeOfCharge" n:if="($item = $method->createOrderItem($order)) !== null">
 							(<span class="value">{if $item->getPrice() > 0}{$item->getPrice()|currency}{else}zdarma{/if}</span>)
 						</span>
 					</div>
