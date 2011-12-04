@@ -198,6 +198,17 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	}
 	
 	/**
+	 * Returns order total ceiling
+	 *
+	 * @return float
+	 */
+	public function getCeiling() {
+		$total = $this->getTotal();
+		
+		return ceil($total) - $total;
+	}
+	
+	/**
 	 * Returns ordered items
 	 * 
 	 * @param bool true if only product items should be returned
