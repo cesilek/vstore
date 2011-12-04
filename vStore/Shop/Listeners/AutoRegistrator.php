@@ -82,7 +82,7 @@ class AutoRegistrator extends vBuilder\Mail\MailNotificator {
 		$orderEntity = $this->context->shop->getOrderEntityClass();
 		$this->context->connection->update($orderEntity::getMetadata()->getTableName(), array(
 			'user' => $user->id
-		))->execute();
+		))->where('[id] = %i', $order->id)->execute();
 		
 		$this->template->user = $user;
 		$this->template->password = $password;
