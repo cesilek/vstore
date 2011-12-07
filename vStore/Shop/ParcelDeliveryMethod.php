@@ -38,7 +38,7 @@ class ParcelDeliveryMethod extends DeliveryMethod {
 	protected $_countries;
 	protected $_freeOfChargeLimit;
 	protected $_charge;
-	
+		
 	/**
 	 * Creates method from app configuration
 	 * 
@@ -78,7 +78,7 @@ class ParcelDeliveryMethod extends DeliveryMethod {
 	 * @return float
 	 */
 	function getCharge($countryCode) {
-		if(!isset($this->_charge[$countryCode]))
+		if(!array_key_exists($countryCode, $this->_charge))
 				throw new Nette\InvalidArgumentException("Country with code '$countryCode' is not defined");
 		
 		return $this->_charge[$countryCode];
@@ -91,7 +91,7 @@ class ParcelDeliveryMethod extends DeliveryMethod {
 	 * @return null|float
 	 */
 	function getFreeOfChargeLimit($countryCode) {
-		if(!isset($this->_freeOfChargeLimit[$countryCode]))
+		if(!array_key_exists($countryCode, $this->_freeOfChargeLimit))
 				throw new Nette\InvalidArgumentException("Country with code '$countryCode' is not defined");
 		
 		return $this->_freeOfChargeLimit[$countryCode];
