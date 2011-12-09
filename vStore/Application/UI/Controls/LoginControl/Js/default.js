@@ -17,7 +17,7 @@ $(function () {
 			url: href,
 			dataType: 'json',
 			success: function (data, textStatus, jqXHR) {
-				userLoggedIn.slideUp(1000, function () {
+				userLoggedIn.slideUp(800, function () {
 					userLoggedOut.removeClass('hidden');
 				});
 				window.location.reload(false);
