@@ -93,7 +93,12 @@ class CartControl extends vStore\Application\UI\Control {
 	public function cartFormSubmitted(Form $form) {
 		$values = $form->values;
 		foreach ($this->order->getItems(true) as $item) {
-			if($values['range'.$item->uniqueId] !== $item->amount) {
+			$amount = $values['range'.$item->uniqueId];
+			if ($amount == 0) {
+				$item->delete();
+				continue;
+			}
+			if($amount !== $item->amount) {
 				$item->amount = $values['range'.$item->uniqueId];
 			}
 		}		

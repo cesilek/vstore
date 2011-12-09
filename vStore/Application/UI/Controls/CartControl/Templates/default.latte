@@ -58,8 +58,11 @@
 			integerPickers.each(function () {
 				var $this = $(this),
 					pageId = $this.attr('name').match(/\d+/)[0],
-					amount = parseInt($this.val(), 10),
-					product = productPrices.soFar[pageId] = productPrices.perOne[pageId] * amount;
+					amount = parseInt($this.val(), 10);
+				if (amount === 0) {
+					$this.closest('tr').hide();
+				}
+				var product = productPrices.soFar[pageId] = productPrices.perOne[pageId] * amount;
 				total += product;
 				$('#productPrice'+pageId).html(currency(product));
 			});
