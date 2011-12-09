@@ -108,6 +108,21 @@ CREATE TABLE `shop_scheduledDiscounts` (
 
 
 
+# Dump of table shop_coupons
+# ------------------------------------------------------------
+
+CREATE TABLE `shop_coupons` (
+  `id` char(8) NOT NULL DEFAULT '',
+  `validSince` date NOT NULL,
+  `validUntil` date DEFAULT NULL,
+  `type` enum('percentage','rebate') NOT NULL DEFAULT 'rebate',
+  `value` float NOT NULL DEFAULT '0',
+  `requiredProductId` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
