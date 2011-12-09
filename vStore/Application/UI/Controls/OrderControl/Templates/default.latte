@@ -1,0 +1,33 @@
+<table class="ordersTable">				
+	<tbody>
+		<tr n:foreach="$orders as $order">
+			<td class="idCol"><a n:href="detail, orderId => $order->id">{$order->id|formatOrderId:true}</a></td>
+			<td class="timeCol">{$order->timestamp->format('j. m. Y')}</td>
+			<td class="priceCol">
+				{var $total = $order->total + $order->ceiling}
+				{$total|currency}
+			</td>
+			<td class="stateCol">
+				{if $order->state == vStore\Shop\Order::STATE_DONE}
+					<span class="orderStateDone">Expedována</span>
+				{elseif $order->state == vStore\Shop\Order::STATE_NEW}
+					<span class="orderStateNew">Čeká na vyřízení</span>
+				{elseif $order->state == vStore\Shop\Order::STATE_CANCELED}
+					<span class="orderStateCanceled">Stornována</span>
+					
+				{else}{* > vStore\Shop\Order::STATE_MARKED *}
+					<span class="orderStateInProgress">Vyřizuje se</span>
+				{/if}
+			</td>
+		</tr>
+	</tbody>
+	
+	<thead>
+		<tr>
+			<td>ID objednávky</td>
+			<td>Datum</td>
+			<td>Cena</td>	
+			<td>Stav</td>	
+		</tr>
+	</thead>
+</table>

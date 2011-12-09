@@ -21,24 +21,25 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Latte\Helpers;
+namespace vStore\Application\UI\Controls;
+
+use vStore, Nette,
+	vBuilder;
 
 /**
- * Latte template helpers for e-shop platform
+ * Order control renderer
  *
  * @author Adam Staněk (velbloud)
- * @since Mar 2, 2011
+ * @since Dec 4, 2011
  */
-class Shop {
-
-	public static function currency($value, $decimals = false) {
-		return str_replace(" ", "\xc2\xa0", number_format($value, $decimals ? 2 : 0, ",", " "))."\xc2\xa0Kč";
-	}
-
-	public static function formatOrderId($value, $spaced = false) {
-		$spacing = $spaced ? '  ' : '';
-	
-		return mb_substr($value, 0, 6) . $spacing . '/' . $spacing . mb_substr($value, 6);
+class OrderControlRenderer extends vStore\Application\UI\ControlRenderer {
+		
+	public function renderDefault() {
+		$this->template->orders = $this->control->orders;
 	}
 	
+	public function renderDetail() {
+		$this->template->order = $this->control->order;
+	}
+		
 }

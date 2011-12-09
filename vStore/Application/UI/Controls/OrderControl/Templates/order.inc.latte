@@ -1,0 +1,18 @@
+{extends '../../CartControl/Templates/order.inc.latte'}
+
+{block beforeTable}
+<div class="stateInfo">
+	<div class="state">Stav objednávky: <span class="value">
+		{if $order->state == vStore\Shop\Order::STATE_DONE}
+			<span class="orderStateDone">Expedována</span>
+		{elseif $order->state == vStore\Shop\Order::STATE_NEW}
+			<span class="orderStateNew">Čeká na vyřízení</span>
+		{elseif $order->state == vStore\Shop\Order::STATE_CANCELED}
+			<span class="orderStateCanceled">Stornována</span>
+			
+		{else}{* > vStore\Shop\Order::STATE_MARKED *}
+			<span class="orderStateInProgress">Vyřizuje se</span>
+		{/if}
+	</span></div>
+</div>
+{/block}
