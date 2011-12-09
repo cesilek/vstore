@@ -82,6 +82,7 @@ class Search extends vStore\Application\UI\Control {
 		
 				return $this->presenter->getContext()->redaction->branch->findAll('vStore\Redaction\Documents\Product')
 				->where('([perex] LIKE %s',$query, ') OR ([content] LIKE %s', $query, ') OR ([title] LIKE %s', $query, ')')
+				->foInvisible()
 				->limit(10);
 	}
 	
