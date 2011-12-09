@@ -5,9 +5,11 @@
 	{block perex}
 		<div class="cmsContent perex">
 			{msg perex-orderDone, parse => true,
+						order => $order,
 						orderId => $order->id,
 						formatedOrderId => vStore\Latte\Helpers\Shop::formatOrderId($order->id),
-						customerEmail => $order->customer->email}
+						customerEmail => $order->customer->email,
+						totalPrice => $order->total + $order->ceiling}
 		</div>
 	{/block}
 		
