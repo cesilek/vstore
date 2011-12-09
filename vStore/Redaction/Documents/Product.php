@@ -60,4 +60,13 @@ class Product extends Document implements vStore\Shop\IProduct {
 		return $this->price;
 	}
 	
+	/**
+	 * Returns true if product is available for buy
+	 *
+	 * @return bool
+	 */
+	public function isAvailable() {
+		return ($this->isVisible() && $this->getEffectivePrice() > 0);
+	}
+	
 }
