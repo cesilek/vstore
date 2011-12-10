@@ -1,1 +1,7 @@
+{include flashes.inc.latte}
+
 {include 'order.inc.latte'}
+
+{if $order->payment instanceOf vStore\Shop\DirectPaymentMethod && !$order->isPaid}
+	<a href="{$control['payment']->payLink()}" class="paymentLink">Zaplatit</a>
+{/if}

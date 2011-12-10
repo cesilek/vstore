@@ -1,0 +1,5 @@
+{block flashes}
+	<div class="flashMessages" n:if="count($flashes)">
+		<div n:foreach="$flashes as $msg" class="message {$msg->type}Message">{$msg->message}</div>
+	</div>
+{/block}

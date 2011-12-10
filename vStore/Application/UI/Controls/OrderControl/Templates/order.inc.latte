@@ -14,5 +14,13 @@
 			<span class="orderStateInProgress">Vyřizuje se</span>
 		{/if}
 	</span></div>
+	
+	<div class="paymentState" n:if="$order->payment instanceOf vStore\Shop\DirectPaymentMethod">Stav platby: <span class="value">
+		{if $order->isPaid}
+			<span class="orderPaymentStateOk">Zaplaceno</span>
+		{else}
+			<span class="orderPaymentStateWaiting">Neuhrazeno</span>
+		{/if}
+	</span></div>
 </div>
 {/block}

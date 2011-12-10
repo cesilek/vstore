@@ -35,10 +35,66 @@ use vStore, Nette,
  */
 class OrderControl extends vStore\Application\UI\Control {
 
+	/** @persistent */
+	public $orderId;
+
 	/** @var vStore\Shop\Order order */
 	private $_order;
 	
 	// <editor-fold defaultstate="collapsed" desc="General">
+	
+	protected function createRenderer() {
+		return new OrderControlRenderer($this);
+	}
+	
+	// </editor-fold>	
+	
+	// <editor-fold defaultstate="collapsed" desc="Order listing (default)">
+	
+	public function actionDefault() {
+
+	}
+	
+	/**
+	 * Returns fluent interface to user orders query
+	 * 
+	 * @return vBuilder\Orm\Fluent
+	 */
+	public function getOrders() {
+		return $this->context->shop->userOrders->orderBy('timestamp DESC');
+	}
+	
+	// </editor-fold>
+	
+	// <editor-fold defaultstate="collapsed" desc="Order detail display (detail)">
+	
+	public function actionDetail() {
+		
+	}
+	
+	public function createComponentPayment() {
+		if($this->order->payment instanceOf vStore\Shop\DirectPaymentMethod) {
+			$control = $this->order->payment->createComponent(
+					$this->order,
+					callback($this, 'onSuccessfulPayment'),
+					callback($this, 'onFailedPayment')
+			);
+			
+			return $control;
+		}
+			
+		throw new Nette\InvalidStateException("Trying to create payment component on order without direct payment method.");
+	}
+	
+	public function onSuccessfulPayment(vStore\Shop\Order $order) {
+		$this->flashMessage('Platba proběhla úspěšně.');
+		$this->redirect('detail', array('orderId' => $order->id));
+	}
+	
+	public function onFailedPayment(vStore\Shop\Order $order, $message) {
+		$this->flashMessage('Při platbě došlo k chybě. ' . $message, 'error');
+		$this->redirect('detail', array('orderId' => $order->id));
+	}
 	
 	/**
 	 * Returns current order
@@ -60,35 +116,6 @@ class OrderControl extends vStore\Application\UI\Control {
 		}
 	
 		return $this->_order;
-	}
-	
-	/**
-	 * Returns fluent interface to user orders query
-	 * 
-	 * @return vBuilder\Orm\Fluent
-	 */
-	public function getOrders() {
-		return $this->context->shop->userOrders->orderBy('timestamp DESC');
-	}
-	
-	protected function createRenderer() {
-		return new OrderControlRenderer($this);
-	}
-	
-	// </editor-fold>	
-	
-	// <editor-fold defaultstate="collapsed" desc="Order listing (default)">
-	
-	public function actionDefault() {
-		
-	}
-	
-	// </editor-fold>
-	
-	// <editor-fold defaultstate="collapsed" desc="Order detail display (detail)">
-	
-	public function actionDetail() {
-		
 	}
 	
 	// </editor-fold>
