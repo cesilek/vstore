@@ -44,6 +44,7 @@ use vStore,
  * @Column(state)
  * @Column(lastStateAuthor, type="OneToOne", entity="vBuilder\Security\User", joinOn="lastStateAuthor=id")
  * @Column(lastStateTime, type="DateTime")
+ * @Column(isPaid, type="boolean")
  * 
  * @author Adam Staněk (velbloud)
  * @since Oct 7, 2011

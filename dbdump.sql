@@ -87,6 +87,7 @@ CREATE TABLE `shop_orders` (
   `state` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `lastStateAuthor` smallint(5) unsigned DEFAULT NULL,
   `lastStateTime` datetime DEFAULT NULL,
+  `isPaid` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `user` (`user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
