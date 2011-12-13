@@ -134,6 +134,12 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		$orderedProducts = $this->context->sessionRepository->findAll('vStore\\Shop\\OrderItem', true);
 		foreach($orderedProducts as $curr) $curr->delete();
 		
+		// Vyresetuju objednavku (Ulozi to destruktor)
+		list($sessionOrder) = $this->context->sessionRepository->findAll('vStore\\Shop\\Order', true)->fetchAll();
+		$sessionOrder->isPaid = false;
+		$sessionOrder->save();
+
+		
 		// Zavolam vsechny listenery (pouziju pro jistotu jiz ulozenou objednavku)
 		$this->context->shop->onOrderCreated($this->context->shop->getOrder($this->id));
 	}

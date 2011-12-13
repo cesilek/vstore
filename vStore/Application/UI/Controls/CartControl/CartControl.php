@@ -36,6 +36,9 @@ use vStore, Nette,
  */
 class CartControl extends vStore\Application\UI\Control {
 	
+	/** @persistent */
+	public $orderId;
+	
 	// <editor-fold defaultstate="collapsed" desc="General">
 	
 	/**
@@ -325,7 +328,7 @@ class CartControl extends vStore\Application\UI\Control {
 	
 	// </editor-fold>	
 	
-	// <editor-fold defaultstate="collapsed" desc="Review page (last)">
+	// <editor-fold defaultstate="collapsed" desc="Review page">
 	
 	public function actionReviewPage() {
 		if(!$this->checkDeliveryPage()) $this->redirect('default');
@@ -359,6 +362,36 @@ class CartControl extends vStore\Application\UI\Control {
 			$this->presenter->flashMessage('Vaše objednávka byla úspěšně odeslána.');
 			$this->redirect('lastPage', array('orderId' => $this->order->id));
 		} 
+	}
+	
+	// </editor-fold>
+	
+	// <editor-fold defaultstate="collapsed" desc="Order confirmation (lastPage)">
+
+	public function createComponentPayment() {
+		$order = $this->shop->getOrder($this->getParam('orderId'));
+	
+		if($order->payment instanceOf vStore\Shop\DirectPaymentMethod) {
+			$control = $order->payment->createComponent(
+					$order,
+					callback($this, 'onSuccessfulPayment'),
+					callback($this, 'onFailedPayment')
+			);
+			
+			return $control;
+		}
+			
+		throw new Nette\InvalidStateException("Trying to create payment component on order without direct payment method.");
+	}
+	
+	public function onSuccessfulPayment(vStore\Shop\Order $order) {
+		$this->presenter->flashMessage('Platba proběhla úspěšně.');
+		$this->redirect('lastPage', array('orderId' => $this->getParam('orderId')));
+	}
+	
+	public function onFailedPayment(vStore\Shop\Order $order, $message) {
+		$this->presenter->flashMessage('Při platbě došlo k chybě. ' . $message, 'error');
+		$this->redirect('lastPage', array('orderId' => $this->getParam('orderId')));
 	}
 	
 	// </editor-fold>
