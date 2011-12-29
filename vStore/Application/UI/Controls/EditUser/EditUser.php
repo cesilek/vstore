@@ -73,15 +73,7 @@ class EditUser extends vStore\Application\UI\Control {
 	}
 	
 	public function actionDefault() {
-		$user = $this->getContext()->user->identity;
-		$onlyNeededFields = array_intersect_key($user->data->getAllData(), array_flip(array (
-			'name',
-			'surname',
-			'email',
-			'newsletter'
-		))); // This is not necessary at all but it doesn't seem right to 
-		// provide the form with more user information than it really needs.
-		$this['updateProfileForm']->setDefaults($onlyNeededFields);
+		$this['updateProfileForm']->loadFromEntity($this->getContext()->user->identity);
 	}
 
 
@@ -102,11 +94,8 @@ class EditUser extends vStore\Application\UI\Control {
 	}
 	
 	public function updateProfileFormSubmitted(Form $form) {
-		$values = $form->values;
 		$user = $this->getContext()->user->identity;
-		foreach ($values as $field => $val) {
-			$user->{$field} = $val;
-		}
+		$form->fillInEntity($user);
 		$user->setBypassSecurityCheck(true);
 		$user->save();
 		$this->presenter->flashMessage('Vaše změny byly úspěšně uloženy.');
