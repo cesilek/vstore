@@ -1,3 +1,6 @@
+{default $cartMode => false}
+{var $total => 0} {* Musime ho pocitat zvlast, kvuli $item->isVisible() *}
+
 <table class="orderItems">
 	<thead>
 		<tr>
@@ -9,8 +12,12 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr n:class="$item->productId < 1 ? nonProductItem, !$item->isVisible() ? hidden" n:foreach="$order->getItems($onlyProducts) as $item">
-			<td class="checkbox" n:if="isset($form) && isset($form['check' . $item->uniqueId])">{input 'check'.$item->uniqueId}</td>
+		<tr n:class="$item->productId < 1 ? nonProductItem, !$item->isVisible($cartMode) ? hidden" n:foreach="$order->items as $item">
+			{if $item->isVisible($cartMode)}
+				{var $total => $total + $item->price*$item->amount}
+			{/if}
+		
+			<td class="checkbox" n:if="isset($form)">{if isset($form['check' . $item->uniqueId])}{input 'check'.$item->uniqueId}{else}{/if}</td>
 			<td class="name">{if $item->productId > 0}<a href="{rlink $item->productId}">{/if}{$item->name}{if $item->productId > 0}</a>{/if}</td>
 			<td class="amount">{if $item->productId > 0}{if isset($form) && isset($form['range' . $item->uniqueId])}{input 'range'.$item->uniqueId class=>'rangePicker'}{else}{$item->amount} ks{/if}{/if}</td>
 
@@ -25,7 +32,7 @@
 			<td class="amount"></td>
 			<td class="unitPrice"></td>
 
-			<td class="price" id="totalPrice">{$order->getTotal($onlyProducts)|currency}</td>
+			<td class="price" id="totalPrice">{$total|currency}</td>
 		</tr>
 	</tfoot>
 </table>

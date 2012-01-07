@@ -26,7 +26,8 @@ namespace vStore\Application\UI\Controls;
 use vStore, Nette,
 	vBuilder,
 	vBuilder\Application\UI\Form\IntegerPicker,
-	Nette\Application\UI\Form;
+	Nette\Application\UI\Form,
+	vStore\Shop\CouponException;
 
 /**
  * Cart control
@@ -116,6 +117,61 @@ class CartControl extends vStore\Application\UI\Control {
 		} else {
 			
 		}
+		$this->redirect('this');
+	}
+	
+	public function createComponentCartDiscountCouponForm($name) {
+		$form = new Form($this, $name);
+		$form->getElementPrototype()->novalidate = 'novalidate';
+		$form->onSuccess[] = callback($this, 'cartDiscountCouponFormSubmitted');
+		
+		$form->addText('discountCode', 'Máte slevový kupón? Vložte svůj kód:')
+			->setRequired(true)
+			->addRule(Form::PATTERN, 'Zadaný kód není platný', '[A-Z0-9]{8}')
+			->addFilter(function ($input) {
+				return mb_strtoupper(trim($input));
+			});
+
+		$form->addSubmit('s', 'Uplatnit slevu');
+		
+		return $form;
+	}
+	
+	public function cartDiscountCouponFormSubmitted(Form $form) {
+		$values = $form->values;
+		
+		try {
+			$this->order->setDiscountCode($values->discountCode);
+			
+			$this->presenter->flashMessage('Slevový kupón "' . $values->discountCode . '" byl úspěšně uplatněn na objednávku');
+		} catch(CouponException $e) {
+			switch($e->getCode()) {
+				case CouponException::NOT_FOUND:
+					$this->presenter->flashMessage('Slevový kupón s kódem "' . $values->discountCode . '" neexistuje', 'warn');
+					break;
+				
+				case CouponException::EXPIRED:
+					$this->presenter->flashMessage('Zadaný slevový kupón propadl :-(', 'warn');
+					break;
+					
+				case CouponException::NOT_ACTIVE_YET:
+					$this->presenter->flashMessage('Tento slevový kupón lze použít nejdříve ' . $e->getCoupon()->validSince->format('j.m.Y'), 'warn');
+					break;
+					
+				case CouponException::USED:
+					$this->presenter->flashMessage('Zadaný slevový kupón již byl jednou uplatněn.', 'warn');
+					break;
+				
+				case CouponException::CONDITION_NOT_MET:
+					$this->presenter->flashMessage('Tento slevový kupón lze uplatnit pouze při zakoupení produktu "' . $this->context->redaction->pageTitle($e->getCoupon()->requiredProductId) . '"', 'warn');
+					break;				
+					
+				default:
+					$this->presenter->flashMessage($e->getMessage(), 'error');		
+			
+			}
+		}
+		
 		$this->redirect('this');
 	}
 	

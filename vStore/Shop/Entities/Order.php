@@ -30,6 +30,8 @@ use vStore,
 /**
  * Basic order implementation
  *
+ * @warning When adding more OrderItem implementations flushing the cache is necessary!
+ *
  * @Table(name="shop_orders")
  * 
  * @Column(id, pk, type="integer")
@@ -51,9 +53,12 @@ use vStore,
  */
 class Order extends vBuilder\Orm\ActiveEntity {
 	
+	const COUPON_ENTITY = 'vStore\\Shop\\Coupon';
+	
 	const DELIVERY_ITEM_ID = -1;
 	const PAYMENT_ITEM_ID = -2;
 	const DISCOUNT_ITEM_ID = -3;
+	const COUPON_ITEM_ID = -4;
 	
 	const STATE_NEW = 0;
 	const STATE_DONE = 1;
@@ -157,6 +162,54 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	}
 	
 	/**
+	 * Add discount coupon to order
+	 *
+	 * @param string coupon code
+	 * @throws CouponException if coupon is not valid
+	 */
+	public function setDiscountCode($code) {
+		$coupon = $this->context->persistentRepository->findAll(self::COUPON_ENTITY)->where('[id] = %s', $code)->fetch();
+		
+		// Kontrola existence kodu
+		if($coupon === false) throw new CouponException("Coupon with code '$code' does not exist", CouponException::NOT_FOUND);
+
+		// Kontrola, jestli kod uz nebyl pouzit
+		if($coupon->isUsed()) throw new CouponException("Coupon with code '$code' has already been used", CouponException::USED, $coupon);
+		
+		// Kontrola, jestli kod uz neni po expiraci
+		if($coupon->isExpired()) throw new CouponException("Coupon with code '$code' has expired", CouponException::EXPIRED, $coupon);
+		
+		// Kontrola, jestli kod uz je aktivni
+		if(!$coupon->isActive()) throw new CouponException("Coupon with code '$code' is not active yet", CouponException::NOT_ACTIVE_YET, $coupon);
+
+		// Kontrola podminky na produkt		
+		if($coupon->requiredProductId) {
+			// Musi se osetrit odebirani produktu po aplikaci slevy
+			throw new CouponException("Slevové kupóny vázané na konkrétní produkt v současné době nejsou podporovány. Kontaktujte prosím obchodníka.");
+		
+			/* 
+			if($this->getItemWithId($coupon->requiredProductId) === null)
+				throw new CouponException("Coupon with code '$code' is only appliable in orders containing product id " . var_export($coupon->requiredProductId, true), CouponException::CONDITION_NOT_MET, $coupon); */
+		}
+		
+		$item = $this->repository->create('vStore\\Shop\\CouponDiscountOrderItem');
+		$item->setDiscountCode($code);
+		$this->replaceItem($item);
+		
+		// Pokud mame kupon nesmime nastavovat slevovy program
+		$this->removeItemWithId(self::DISCOUNT_ITEM_ID);
+	}
+	
+	/**
+	 * Returns true if order has any discount coupon applied
+	 *
+	 * @return bool
+	 */
+	public function hasDiscountCode() {
+		return $this->getItemWithId(self::COUPON_ITEM_ID) !== null;
+	}
+	
+	/**
 	 * Adds product to cart
 	 * 
 	 * @param IProduct product
@@ -228,7 +281,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		if(!$this->_itemsAltered && $this->repository instanceof vBuilder\Orm\SessionRepository) {
 			$this->_itemsAltered = true;
 			
-			if($this->context->config->get('shop.scheduledDiscounts.enabled', false)) {
+			if($this->context->config->get('shop.scheduledDiscounts.enabled', false) && !$this->hasDiscountCode()) {
 				if($this->getItemWithId(self::DISCOUNT_ITEM_ID) === null) {
 					$items->add($this->repository->create('vStore\\Shop\\ScheduledDiscountOrderItem'));
 				}
@@ -323,8 +376,8 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	/**
 	 * Calculates PRODUCT items in the cart
 	 * 
-	 * Calculation is separated from total cart info because postal charges and etc.
-	 * are often dynamic items calculated using of product total.
+	 * Calculation is separated from total cart info because postal charges and etc. are
+	 * often dynamic items calculated using product total.
 	 */
 	protected function calculateProductInfo() {
 		

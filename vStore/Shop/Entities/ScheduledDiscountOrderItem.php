@@ -46,9 +46,11 @@ class ScheduledDiscountOrderItem extends DynamicOrderItem {
 	/**
 	 * Returns true if item should be displayed in order item tables
 	 * 
+	 * @param bool true, if we are quering for cart table, false for general order table
+	 *
 	 * @return bool 
 	 */
-	public function isVisible() {
+	public function isVisible($cartMode = false) {
 		return $this->getPrice() != 0;
 	}
 	

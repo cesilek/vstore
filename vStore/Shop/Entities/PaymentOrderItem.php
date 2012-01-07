@@ -28,51 +28,20 @@ use vStore,
 		Nette;
 
 /**
- * Model for ordered items
- *
- * @Table(name="shop_orderItems")
- * 
- * @Column(orderId, pk, type="integer")
- * @Column(productId, pk, type="integer")
- * @Column(name)
- * @Column(amount, type="integer")
- * @Column(price, type="float")
- * @Column(params, type="Json")
+ * Order item for payment methods
  * 
  * @author Adam Staněk (velbloud)
- * @since Oct 7, 2011
+ * @since Jan 7, 2011
  */
-class OrderItem extends vBuilder\Orm\ActiveEntity {
+class PaymentOrderItem extends OrderItem {
 	
-	/**
-	 * Returns unique id in the cart
-	 * 
-	 * @return string up to 32 chars long 
-	 */
-	public function getUniqueId() {
-		if($this->params == null || count($this->params->toArray()) == 0) {
-			return $this->productId;
-		} else {
-			return md5($this->productId . $this->data->params);
-		}
-	}
-	
-	/**
-	 * Returns effective price of item
-	 * 
-	 * @return float 
-	 */
-	public function getPrice() {
-		// Pokud data jeste nejsou ulozena v databazi, nacitame VZDY aktualni cenu
-		if($this->repository instanceof vBuilder\Orm\SessionRepository && $this->productId > 0) {
-			$price = $this->context->redaction->get($this->productId)->getEffectivePrice();
-			if($this->defaultGetter('price') != $price) $this->data->price = $price;
-			return $price;
-		}
+	public function __construct() {
+		call_user_func_array(array('parent', '__construct'), func_get_args()); 
 		
-		return $this->defaultGetter('price');
-	}
-	
+		$this->name = 'Dobírečné';
+		$this->productId = Order::PAYMENT_ITEM_ID;
+		$this->amount = 1;
+	}	
 
 	/**
 	 * Returns true if item should be displayed in order item tables
@@ -82,7 +51,7 @@ class OrderItem extends vBuilder\Orm\ActiveEntity {
 	 * @return bool 
 	 */
 	public function isVisible($cartMode = false) {
-		return true;
+		return !$cartMode;
 	}
 		
 }

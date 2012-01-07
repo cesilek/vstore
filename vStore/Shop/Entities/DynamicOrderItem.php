@@ -124,5 +124,16 @@ abstract class DynamicOrderItem extends OrderItem {
 	public function getAmount() {
 		return 1;
 	}
+	
+	/**
+	 * Generaly we don't want dynamic items to show up in cart table
+	 * 
+	 * @param bool true, if we are quering for cart table, false for general order table
+	 *
+	 * @return bool 
+	 */
+	public function isVisible($cartMode = false) {
+		return !$cartMode;
+	}
 		
 }

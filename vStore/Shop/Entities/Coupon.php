@@ -45,6 +45,55 @@ use vStore,
 class Coupon extends vBuilder\Orm\ActiveEntity {
 	
 	const TYPE_PERCENTAGE = 'percentage';
-	const TYPE_RABATE = 'rabate';
+	const TYPE_REBATE = 'rebate';
+	
+	private $_boundOrderId = null;
+	
+	/**
+	 * Returns true if coupon has been used already
+	 *
+	 * @return bool
+	 */
+	function isUsed() {
+		return $this->boundOrderId !== null;
+	}
+	
+	/**
+	 * Return ID of order in which has been this coupon used or NULL if it 
+	 * has not been used yet.
+	 *
+	 * @return null|int order id or null
+	 */
+	function getBoundOrderId() {
+		if($this->_boundOrderId === null) {
+			$item = $this->context->repository->findAll('vStore\\Shop\\CouponDiscountOrderItem')
+			->where('[params] = %s', json_encode(array(
+				'discountCode' => $this->id
+			)))->fetch();
+			
+			if($item === false) $this->_boundOrderId = false;
+			else $this->_boundOrderId = $item->orderId;
+		}
+		
+		return ($this->_boundOrderId !== false) ? $this->_boundOrderId : null;
+	}
+	
+	/**
+	 * Returns true if coupon is active (has been activated and is not expired)
+	 *
+	 * @return bool
+	 */
+	function isActive() {
+		return ($this->validSince->getTimestamp() <= time()) && !$this->isExpired();
+	}
+	
+	/**
+	 * Returns true if coupon has expired
+	 *
+	 * @return bool
+	 */
+	function isExpired() {
+		return $this->validUntil->getTimestamp() < time();
+	}
 	
 }

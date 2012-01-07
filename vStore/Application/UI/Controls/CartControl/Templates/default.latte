@@ -7,12 +7,28 @@
 			<div class="cmsContent perex">{msg perex-shoppingCart, parse => true}</div>
 		{/block}
 
+		{if $control->context->config->get('shop.coupons.enabled', false)}
+		{block discountCouponForm}
+			{form cartDiscountCouponForm}
+				<ul class="error" n:if="$form->hasErrors()">
+					<li n:foreach="$form->errors as $error">{$error}</li>
+				</ul>
+			
+				<div class="shoppingCartDiscountCoupon" n:if="!$order->hasDiscountCode()">			
+					{label discountCode /}
+					{input discountCode}
+					{input s}
+				</div>				
+			{/form}
+		{/block}
+		{/if}
+
 		{form cartForm}
 			<ul class="error" n:if="$form->hasErrors()">
 				<li n:foreach="$form->errors as $error">{$error}</li>
 			</ul>
 
-			{include 'cartTable.inc.latte', form => $form, onlyProducts => true}
+			{include 'cartTable.inc.latte', form => $form, cartMode => true}
 
 			<div class="buttonBlock">
 			{input delete value=>'Smazat vybrané'}
