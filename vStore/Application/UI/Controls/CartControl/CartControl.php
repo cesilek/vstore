@@ -126,7 +126,7 @@ class CartControl extends vStore\Application\UI\Control {
 		$form->onSuccess[] = callback($this, 'cartDiscountCouponFormSubmitted');
 		
 		$form->addText('discountCode', 'Máte slevový kupón? Vložte svůj kód:')
-			->setRequired(true)
+			->setRequired('Zadaný kód není platný')
 			->addRule(Form::PATTERN, 'Zadaný kód není platný', '[A-Z0-9]{8}')
 			->addFilter(function ($input) {
 				return mb_strtoupper(trim($input));
