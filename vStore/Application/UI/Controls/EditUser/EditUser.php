@@ -85,6 +85,13 @@ class EditUser extends vStore\Application\UI\Control {
 			->setRequired('Zadejte prosím své jméno.');
 		$form->addText('surname', 'Přijímení:')
 			->setRequired('Zadejte prosím své přijímení.');
+		
+		// Přezdívky (Optional)
+		if($this->getContext()->user->identity->getMetadata()->hasField('nickname')) {
+			$form->addText('nickname', 'Přezdívka do diskuze:')
+				->setRequired('Vaše přezdívka nemůže být prázdná.');
+		}
+			
 		$form->addText('email', 'E-mail:')
 			->setRequired('Vyplňte prosím svůj e-mail.')
 			->addRule(Form::EMAIL, 'Vyplňte prosím validní e-mailovou adresu.');
