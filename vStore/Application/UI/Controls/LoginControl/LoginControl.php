@@ -241,7 +241,11 @@ class LoginControl extends BaseForm {
 	
 	public function handleLogout() {
 		$this->context->user->logOut();
-		$this->presenter->redirect('this');
+
+		// Soucasna stranka / akce muze byt zabezpecena -> 403
+		// Bacha, pokud se to bude resit AJAXove!
+		//$this->presenter->redirect('this');
+		$this->presenter->redirectUrl($this->context->redaction->link('//'));
 	}
 	
 	
