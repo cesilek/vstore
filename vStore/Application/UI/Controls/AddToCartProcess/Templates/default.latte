@@ -17,8 +17,8 @@
 					{input $tmp}
 				</td>
 				
-				<td class="price" id="productPrice{$product->pageId}">{$product->price|currency}</td>
-				{var $addToTotal += $product->price}
+				<td class="price" id="productPrice{$product->pageId}">{$product->effectivePrice|currency}</td>
+				{var $addToTotal += $product->effectivePrice}
 			</tr>
 		</tbody>
 		<thead>
@@ -60,7 +60,7 @@
 	$(function () {
 		var productPrices = {
 		{foreach $products as $product}
-			{$product->pageId}: {$product->price},
+			{$product->pageId}: {$product->effectivePrice},
 		{/foreach}
 			total: {$totalPrice+$addToTotal},
 			tempTotal: {$totalPrice+$addToTotal},
