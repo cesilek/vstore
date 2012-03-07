@@ -17,4 +17,44 @@
 		<a href="{$control['payment']->payLink()}" class="paymentLink">Zaplatit</a>
 	{/if}
 	
+	{* Kvuli tomu, ze se sem vracime pri platbe apod. *}
+	{if $justSent}
+		<!-- Google Analytics E-commerce -->
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			
+			// Objednavka
+			_gaq.push(['_addTrans',
+				{$order->id},           							// order ID - required
+				'',					  								// affiliation or store name
+				{$order->total + $order->ceiling},          		// total - required
+				'0',           										// tax
+				'0',              									// shipping
+				{$order->address ? $order->address->city : ''}, 	// city
+				'',     											// state or province
+				{$order->address ? $order->address->country : ''}  	// country
+			]);
+			
+			// Produkty
+			{foreach $order->items as $item}
+				{if $item->productId > 0}
+					_gaq.push(['_addItem',
+						{$order->id},          					// order ID - required
+						{$item->productId}, 			        // SKU/code - required
+						{$item->name},							// product name
+						'',										// category or variation
+						{$item->price},							// unit price - required
+						{$item->amount}							// quantity - required
+					]);
+				{/if}
+			{/foreach}
+			
+			// Odeslani transakci / produktu
+			_gaq.push(['_trackTrans']);
+			
+		</script>
+		
+		{block justSent}{/block}
+	{/if}
+	
 </div>

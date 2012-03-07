@@ -55,6 +55,15 @@ class CartControl extends vStore\Application\UI\Control {
 		return new CartRenderer($this);
 	}
 	
+	/**
+	 * Returns session namespace provided to pass temporary data between control actions
+	 *
+	 * @return Nette\Http\SessionSection
+	 */
+	protected function getControlSession() {
+		return $this->context->session->getSection('vStore.Application.UI.Controls.CartControl');
+	}
+	
 	// </editor-fold>	
 	
 	// <editor-fold defaultstate="collapsed" desc="Shopping cart (default)">
@@ -414,6 +423,7 @@ class CartControl extends vStore\Application\UI\Control {
 			
 		} elseif($form['next']->isSubmittedBy()) {
 			$this->order->send();
+			$this->getControlSession()->justSent = true;
 			
 			$this->presenter->flashMessage('Vaše objednávka byla úspěšně odeslána.');
 			$this->redirect('lastPage', array('orderId' => $this->order->id));
@@ -423,6 +433,14 @@ class CartControl extends vStore\Application\UI\Control {
 	// </editor-fold>
 	
 	// <editor-fold defaultstate="collapsed" desc="Order confirmation (lastPage)">
+
+	public function actionLastPage() {
+		if(isset($this->getControlSession()->justSent)) {
+			$this->template->justSent = true;
+			unset($this->getControlSession()->justSent);
+		} else
+			$this->template->justSent = false;
+	}
 
 	public function createComponentPayment() {
 		$order = $this->shop->getOrder($this->getParam('orderId'));
