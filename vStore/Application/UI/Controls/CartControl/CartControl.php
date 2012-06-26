@@ -274,6 +274,8 @@ class CartControl extends vStore\Application\UI\Control {
 	}
 	
 	public function createComponentCustomerForm() {
+		$allowCompanyOrders = false; // TODO: config
+	
 		$form = new Form;
 		$form->onSuccess[] = callback($this, 'customerFormSubmitted');
 		$control = $this;
@@ -293,6 +295,25 @@ class CartControl extends vStore\Application\UI\Control {
 					->addRule(Form::FILLED, 'Je nutné vyplnit e-mailovou adresu')
 					->addRule(Form::EMAIL, 'Prosím vyplňte platnou e-mailovou adresu');
 		
+		// Firemní objednávky -----------------------------------------------------
+		if($allowCompanyOrders) {
+			$form->addCheckbox('businessCustomer', 'Přeji si nakoupit jako firemní zákazník');
+				
+			$form->addText('companyIn', 'IČ')
+				->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
+					->addRule(Form::FILLED, 'Pokud is přejete objednat zboží jako firemní zákazník, je třeba vyplnit IČ společnosti')
+					->addRule(function ($formControl) {
+						return vBuilder\Utils\Validators::isCzechSubjectIn($formControl->getValue());
+					}, 'Zadané IČ společnosti není platné');
+					
+			$form->addText('companyTin', 'DIČ');
+			
+			$form->addText('companyName', 'Název společnosti')
+				->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
+					->addRule(Form::FILLED, 'Pokud is přejete objednat zboží jako firemní zákazník, je třeba vyplnit název Vaší společnosti');	
+		}
+					
+		// Adresa dodání -----------------------------------------------------------
 		if($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
 			$form->addText('street', 'Ulice')
 						->addRule(Form::FILLED, 'Je nutné vyplnit adresu (Ulice).');
@@ -325,9 +346,44 @@ class CartControl extends vStore\Application\UI\Control {
 				$form['country']->setDefaultValue($address->country);
 			}
 			
+			// Fakturační adresa?
+			if($allowCompanyOrders) {
+				$form->addCheckbox('differentInvoiceAddress', 'Má fakturační adresa je odlišná od adresy dodání');
+			}
+
 		}
 		
+		// Fakturační adresa ---------------------------------------------------------
+		if($allowCompanyOrders) {				
+			$form->addText('invoiceStreet', 'Ulice')
+					->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
+					->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE)
+						->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Ulice).');
+		
+			$form->addText('invoiceHouseNumber', 'Číslo popisné')
+					->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
+					->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE)
+						->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Č.P.).');
+
+			$form->addText('invoiceCity', 'Město')
+					->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
+					->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE)
+						->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Město).');
+
+			$form->addText('invoiceZip', 'PSČ')
+					->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
+					->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE)
+						->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (PSČ).');
+
+			$form->addSelect('invoiceCountry', 'Země', $this->order->delivery->availableCountries);
+		}
+		
+		
 		$form->addTextArea('note', 'Poznámka');		
+		$form->addSubmit('back', 'Zpět k výběru dopravy')->setValidationScope(false);
+		$form->addSubmit('next', 'Pokračovat v objednávce');
+		
+		// Načtení dat z poslední objednávky ---------------------------------------------
 		
 		$customer = null;
 		if($this->order->customer) {
@@ -349,8 +405,7 @@ class CartControl extends vStore\Application\UI\Control {
 		
 		$form['note']->setDefaultValue($this->order->note);
 		
-		$form->addSubmit('back', 'Zpět k výběru dopravy')->setValidationScope(false);
-		$form->addSubmit('next', 'Pokračovat v objednávce');
+		
 		
 		return $form;
 	}
@@ -372,6 +427,45 @@ class CartControl extends vStore\Application\UI\Control {
 			$this->order->customer->email = $values->email;
 			$this->order->customer->phone = $values->phone;
 			
+			$invoiceAddress = null;
+			
+			// Firemni zakaznici
+			if($values->businessCustomer) {
+				if($this->order->company == null)
+					$this->order->company = $this->order->repository->create('vStore\\Shop\\Company');
+				
+				$this->order->company->in = $values->companyIn;	
+				$this->order->company->tin = $values->companyTin;
+				$this->order->company->name = $values->companyName;
+								
+				if($values->differentInvoiceAddress) {
+					if($this->order->company->address == null)
+						$this->order->company->address = $this->order->repository->create('vStore\\Shop\\ShippingAddress');
+				
+					$this->order->company->address->street = $values->invoiceStreet;
+					$this->order->company->address->houseNumber = $values->invoiceHouseNumber;
+					$this->order->company->address->city = $values->invoiceCity;
+					$this->order->company->address->zip = $values->invoiceZip;
+					$this->order->company->address->country = $values->invoiceCountry;
+				} else {
+					if($this->order->address == null)
+						$this->order->address = $this->order->repository->create('vStore\\Shop\\ShippingAddress');
+						
+					$this->order->company->address = $this->order->address;
+				
+					// Pokud nejde o doruceni, tak si musim adresu nastavit sam, jinak se to nastavi
+					// o par radku nize
+					if(!($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod)) {
+						$this->order->address->street = $values->street;
+						$this->order->address->houseNumber = $values->houseNumber;
+						$this->order->address->city = $values->city;
+						$this->order->address->zip = $values->zip;
+						$this->order->address->country = $values->country;
+					}					
+				}
+			} else
+				$this->order->company = null;
+			
 			$this->order->note = $values->note;
 			
 			if($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
@@ -385,6 +479,8 @@ class CartControl extends vStore\Application\UI\Control {
 				$this->order->address->city = $values->city;
 				$this->order->address->zip = $values->zip;
 				$this->order->address->country = $values->country;
+			} else {
+				$this->order->address = null;
 			}
 			
 			$this->redirect('reviewPage');

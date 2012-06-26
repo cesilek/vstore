@@ -20,19 +20,72 @@
 			<td class="label label2">{$form['surname']->label}<span class="requiredStar" n:if="$form['email']->required">*</span></td>
 			<td class="control control2">{$form['surname']->control}</td>
 		</tr>
-	</table>
-	
-	<h3>Kontaktní údaje</h3>
-	<table>
-		<tr>
-			<td class="label">{$form['email']->label}<span class="requiredStar" n:if="$form['email']->required">*</span></td>
-			<td class="control">{$form['email']->control}</td>
-			
-			<td class="label label2">{$form['phone']->label}<span class="requiredStar" n:if="$form['email']->required">*</span></td>
-			<td class="control control2">{$form['phone']->control}</td>
+		
+		<tr n:if="isset($form['businessCustomer'])">
+			<td colspan="4" class="checkbox">
+				{$form['businessCustomer']->control}
+				{$form['businessCustomer']->label}
+			</td>
 		</tr>
 	</table>
 	
+	<div class="companyInfo" n:if="isset($form['companyIn']) && isset($form['companyTin']) && $form['companyName']">
+		<h3>Údaje o společnosti</h3>
+		<table>
+			<tr>
+				<td class="label">{$form['companyIn']->label}<span class="requiredStar">*</span></td>
+				<td class="control">{$form['companyIn']->control}</td>
+				
+				<td class="label label2">{$form['companyTin']->label}</td>
+				<td class="control control2">{$form['companyTin']->control}</td>
+			</tr>
+			
+			<tr>
+				<td class="label">{$form['companyName']->label}<span class="requiredStar">*</span></td>
+				<td class="control">{$form['companyName']->control}</td>
+				
+				<!-- <td class="label label2">&nbsp;</td>
+				<td class="control control2">&nbsp;</td> -->
+			</tr>
+			
+			<tr n:if="isset($form['differentInvoiceAddress'])">
+				<td colspan="4" class="checkbox">
+					{$form['differentInvoiceAddress']->control}
+					{$form['differentInvoiceAddress']->label}
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+	<div class="invoiceAddress" n:if="isset($form['invoiceStreet']) && isset($form['differentInvoiceAddress'])">
+		<h3>Fakturační adresa</h3>
+		<table>
+			<tr>
+				<td class="label">{$form['invoiceStreet']->label}<span class="requiredStar">*</span></td>
+				<td class="control">{$form['invoiceStreet']->control}</td>
+
+				<td class="label label2">{$form['invoiceHouseNumber']->label}<span class="requiredStar">*</span></td>
+				<td class="control control2">{$form['invoiceHouseNumber']->control}</td>
+			</tr>
+			
+			<tr>
+				<td class="label">{$form['invoiceCity']->label}<span class="requiredStar">*</span></td>
+				<td class="control">{$form['invoiceCity']->control}</td>
+				
+				<td class="label label2">{$form['invoiceZip']->label}<span class="requiredStar">*</span></td>
+				<td class="control control2">{$form['invoiceZip']->control}</td>
+			</tr>
+			
+			<tr>
+				<td class="label">{$form['invoiceCountry']->label}<span class="requiredStar">*</span></td>
+				<td class="control">{$form['invoiceCountry']->control}</td>
+				
+				<!-- <td class="label label2">&nbsp;</td>
+				<td class="control control2">&nbsp;</td> -->
+			</tr>
+		</table>
+	</div>
+		
 	{if isset($form['street'])}
 		<h3>Dodací adresa</h3>
 		<table>
@@ -61,6 +114,17 @@
 			</tr>
 		</table>
 	{/if}
+	
+	<h3>Kontaktní údaje</h3>
+	<table>
+		<tr>
+			<td class="label">{$form['email']->label}<span class="requiredStar" n:if="$form['email']->required">*</span></td>
+			<td class="control">{$form['email']->control}</td>
+			
+			<td class="label label2">{$form['phone']->label}<span class="requiredStar" n:if="$form['email']->required">*</span></td>
+			<td class="control control2">{$form['phone']->control}</td>
+		</tr>
+	</table>
 		
 	<h3>{$form['note']->label}</h3>
 	<div class="noteControlBlock">
@@ -71,5 +135,36 @@
 		{input back}
 		{input next}
 	</div>
+	
+	<script type="text/javascript">
+		var container = $('#shoppingCartCustomer');
+		var form = container.parents('FORM');
+		var companyInfo = container.find('DIV.companyInfo');
+		var invoiceAddress = container.find('DIV.invoiceAddress');
+	
+		// Nakup na firmu ---------
+		if(companyInfo.size() && container.find('[name=businessCustomer]').size()) {
+			form.find('[name=businessCustomer]').change(function () {
+				if($(this).is(':checked') && companyInfo.is(':hidden')) {
+					companyInfo.slideDown();
+					form.find('[name=differentInvoiceAddress]').change();
+				} else if(companyInfo.is(':visible')) {
+					companyInfo.hide();
+					invoiceAddress.hide();
+				}
+			}).change();
+		}
+		
+		// Fakturacni adresa ------
+		if(invoiceAddress.size() && container.find('[name=differentInvoiceAddress]').size()) {
+			form.find('[name=differentInvoiceAddress]').change(function () {
+				if($(this).is(':checked') && invoiceAddress.is(':hidden')) {
+					invoiceAddress.slideDown();
+				} else if(invoiceAddress.is(':visible')) {
+					invoiceAddress.hide();
+				}
+			}).change();
+		}
+	</script>
 </div>	
 {/form}
