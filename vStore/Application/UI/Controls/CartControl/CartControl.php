@@ -430,7 +430,7 @@ class CartControl extends vStore\Application\UI\Control {
 			$invoiceAddress = null;
 			
 			// Firemni zakaznici
-			if($values->businessCustomer) {
+			if(isset($values->businessCustomer)) {
 				if($this->order->company == null)
 					$this->order->company = $this->order->repository->create('vStore\\Shop\\Company');
 				
