@@ -40,6 +40,7 @@ use vStore,
  * @Column(items, type="OneToMany", entity="vStore\Shop\OrderItem", joinOn="id=orderId", processSubclasses="true")
  * @Column(user, type="OneToOne", entity="vBuilder\Security\User", joinOn="user=id")
  * @Column(customer, type="OneToOne", entity="vStore\Shop\CustomerInfo", joinOn="customer=id")
+ * @Column(company, type="OneToOne", entity="vStore\Shop\Company", joinOn="company=id")
  * @Column(address, type="OneToOne", entity="vStore\Shop\ShippingAddress", joinOn="address=id")
  * @Column(note)
  * @Column(timestamp, type="CreatedDateTime")
