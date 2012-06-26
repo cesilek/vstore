@@ -102,7 +102,8 @@ class QuickPick extends BaseForm {
 				//->orderByStructure();
 				
 			foreach($docs as $doc) {
-				$result[] = $doc->pageId;
+				if($doc->isAvailable())
+					$result[] = $doc->pageId;
 			}
 		
 			/*
