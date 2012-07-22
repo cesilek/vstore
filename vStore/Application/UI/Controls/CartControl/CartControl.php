@@ -333,7 +333,7 @@ class CartControl extends vStore\Application\UI\Control {
 			if($this->order->address) {
 				$address = $this->order->address;
 			} elseif($this->context->user->isLoggedIn()) {
-				$lastUserOrder = $this->shop->getUserOrders()->where('[address] IS NOT NULL')->orderBy('[timestamp]')->fetch();
+				$lastUserOrder = $this->shop->getUserOrders()->where('[address] IS NOT NULL')->orderBy('[timestamp] DESC')->fetch();
 				if($lastUserOrder && $lastUserOrder->address)
 					$address = $lastUserOrder->address;
 			}
@@ -389,12 +389,15 @@ class CartControl extends vStore\Application\UI\Control {
 		if($this->order->customer) {
 			$customer = $this->order->customer;
 		} elseif($this->context->user->isLoggedIn()) {
-			if(!isset($lastUserOrder))
-				$lastUserOrder = $this->shop->getUserOrders()->orderBy('[timestamp]')->fetch();
+			// Predtim hledame jen s adresou, je mozne, ze dosud zadna objednavka nebyla poslana postou
+			if(!isset($lastUserOrder) || $lastUserOrder == FALSE)
+				$lastUserOrder = $this->shop->getUserOrders()->orderBy('[timestamp] DESC')->fetch();
 			
 			if($lastUserOrder && $lastUserOrder->customer)
 				$customer = $lastUserOrder->customer;
 		}
+		
+		
 		
 		if($customer) {
 			$form['name']->setDefaultValue($customer->name);
