@@ -29,7 +29,7 @@ use vStore,
 	Nette;
 
 /**
- * Basic implementation of order delivery method
+ * Magic proxy for delivery method with bound parameters
  *
  * @author Adam Staněk (velbloud)
  * @since Oct 7, 2011
