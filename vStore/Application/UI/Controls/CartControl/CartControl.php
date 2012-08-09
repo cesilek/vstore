@@ -354,7 +354,14 @@ class CartControl extends vStore\Application\UI\Control {
 		}
 					
 		// Adresa dodání -----------------------------------------------------------
-		if($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
+		$needAddress =
+				$this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod
+					|| (
+						$this->order->delivery instanceof vStore\Shop\ParametrizedDeliveryMethod
+						&& $this->order->delivery->getMethod() instanceof vStore\Shop\ParcelDeliveryMethod
+					);
+					
+		if($needAddress) {
 			$form->addText('street', 'Ulice')
 						->addRule(Form::FILLED, 'Je nutné vyplnit adresu (Ulice).');
 			

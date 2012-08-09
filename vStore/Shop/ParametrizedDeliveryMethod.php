@@ -68,6 +68,15 @@ class ParametrizedDeliveryMethod extends vBuilder\Object implements IDeliveryMet
 		return $this->_params;
 	}
 	
+	/**
+	 * Returns actual method
+	 *
+	 * @return IDeliveryMethod
+	 */
+	function getMethod() {
+		return $this->_refInstance;
+	}
+	
 	// --------------------------------------------------------------------------------------------------
 	// Proxy methods ------------------------------------------------------------------------------------
 	// --------------------------------------------------------------------------------------------------
