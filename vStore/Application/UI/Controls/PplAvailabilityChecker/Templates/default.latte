@@ -1,0 +1,136 @@
+{block pplAvailabilityCheckerDefault}
+	{var $elementId = $method->id . '-pplCheckerBlock'}
+	<div id="{$elementId}" style="display: none;">
+		<input type="checkbox" name="{$method->id}-eveningDelivery" id="{$method->id}-eveningDelivery" />
+		<label for="{$method->id}-eveningDelivery">
+			Večerní doručení
+			- <a href="#" class="checkPplAvailabilityLink">Ověřit dostupnost</a>
+		</label>
+	</div>
+	
+	
+	{var $inlineElId = $method->id . '-inlineModalBlock'}
+	<div style="display: none;">
+		<form>
+			<div id="{$inlineElId}">
+				
+				<div class="formBlock">
+					<label for="{$inlineElId}-spc">Vaše směrovací číslo (PSČ):</label>
+					<input type="text" name="searchPostalCode" id="{$inlineElId}-spc" maxlength="6" />
+					<div class="cleaner"></div>
+				</div>
+			
+				<div class="searchPostalResultsBlock">
+					<div class="help">Prosím zadejte Vaše PSČ</div>
+					<div class="searching" style="display: none;">Zjišťuji dostupnost...</div>
+					<div class="available" style="display: none;">Služba je dostupná.</div>
+					<div class="na" style="display: none;">Litujeme, ale služba večerní doručení není v této destinaci dostupná.</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	
+	<script type="text/javascript">
+		$(function () {
+			var controlEl = $("#" + {$elementId});
+			var inlineEl = $("#" + {$inlineElId});
+			var thisInput = controlEl.parents('TR').find('INPUT[type=radio]');
+			var eveningDeliveryCheck = controlEl.find('INPUT[type=checkbox]');
+			var allDeliveryRadios = thisInput.parents('FORM').find('INPUT[name=' + thisInput.attr('name') + ']');
+			var deliveryAttrInput = thisInput.parents('FORM').find('INPUT[name=deliveryAttr]');
+			var searchPostalInput = inlineEl.find('INPUT[name=searchPostalCode]');
+			var searchResultsBlock = inlineEl.find('.searchPostalResultsBlock');
+
+		
+			// Update pri nacteni
+			if(deliveryAttrInput.val() == 'eveningDelivery') {
+				eveningDeliveryCheck.attr('checked', 'checked');
+			}		
+			
+			// Update vysledku vyhledavani podle PSC (vcasna vazba)		
+			searchPostalInput.keyup(function () {
+				var str = $(this).val().replace(/\s/g, '');
+				if(str.length == 5) {
+					searchResultsBlock.find('.na, .available, .help').hide();
+					searchResultsBlock.find('.searching').show();
+									
+				} else {
+					searchResultsBlock.find('.na, .available, .searching').hide();
+					searchResultsBlock.find('.help').show();
+				}
+			});
+			
+			// Update vysledku vyhledavani (zpozdena vazba)
+			searchPostalInput.onDelayedKeyup({
+				handler: function () {
+					var str = $(this).val().replace(/\s/g, '');
+					if(str.length == 5) {
+						var url = {link //checkAvailabilityByCode} + '&' + {$control->uniqueId} + '-code=' + str;
+						$.getJSON(url, function (data) {
+							searchResultsBlock.find('.searching, .help').hide();
+						
+							if(data.result) {
+								searchResultsBlock.find('.available').show();
+								inlineEl.data('available', true);
+							} else {
+								searchResultsBlock.find('.na').show();
+								inlineEl.data('available', false);
+							}
+						});
+					}
+				},
+				delay: 230
+			});
+			
+			// Dialog pro overeni dostupnosti sluzby
+			var checkPplAvailabilityHandler = function () {
+				$.colorbox({
+					inline:true,
+					href:'#' + {$inlineElId},
+					innerWidth: '550px',
+					onComplete: function () {
+						searchPostalInput.focus();
+					},
+					
+					onClosed: function () {
+						if(inlineEl.data('available')) {
+							deliveryAttrInput.val('eveningDelivery');
+							
+							// Protoze se mohlo kliknout jen na odkaz
+							eveningDeliveryCheck.attr('checked', 'checked');
+						} else {
+							eveningDeliveryCheck.removeAttr("checked");
+							deliveryAttrInput.val('');
+						}
+					}
+				});
+			};			
+			
+			// Poveseni kontroly na eventy
+			eveningDeliveryCheck.change(checkPplAvailabilityHandler);
+			controlEl.find('.checkPplAvailabilityLink').click(function () {
+				checkPplAvailabilityHandler();
+			
+				return false;
+			});
+			
+			// Poslouchame na vsech RADIO inputech (pro kazdy druh dopravy)			
+			// A hlidame zmeny. Pokud se jedna o nasi metodu, zobrazime blok s control
+			allDeliveryRadios.change(function () {
+				var currInput = thisInput.parents('FORM').find('INPUT[name=' + thisInput.attr('name') + ']:checked');
+				
+				// Pokud vybirame nasi metodu
+				if(currInput.val() == {$method->id}) {
+					controlEl.slideDown();
+					deliveryAttrInput.val(eveningDeliveryCheck.is(':checked') ? 'eveningDelivery' : '');
+
+				} else {
+					controlEl.hide();
+					deliveryAttrInput.val('');
+				}
+			});
+
+		});
+	</script>
+{/block}
