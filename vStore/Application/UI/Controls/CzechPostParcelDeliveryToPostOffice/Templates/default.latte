@@ -1,0 +1,202 @@
+{addJs LIBS_DIR . '/vBuilderFw/client-side/js/jquery.ui.onDelayedKeyup.js'}
+
+{block czechPostParcelDeliveryToPostOfficeDefault}
+	{var $elementId = $method->id . '-postOfficeSelectBlock'}
+	<div id="{$elementId}" style="display: none;">
+		Vybraná pošta:
+		<em style="color: #008C00" class="postOfficeName">
+			{if $form['deliveryAttr']->getValue()}
+				{var $po = $control->context->postOfficeProvider->getByPostalCode($form['deliveryAttr']->getValue())}
+				{if $po}
+					{$po->formatedAddress}
+				{else}
+					nevybráno
+				{/if}
+			{else}
+				nevybráno
+			{/if}		
+		</em> - <a href="#" class="postOfficeChangeLink">Zvolit jinou poštu</a>
+	</div>
+	
+	{var $inlineElId = $method->id . '-inlineModalBlock'}
+	<div style="display: none;">
+		<form>
+			<div id="{$inlineElId}">
+				
+				<div class="formBlock">
+					<label for="{$inlineElId}-spc">Vaše směrovací číslo (PSČ):</label>
+					<input type="text" name="searchPostalCode" id="{$inlineElId}-spc" />
+					<div class="cleaner"></div>
+				</div>
+			
+				<div class="searchPostalResultsBlock">
+					<div class="help">Prosím zadejte Vaše PSČ</div>
+					<div class="searching" style="display: none;">Vyhledávám...</div>
+					<div class="noResults" style="display: none;">Pro zadané PSČ nebyla nalezena žádná pošta</div>
+					<div class="results" style="display: none;">R</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<script type="text/javascript">
+		$(function () {
+			var controlEl = $("#" + {$elementId});
+			var inlineEl = $("#" + {$inlineElId});
+			var thisInput = controlEl.parents('TR').find('INPUT[type=radio]');
+			var allDeliveryRadios = thisInput.parents('FORM').find('INPUT[name=' + thisInput.attr('name') + ']');
+			var deliveryAttrInput = thisInput.parents('FORM').find('INPUT[name=deliveryAttr]');
+			var searchPostalInput = inlineEl.find('INPUT[name=searchPostalCode]');
+			var searchResultsBlock = inlineEl.find('.searchPostalResultsBlock');
+
+
+			// Synchdonizace PSC pri nacteni
+			if(deliveryAttrInput.val()) {
+				inlineEl.data('postalCode', deliveryAttrInput.val());
+				// searchPostalInput.val(deliveryAttrInput.val());
+			}
+
+			// Update vysledku vyhledavani podle PSC (vcasna reakce)			
+			searchPostalInput.keyup(function () {
+				var str = $.trim($(this).val());
+				if(str.length > 0) {
+					searchResultsBlock.find('.noResults, .help').hide();
+					
+					if(!searchResultsBlock.find('.results').is(':visible'))
+						searchResultsBlock.find('.searching').show();
+				} else {
+					searchResultsBlock.find('.noResults, .results, .searching').hide();
+					searchResultsBlock.find('.help').show();
+				}
+				
+			});
+			
+			// Update vysledku vyhledavani podle PSC
+			searchPostalInput.onDelayedKeyup({
+				handler: function () {
+					var str = $.trim($(this).val());
+					if(str.length > 0) {
+						var url = {link //findPostOfficesByCode} + '&' + {$control->uniqueId} + '-codePrefix=' + str;
+						$.getJSON(url, function (data) {
+							var items = [];
+							
+							var results = searchResultsBlock.find('.results');
+							results.empty().hide();
+							
+							$.each(data, function (key, val) {
+								var el = $('<a href="#" />').addClass('postOffice');
+																
+								el.append('<span class="code">' + val.code + '</span>');
+								el.append('<span class="name">' + val.name + '</span>');
+								el.append('<span class="hint" style="display: none;"> - vybrat</span>');
+								el.append('<br />');
+								el.append('<span class="address">' + val.address + '</span>');
+								
+								if(val.isAvailable) {
+									el.addClass('availablePostOffice');
+									
+									el.click(function () {
+										inlineEl.data('postalCode', $(this).find('.code').html().replace(/\s/g, ''));
+										inlineEl.data('postName', $(this).find('.address').html());
+										$.colorbox.close();
+									
+										return false;
+									});
+								} else {
+									el.click(function () {
+										alert("Vybraná pošta není v současné chvíli schopna přijmout Váš balík.Vyberte prosím jinou.");
+									
+										return false;
+									});
+								}
+								
+								el.appendTo(results);	
+							});
+							
+							results.find('A:first').addClass('first');
+							
+							searchResultsBlock.find('.searching').hide();
+							if(data.length > 0) {
+								results.show();
+					
+							} else {
+								searchResultsBlock.find('.noResults').show();
+							}
+							
+							$.colorbox.resize();
+							searchPostalInput.focus();
+						});
+					}
+				},
+				delay: 230
+			});
+			
+			
+			// Dialog pro zmenu posty
+			var changePOHandler = function () {
+				$.colorbox({
+					inline:true,
+					href:'#' + {$inlineElId},
+					innerWidth: '550px',
+					onComplete: function () {
+						searchPostalInput.focus();
+					},
+					
+					onClosed: function () {
+						if(inlineEl.data('postName') && inlineEl.data('postalCode')) {
+							deliveryAttrInput.val(inlineEl.data('postalCode'));
+							controlEl.find('.postOfficeName').html(inlineEl.data('postName'));
+							controlEl.slideDown();
+						} else {
+							var prevInput = thisInput.data('prevDeliveryInput');
+
+							if(prevInput != undefined) {
+								prevInput.attr("checked", "checked");
+								
+							} else  {
+								var currInput = thisInput.parents('FORM').find('INPUT[name=' + thisInput.attr('name') + ']:checked');
+								currInput.removeAttr("checked");
+							}
+						}
+					}
+				});
+			};
+			
+			// Tlacitko pro zmenu posty
+			controlEl.find('.postOfficeChangeLink').click(function () {
+				changePOHandler();
+			
+				return false;
+			});
+			
+			// Poslouchame na vsech RADIO inputech (pro kazdy druh dopravy)			
+			// A hlidame zmeny. Pokud se jedna o nasi metodu, overime, zda-li je vybrany atribut.
+			// Pokud ne, zavolame changePOHandler
+			allDeliveryRadios.change(function () {
+				var currInput = thisInput.parents('FORM').find('INPUT[name=' + thisInput.attr('name') + ']:checked');
+				
+				// Pokud vybirame nasi metodu
+				if(currInput.val() == {$method->id}) {
+					
+					if(!inlineEl.data('postalCode')) {
+						changePOHandler();
+					}
+					
+					else {
+						deliveryAttrInput.val(inlineEl.data('postalCode'));
+						controlEl.slideDown();
+					}
+
+				} else {
+					controlEl.hide();
+					deliveryAttrInput.val('');
+					
+					// Musi byt jen v teto vetvi, protoze jinak je to poveseny na colorbox eventu
+					// a hazelo by to vzdy aktualni input
+					thisInput.data("prevDeliveryInput", currInput);
+				}
+			});
+
+		});
+	</script>
+{/block}
