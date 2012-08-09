@@ -152,6 +152,7 @@
 
 							if(prevInput != undefined) {
 								prevInput.attr("checked", "checked");
+								prevInput.change(); // Je treba vyvolat event (napr. kvuli PPL)
 								
 							} else  {
 								var currInput = thisInput.parents('FORM').find('INPUT[name=' + thisInput.attr('name') + ']:checked');
