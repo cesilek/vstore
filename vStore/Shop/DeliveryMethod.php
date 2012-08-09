@@ -39,6 +39,7 @@ class DeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 	protected $_name;
 	protected $_description;
 	protected $_suitablePayments;
+	protected $_controlClass;
 	
 	/**
 	 * Protected constructor
@@ -61,6 +62,7 @@ class DeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 		$method->_name = $config->get('name', $id);
 		$method->_description = $config->get('description');
 		$method->_suitablePayments = $config->get('suitablePayments') ? $config->get('suitablePayments')->toArray() : null;
+		$method->_controlClass = $config->get('control');
 		
 		return $method;
 	}
@@ -120,6 +122,24 @@ class DeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 	 */
 	function createOrderItem(Order $order) {
 		return null;
+	}
+	
+	/**
+	 * Creates parametrized instance of this delivery method
+	 *
+	 * @return ParametrizedDeliveryMethod
+	 */
+	function createParametrizedMethod(array $parameters) {
+		return new ParametrizedDeliveryMethod($this, $parameters);
+	}
+	
+	/**
+ 	 * Returns class name of control for advanced rendering or null
+ 	 *
+	 * @return string|null
+	 */
+	function getControlClass() {
+		return $this->_controlClass;
 	}
 	
 }

@@ -24,7 +24,8 @@
 namespace vStore;
 
 use vBuilder,
-	 Nette;
+	vBuilder\Utils\Strings,
+	Nette;
 
 /**
  * Shop super-class
@@ -126,10 +127,14 @@ class Shop extends vBuilder\Object {
 	public function getDeliveryMethod($id) {
 		if($id === null) return null;
 		
-		if(!isset($this->availableDeliveryMethods[$id]))
-			throw new Nette\InvalidArgumentException("Delivery method '$id' not defined");
+		list($methodId, $parameters) = Strings::parseParametrizedString($id);
 		
-		return $this->availableDeliveryMethods[$id];
+		if(!isset($this->availableDeliveryMethods[$methodId]))
+			throw new Nette\InvalidArgumentException("Delivery method '$methodId' not defined");
+				
+		return count($parameters) > 0
+					? $this->availableDeliveryMethods[$methodId]->createParametrizedMethod($parameters)
+					: $this->availableDeliveryMethods[$methodId];
 	}
 	
 	/**

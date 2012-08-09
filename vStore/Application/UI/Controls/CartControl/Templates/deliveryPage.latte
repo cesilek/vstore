@@ -8,6 +8,8 @@
 		<div class="cmsContent perex">{msg perex-deliveryAndPayment, parse => true}</div>
 	{/block}
 	
+	{input 'deliveryAttr'}
+		
 	<h3 class="first">Způsob dopravy</h3>
 	<table id="shoppingCartDelivery">
 
@@ -24,6 +26,11 @@
 						</span>
 					</div>
 					<div class="description" n:if="!empty($method->description)">{$method->description}</div>
+					
+					<div class="control" n:if="!empty($method->controlClass)">
+						{var $controlName = 'deliveryControl' . $method->id}
+						{control $controlName, 'method' => $method, 'form' => $form}
+					</div>
 				{/label}
 			</td>
 		</tr>

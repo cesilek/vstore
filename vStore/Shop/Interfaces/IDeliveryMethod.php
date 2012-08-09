@@ -61,4 +61,14 @@ interface IDeliveryMethod {
 	 */
 	function createOrderItem(Order $order);
 	
+	/**
+	 * @return IDeliveryMethod
+	 */
+	function createParametrizedMethod(array $parameters);
+	
+	/**
+	 * @return string|null
+	 */
+	function getControlClass();
+	
 }

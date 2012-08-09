@@ -27,7 +27,9 @@ use vStore, Nette,
 	vBuilder,
 	vBuilder\Application\UI\Form\IntegerPicker,
 	Nette\Application\UI\Form,
-	vStore\Shop\CouponException;
+	vBuilder\Utils\Strings,
+	vStore\Shop\CouponException,
+	vStore\Shop\ParametrizedDeliveryMethod;
 
 /**
  * Cart control
@@ -210,6 +212,12 @@ class CartControl extends vStore\Application\UI\Control {
 		$form->addRadioList('delivery')->setItems($delivery)
 					->addRule(Form::FILLED, 'Způsob platby musí být vybrán.');
 		
+		$form->addHidden('deliveryAttr');
+		if($this->order->delivery && $this->order->delivery instanceof ParametrizedDeliveryMethod) {
+			$params = $this->order->delivery->getParams();
+			$form['deliveryAttr']->setDefaultValue($params[0]);
+		}
+		
 		$defaultDelivery = $this->order->delivery ? $this->order->delivery->id : $defaultDelivery;
 		$form['delivery']->setDefaultValue($defaultDelivery);
 		
@@ -244,8 +252,13 @@ class CartControl extends vStore\Application\UI\Control {
 		} elseif($form['next']->isSubmittedBy()) {
 			
 			try {
+				$delivery = $this->shop->getDeliveryMethod($values->delivery);
+				if($values->deliveryAttr) {
+					$delivery = $delivery->createParametrizedMethod(array($values->deliveryAttr));
+				}
+			
 				$this->shop->order->setDeliveryAndPayment(
-								$this->shop->getDeliveryMethod($values->delivery),
+								$delivery,
 								$this->shop->getPaymentMethod($values->payment)
 				);
 				
@@ -259,6 +272,33 @@ class CartControl extends vStore\Application\UI\Control {
 		} 
 	}
 	
+	/**
+	 * Component factory. Creates delivery controls or fallback to parent handling.
+	 * @param  string      component name
+	 * @return IComponent  the created component (optionally)
+	 */
+	protected function createComponent($name) {
+		if(Strings::startsWith($name, 'deliveryControl')) {
+		
+			foreach($this->shop->availableDeliveryMethods as $m) {
+				if(mb_substr($name, 15) == $m->id) {
+				
+					if($m->getControlClass() != NULL) {
+						$class = $m->getControlClass();
+						$control = new $class($this, $name);
+						
+						return $control;
+					}
+									
+					break;
+				}
+			}
+			
+			return null;
+		}
+		
+		return parent::createComponent($name);
+	}
 	
 	// </editor-fold>	
 	
