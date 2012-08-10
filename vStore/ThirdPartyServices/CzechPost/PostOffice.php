@@ -67,6 +67,24 @@ class PostOffice extends Nette\Object {
 	}
 	
 	/**
+	 * Returns street and house number
+	 *
+	 * @return string
+	 */
+	public function getStreet() {
+		return $this->street;
+	}
+	
+	/**
+	 * Returns city
+	 *
+	 * @return string
+	 */
+	public function getCity() {
+		return $this->city;
+	}
+	
+	/**
 	 * Returns postal code
 	 *
 	 * @return int
@@ -85,6 +103,16 @@ class PostOffice extends Nette\Object {
 		$psc = (string) $this->postalCode;
 		return mb_substr($psc, 0, 3) . ' ' . mb_substr($psc, 3, 2);
 	}
+	
+	/**
+	 * Returns country name
+	 *
+	 * @return string
+	 */
+	public function getCountry() {
+		return 'Česká republika';
+	}
+	
 	
 	/**
 	 * Returns official name of this PO
