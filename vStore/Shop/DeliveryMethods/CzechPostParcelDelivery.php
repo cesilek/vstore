@@ -21,59 +21,18 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Shop;
+namespace vStore\Shop\DeliveryMethods;
 
-use vBuilder,
-		Nette;
+use vStore,
+	vBuilder,
+	Nette;
 
 /**
- * Interface of shop delivery method data class
+ * Czech Post: Parcel delivery
  *
  * @author Adam Staněk (velbloud)
- * @since Oct 7, 2011
+ * @since Aug 10, 2011
  */
-interface IDeliveryMethod {
-	
-	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context);
-	
-	/**
-	 * @return bool
-	 */
-	function isEnabled();
-	
-	/**
-	 * @return string
-	 */
-	function getId();
-		
-	/**
-	 * @return string
-	 */
-	function getName();
-	
-	/**
-	 * @return string
-	 */
-	function getDescription();
-		
-	/**
-	 * @return bool
-	 */
-	function isSuitableWith($payment);
-	
-	/**
-	 * @return OrderItem|null
-	 */
-	function createOrderItem(Order $order);
-	
-	/**
-	 * @return IDeliveryMethod
-	 */
-	function createParametrizedMethod(array $parameters);
-	
-	/**
-	 * @return string|null
-	 */
-	function getControlClass();
+class CzechPostParcelDelivery extends ParcelDeliveryMethod {
 	
 }

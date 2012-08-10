@@ -35,6 +35,7 @@ use vStore,
  */
 class PaymentMethod extends vBuilder\Object implements IPaymentMethod {
 	
+	private $_enabled = true;
 	private $_id;
 	private $_name;
 	private $_description;
@@ -61,8 +62,18 @@ class PaymentMethod extends vBuilder\Object implements IPaymentMethod {
 		$method->_name = $config->get('name', $id);
 		$method->_description = $config->get('description');
 		$method->_charge = $config->get('charge');
+		if($config->get('enabled') !== NULL) $method->_enabled = (bool) $config->get('enabled');
 		
 		return $method;
+	}
+	
+	/**
+	 * Returns true if this method is available for new orders
+	 *
+	 * @return bool
+	 */
+	function isEnabled() {
+		return $this->_enabled;
 	}
 	
 	/**

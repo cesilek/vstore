@@ -41,8 +41,12 @@ class CartRenderer extends vStore\Application\UI\ControlRenderer {
 	}
 	
 	public function renderDeliveryPage() {
-		$this->template->deliveryMethods = $this->shop->availableDeliveryMethods;
-		$this->template->paymentMethods = $this->shop->availablePaymentMethods;
+		$enabledFilterCb = function ($method) {
+			return $method->isEnabled();
+		};
+	
+		$this->template->deliveryMethods = array_filter($this->shop->availableDeliveryMethods, $enabledFilterCb);
+		$this->template->paymentMethods = array_filter($this->shop->availablePaymentMethods, $enabledFilterCb);
 		$this->template->order = $this->shop->order;
 	}
 	

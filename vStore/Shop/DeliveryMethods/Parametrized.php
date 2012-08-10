@@ -21,9 +21,12 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Shop;
+namespace vStore\Shop\DeliveryMethods;
 
 use vStore,
+	vStore\Shop\IDeliveryMethod,
+	vStore\Shop\IPaymentMethod,
+	vStore\Shop\Order,
 	vBuilder,
 	vBuilder\Utils\Strings,
 	Nette;
@@ -124,6 +127,15 @@ class ParametrizedDeliveryMethod extends vBuilder\Object implements IDeliveryMet
 	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
 		throw new \LogicException("Parametrized delivery method is not meant to be created from config");
 	}	
+	
+	/**
+	 * Returns true if this method is available for new orders
+	 *
+	 * @return bool
+	 */
+	function isEnabled() {
+		return $this->_refInstance->isEnabled();
+	}
 	
 	/**
 	 * Returns method name

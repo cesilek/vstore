@@ -205,6 +205,8 @@ class CartControl extends vStore\Application\UI\Control {
 		$delivery = array();
 		$defaultDelivery = null;
 		foreach($this->shop->availableDeliveryMethods as $m) {
+			if(!$m->isEnabled()) continue;
+		
 			$delivery[$m->id] = $m->name;
 			if(!isset($defaultDelivery))
 				$defaultDelivery = $m->id;
@@ -224,6 +226,8 @@ class CartControl extends vStore\Application\UI\Control {
 		$payments = array();
 		$defaultPayment = null;
 		foreach($this->shop->availablePaymentMethods as $m) {
+			if(!$m->isEnabled()) continue;
+			
 			$payments[$m->id] = $m->name;
 			if(!isset($defaultPayment) && $this->shop->getDeliveryMethod($defaultDelivery)->isSuitableWith($m))
 				$defaultPayment = $m->id;
@@ -616,10 +620,10 @@ class CartControl extends vStore\Application\UI\Control {
 	 * @return bool
 	 */
 	protected function isCustomerAddressNeeded() {
-		return $this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod
+		return $this->order->delivery instanceof vStore\Shop\DeliveryMethods\ParcelDeliveryMethod
 					|| (
-						$this->order->delivery instanceof vStore\Shop\ParametrizedDeliveryMethod
-						&& $this->order->delivery->getMethod() instanceof vStore\Shop\ParcelDeliveryMethod
+						$this->order->delivery instanceof vStore\Shop\DeliveryMethods\ParametrizedDeliveryMethod
+						&& $this->order->delivery->getMethod() instanceof vStore\Shop\DeliveryMethods\ParcelDeliveryMethod
 					);
 	}
 	

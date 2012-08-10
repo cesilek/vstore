@@ -37,6 +37,11 @@ interface IPaymentMethod {
 	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context);
 	
 	/**
+	 * @return bool
+	 */
+	function isEnabled();
+	
+	/**
 	 * @return string
 	 */
 	function getId();

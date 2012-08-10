@@ -21,11 +21,14 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Shop;
+namespace vStore\Shop\DeliveryMethods;
 
 use vStore,
-		vBuilder,
-		Nette;
+	vStore\Shop\IDeliveryMethod,
+	vStore\Shop\IPaymentMethod,
+	vStore\Shop\Order,
+	vBuilder,
+	Nette;
 
 /**
  * Implementation of parce delivery method
@@ -33,7 +36,7 @@ use vStore,
  * @author Adam Staněk (velbloud)
  * @since Oct 8, 2011
  */
-class ParcelDeliveryMethod extends DeliveryMethod {
+class ParcelDeliveryMethod extends GeneralDeliveryMethod {
 	
 	protected $_countries;
 	protected $_freeOfChargeLimit;

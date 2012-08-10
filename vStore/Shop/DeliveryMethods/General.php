@@ -21,20 +21,24 @@
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace vStore\Shop;
+namespace vStore\Shop\DeliveryMethods;
 
 use vStore,
-		vBuilder,
-		Nette;
+	vStore\Shop\IDeliveryMethod,
+	vStore\Shop\IPaymentMethod,
+	vStore\Shop\Order,
+	vBuilder,
+	Nette;
 
 /**
- * Basic implementation of order delivery method
+ * Generic implementation of order delivery method
  *
  * @author Adam Staněk (velbloud)
  * @since Oct 7, 2011
  */
-class DeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
+class GeneralDeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 		
+	protected $_enabled = true;
 	protected $_id;
 	protected $_name;
 	protected $_description;
@@ -59,12 +63,22 @@ class DeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 		$method = new static;
 		
 		$method->_id = $id;
-		$method->_name = $config->get('name', $id);
-		$method->_description = $config->get('description');
-		$method->_suitablePayments = $config->get('suitablePayments') ? $config->get('suitablePayments')->toArray() : null;
-		$method->_controlClass = $config->get('control');
+		$method->_name = $config->get('name', $method->_name ? $method->_name : $id);
+		if($config->get('description'))  $method->_description = $config->get('description');
+		if($config->get('suitablePayments')) $method->_suitablePayments = $config->get('suitablePayments')->toArray();
+		if($config->get('control')) $method->_controlClass = $config->get('control');		
+		if($config->get('enabled') !== NULL) $method->_enabled = (bool) $config->get('enabled');
 		
 		return $method;
+	}
+	
+	/**
+	 * Returns true if this method is available for new orders
+	 *
+	 * @return bool
+	 */
+	function isEnabled() {
+		return $this->_enabled;
 	}
 	
 	/**

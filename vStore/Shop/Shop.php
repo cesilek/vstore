@@ -150,9 +150,9 @@ class Shop extends vBuilder\Object {
 				$m = $methods->$id;
 				
 				if(($class = $m->get('type')) != null) {
-					$class = 'vStore\\Shop\\' . ucfirst($class) . 'DeliveryMethod';
+					$class = 'vStore\\Shop\\DeliveryMethods\\' . ucfirst($class);
 				} else
-					$class = 'vStore\\Shop\\DeliveryMethod';
+					$class = 'vStore\\Shop\\DeliveryMethods\\GeneralDeliveryMethod';
 				
 				$this->_availableDeliveryMethods[$id] = $class::fromConfig($id, $m, $this->context);
 			}
