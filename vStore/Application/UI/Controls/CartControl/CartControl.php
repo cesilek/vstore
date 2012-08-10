@@ -354,14 +354,8 @@ class CartControl extends vStore\Application\UI\Control {
 		}
 					
 		// Adresa dodání -----------------------------------------------------------
-		$needAddress =
-				$this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod
-					|| (
-						$this->order->delivery instanceof vStore\Shop\ParametrizedDeliveryMethod
-						&& $this->order->delivery->getMethod() instanceof vStore\Shop\ParcelDeliveryMethod
-					);
 					
-		if($needAddress) {
+		if($this->isCustomerAddressNeeded()) {
 			$form->addText('street', 'Ulice')
 						->addRule(Form::FILLED, 'Je nutné vyplnit adresu (Ulice).');
 			
@@ -505,7 +499,7 @@ class CartControl extends vStore\Application\UI\Control {
 				
 					// Pokud nejde o doruceni, tak si musim adresu nastavit sam, jinak se to nastavi
 					// o par radku nize
-					if(!($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod)) {
+					if(!$this->isCustomerAddressNeeded()) {
 						$this->order->address->street = $values->street;
 						$this->order->address->houseNumber = $values->houseNumber;
 						$this->order->address->city = $values->city;
@@ -518,7 +512,7 @@ class CartControl extends vStore\Application\UI\Control {
 			
 			$this->order->note = $values->note;
 			
-			if($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
+			if($this->isCustomerAddressNeeded()) {
 				
 				// TODO: Nemel by tvorit entitu pokazdy, mel by se podivat, pokud tam takova uz neni
 				if($this->order->address == null)
@@ -615,5 +609,18 @@ class CartControl extends vStore\Application\UI\Control {
 	}
 	
 	// </editor-fold>
+	
+	/**
+	 * Returns true if customer has to fill in his address
+	 *
+	 * @return bool
+	 */
+	protected function isCustomerAddressNeeded() {
+		return $this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod
+					|| (
+						$this->order->delivery instanceof vStore\Shop\ParametrizedDeliveryMethod
+						&& $this->order->delivery->getMethod() instanceof vStore\Shop\ParcelDeliveryMethod
+					);
+	}
 	
 }
