@@ -13,7 +13,7 @@
 	<h3 class="first">Způsob dopravy</h3>
 	<table id="shoppingCartDelivery">
 
-		<tr n:foreach="$deliveryMethods as $method">
+		<tr n:class="$method->id" n:foreach="$deliveryMethods as $method">
 			<td class="radioCol">
 				{= $form['delivery']->getControl($method->id)->offsetGet(0)}
 			</td>
