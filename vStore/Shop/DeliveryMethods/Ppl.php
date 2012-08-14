@@ -44,4 +44,20 @@ class Ppl extends ParcelDeliveryMethod {
 		$this->_controlClass = 'vStore\\Application\\UI\\Controls\\PplAvailabilityChecker';
 	}
 	
+	/**
+	 * Creates method from app configuration
+	 * 
+	 * @param string id
+	 * @param vBuilder\Config\ConfigDAO config
+	 * @param Nette\DI\IContainer DI context
+	 */
+	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
+		$method = parent::fromConfig($id, $config, $context);
+		
+		if($config->get('allowEveningDelivery') === FALSE)
+			$method->_controlClass = NULL;
+		
+		return $method;
+	}
+	
 }
