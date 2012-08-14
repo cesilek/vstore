@@ -36,6 +36,9 @@ use vStore,
  */
 class ParcelDeliveryOrderItem extends DynamicOrderItem {
 	
+	/** @var vStore\Shop\IDeliveryMethod */
+	protected $_method;
+	
 	/**
 	 * Returns product id (delivery items have fixed ID)
 	 * 
@@ -55,6 +58,28 @@ class ParcelDeliveryOrderItem extends DynamicOrderItem {
 	}
 	
 	/**
+	 * Returns bound delivery method
+	 *
+	 * @return vStore\Shop\IDeliveryMethod
+	 * @throws Nette\InvalidStateException if delivery method is not set
+	 */
+	public function getMethod() {
+		if(!isset($this->_method))
+			throw new Nette\InvalidStateException("Delivery method not set");
+			
+		return $this->_method;
+	}
+	
+	/**
+	 * Sets the delivery method
+	 *
+	 * @param vStore\Shop\IDeliveryMethod
+	 */
+	public function setMethod(IDeliveryMethod $method) {
+		$this->_method = $method;
+	}
+	
+	/**
 	 * Computes price for this item
 	 * 
 	 * @return float
@@ -66,12 +91,15 @@ class ParcelDeliveryOrderItem extends DynamicOrderItem {
 		if(!($this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod))
 			throw new Nette\InvalidStateException(get_called_class() . " can be only used with ParcelDeliveryMethod"); */
 		
-		$delivery = $this->context->shop->getDeliveryMethod('byPost');
+		
+		
+		// $delivery = $this->context->shop->getDeliveryMethod('byPost');
+		$delivery = $this->method;
 		
 		// Kvuli zobrazovani prubezneho postovneho jeste pred zadanim dorucovaci adresy
 		//if($this->order->address == null) throw new Nette\InvalidStateException("Given order does not have delivery address set");
 	
-		if($this->order->address != null) {
+		if($this->order->address != null && array_key_exists($this->order->address->country, $delivery->getAvailableCountries())) {
 			$countryCode = $this->order->address->country;
 		} else {
 			list($countryCode) = array_keys($delivery->availableCountries);

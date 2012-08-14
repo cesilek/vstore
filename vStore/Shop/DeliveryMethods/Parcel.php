@@ -82,7 +82,7 @@ class ParcelDeliveryMethod extends GeneralDeliveryMethod {
 	 */
 	function getCharge($countryCode) {
 		if(!array_key_exists($countryCode, $this->_charge))
-				throw new Nette\InvalidArgumentException("Country with code '$countryCode' is not defined");
+				throw new Nette\InvalidArgumentException("Country with code '$countryCode' is not defined for '$this->id'");
 		
 		return $this->_charge[$countryCode];
 	}
@@ -95,7 +95,7 @@ class ParcelDeliveryMethod extends GeneralDeliveryMethod {
 	 */
 	function getFreeOfChargeLimit($countryCode) {
 		if(!array_key_exists($countryCode, $this->_freeOfChargeLimit))
-				throw new Nette\InvalidArgumentException("Country with code '$countryCode' is not defined");
+				throw new Nette\InvalidArgumentException("Country with code '$countryCode' is not defined for '$this->id'");
 		
 		return $this->_freeOfChargeLimit[$countryCode];
 	}
@@ -109,6 +109,7 @@ class ParcelDeliveryMethod extends GeneralDeliveryMethod {
 	 */
 	function createOrderItem(Order $order) {
 		$item = $order->repository->create('vStore\\Shop\\ParcelDeliveryOrderItem');
+		$item->setMethod($this);
 		
 		return $item;
 	}

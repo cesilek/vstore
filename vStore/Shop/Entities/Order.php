@@ -42,6 +42,7 @@ use vStore,
  * @Column(customer, type="OneToOne", entity="vStore\Shop\CustomerInfo", joinOn="customer=id")
  * @Column(company, type="OneToOne", entity="vStore\Shop\Company", joinOn="company=id")
  * @Column(address, type="OneToOne", entity="vStore\Shop\ShippingAddress", joinOn="address=id")
+ * @Column(packageInfo, type="OneToOne", entity="vStore\Shop\PackageInfo", joinOn="id=orderId", mappedBy="vStore\Shop\Order")
  * @Column(note)
  * @Column(timestamp, type="CreatedDateTime")
  * @Column(state)
@@ -289,7 +290,12 @@ class Order extends vBuilder\Orm\ActiveEntity {
 			}
 		}
 		
-		if($onlyProducts == false) return $items;
+		if($onlyProducts == false) {
+			if($this->getItemWithId(self::DELIVERY_ITEM_ID) instanceof ParcelDeliveryOrderItem)
+				$this->getItemWithId(self::DELIVERY_ITEM_ID)->setMethod($this->delivery);
+				
+			return $items;
+		}
 		
 		return array_filter($items->toArray(), function($item) {
 			if($item->productId > 0) return true;
