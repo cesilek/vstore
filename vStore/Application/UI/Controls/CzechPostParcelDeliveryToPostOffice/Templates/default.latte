@@ -8,7 +8,7 @@
 			{if $form['deliveryAttr']->getValue()}
 				{var $po = $control->context->postOfficeProvider->getByPostalCode($form['deliveryAttr']->getValue())}
 				{if $po}
-					{$po->formatedAddress}
+					{$po->formattedAddress}
 				{else}
 					nevybráno
 				{/if}

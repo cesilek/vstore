@@ -61,9 +61,9 @@ class CzechPostParcelDeliveryToPostOffice extends vStore\Application\UI\Control 
 			$postOffices = $this->context->postOfficeProvider->findByPostalCode($codePrefix);
 			foreach($postOffices as $po) {
 				$struct = new \StdClass;
-				$struct->code = $po->formatedPostalCode;
+				$struct->code = $po->formattedPostalCode;
 				$struct->name = $po->name;
-				$struct->address = $po->formatedAddress;
+				$struct->address = $po->formattedAddress;
 				
 				$struct->isAvailable = $po->isAvailable() && (
 						$po->getMaximumPackageValue() === NULL
