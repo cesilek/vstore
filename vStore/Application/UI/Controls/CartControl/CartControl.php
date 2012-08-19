@@ -253,7 +253,8 @@ class CartControl extends vStore\Application\UI\Control {
 		if($form['back']->isSubmittedBy()) {
 			$this->redirect('default');
 			
-		} elseif($form['next']->isSubmittedBy()) {
+		// Pozor na AJAX submit (pripadna review page)
+		} else /* if($form['next']->isSubmittedBy()) */ {
 			
 			try {
 				$delivery = $this->shop->getDeliveryMethod($values->delivery);
