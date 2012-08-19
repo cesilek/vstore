@@ -97,12 +97,13 @@ class ParametrizedDeliveryMethod extends vBuilder\Object implements IDeliveryMet
 	}
 	
 	public function & __get($name) {
-		//return $this->_refInstance->{$name};
-		
-		// WARNING!!!
-		// Indirect modification "fix"
-		$t = $this->_refInstance->{$name};
-		return $t;
+		try {
+			$t = Nette\ObjectMixin::get($this, $name);
+			return $t;
+		} catch(Nette\MemberAccessException $e) {
+			$t = $this->_refInstance->{$name};
+			return $t;
+		}
 	}
 	
 	public function __isset($name) {
