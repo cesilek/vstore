@@ -534,7 +534,7 @@ class Order extends vBuilder\Orm\ActiveEntity {
 	 * @return bool
 	 * @throws OrderException 
 	 */
-	protected function checkDeliveryPayment($delivery, $payment, $throw = true) {
+	public function checkDeliveryPayment($delivery, $payment, $throw = true) {
 		if(!isset($delivery) || !isset($payment)) return true;
 		if($delivery->isSuitableWith($payment)) return true;
 		
