@@ -29,7 +29,7 @@ use vStore, Nette,
 	Nette\Application\UI\Form,
 	vBuilder\Utils\Strings,
 	vStore\Shop\CouponException,
-	vStore\Shop\ParametrizedDeliveryMethod;
+	vStore\Shop\DeliveryMethods\ParametrizedDeliveryMethod;
 
 /**
  * Cart control
@@ -215,12 +215,15 @@ class CartControl extends vStore\Application\UI\Control {
 					->addRule(Form::FILLED, 'Způsob platby musí být vybrán.');
 		
 		$form->addHidden('deliveryAttr');
-		if($this->order->delivery && $this->order->delivery instanceof ParametrizedDeliveryMethod) {
+		if($this->order->delivery && ($this->order->delivery instanceof ParametrizedDeliveryMethod)) {
 			$params = $this->order->delivery->getParams();
 			$form['deliveryAttr']->setDefaultValue($params[0]);
 		}
 		
-		$defaultDelivery = $this->order->delivery ? $this->order->delivery->id : $defaultDelivery;
+		$defaultDelivery = $this->order->delivery
+				? ($this->order->delivery instanceof ParametrizedDeliveryMethod ? $this->order->delivery->method->id : $this->order->delivery->id)
+				: $defaultDelivery;
+				
 		$form['delivery']->setDefaultValue($defaultDelivery);
 		
 		$payments = array();
