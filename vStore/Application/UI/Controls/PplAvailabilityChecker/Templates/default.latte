@@ -42,7 +42,6 @@
 			var deliveryAttrInput = thisInput.parents('FORM').find('INPUT[name=deliveryAttr]');
 			var searchPostalInput = inlineEl.find('INPUT[name=searchPostalCode]');
 			var searchResultsBlock = inlineEl.find('.searchPostalResultsBlock');
-
 		
 			// Update pri nacteni
 			if(deliveryAttrInput.val() == 'eveningDelivery') {
@@ -134,7 +133,9 @@
 
 				} else {
 					controlEl.hide();
-					deliveryAttrInput.val('');
+					
+					// Reset se nyni provadi pri kazde zmene primo v DAP
+					// deliveryAttrInput.val('');
 				}
 			});
 

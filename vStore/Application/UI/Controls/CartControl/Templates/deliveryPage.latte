@@ -1,3 +1,5 @@
+{addJs LIBS_DIR . '/vBuilderFw/client-side/js/jquery.bindFirst.js'}
+
 {block shoppingCartDAP}
 
 {form deliveryPaymentForm}
@@ -119,6 +121,12 @@
 				$this.trigger('change');
 				return false;
 			}
+		});
+		
+		// Before any other change event listeners are processed,
+		// we need to ensure, that the deliveryAttr is always reset.
+		$('#shoppingCartDAP INPUT[name=delivery]').bindFirst('change', function () {
+			$('#shoppingCartDAP INPUT[name=deliveryAttr]').val('');
 		});
 	});
 </script>
