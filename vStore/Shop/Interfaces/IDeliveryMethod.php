@@ -76,4 +76,9 @@ interface IDeliveryMethod {
 	 */
 	function getControlClass();
 	
+	/**
+	 * @return string|null
+	 */
+	function getMoreInfoUrl();
+	
 }

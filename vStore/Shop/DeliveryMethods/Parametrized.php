@@ -196,4 +196,13 @@ class ParametrizedDeliveryMethod extends vBuilder\Object implements IDeliveryMet
 		return $this->_refInstance->getControlClass();
 	}
 	
+	/**
+	 * Returns URL of page with more information about this method
+	 * 
+	 * @return string|null
+	 */
+	function getMoreInfoUrl() {
+		return $this->_refInstance->getMoreInfoUrl();
+	}
+	
 }

@@ -44,6 +44,7 @@ class GeneralDeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 	protected $_description;
 	protected $_suitablePayments;
 	protected $_controlClass;
+	protected $_moreInfoUrl;
 	
 	/**
 	 * Protected constructor
@@ -68,6 +69,13 @@ class GeneralDeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 		if($config->get('suitablePayments')) $method->_suitablePayments = $config->get('suitablePayments')->toArray();
 		if($config->get('control')) $method->_controlClass = $config->get('control');		
 		if($config->get('enabled') !== NULL) $method->_enabled = (bool) $config->get('enabled');
+		
+		if($config->get('moreInfoUrl')) {		
+			$method->_moreInfoUrl = $config->get('moreInfoUrl');
+			if(is_numeric($method->_moreInfoUrl)) {
+				$method->_moreInfoUrl = $context->redaction->link('//' + $method->_moreInfoUrl);
+			}
+		}
 		
 		return $method;
 	}
@@ -154,6 +162,15 @@ class GeneralDeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 	 */
 	function getControlClass() {
 		return $this->_controlClass;
+	}
+	
+	/**
+	 * Returns URL of page with more information about this method
+	 * 
+	 * @return string|null
+	 */
+	function getMoreInfoUrl() {
+		return $this->_moreInfoUrl;
 	}
 	
 }

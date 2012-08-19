@@ -26,6 +26,9 @@
 						<span n:class="charge, $item->getPrice() == 0 ? freeOfCharge" n:if="($item = $method->createOrderItem($order)) !== null">
 							(<span class="value">{if $item->getPrice() > 0}{$item->getPrice()|currency}{else}zdarma{/if}</span>)
 						</span>
+						{if $method->moreInfoUrl}
+						- <a href="{$method->moreInfoUrl}">více informací</a>
+						{/if}
 					</div>
 					<div class="description" n:if="!empty($method->description)">{$method->description}</div>
 					
