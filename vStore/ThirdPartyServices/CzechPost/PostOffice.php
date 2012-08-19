@@ -94,12 +94,12 @@ class PostOffice extends Nette\Object {
 	}
 	
 	/**
-	 * Returns formated postal code:
+	 * Returns formatted postal code:
 	 * Ex. 193 00
 	 *
 	 * @return string
 	 */
-	public function getFormatedPostalCode() {
+	public function getFormattedPostalCode() {
 		$psc = (string) $this->postalCode;
 		return mb_substr($psc, 0, 3) . ' ' . mb_substr($psc, 3, 2);
 	}
@@ -124,13 +124,13 @@ class PostOffice extends Nette\Object {
 	}
 	
 	/**
-	 * Returns comma formated address:
+	 * Returns comma formatted address:
 	 * <street> <house number>, <postal code> <city>
 	 *
 	 * @return string
 	 */
-	public function getFormatedAddress() {
-		return $this->street . ', ' . $this->getFormatedPostalCode() . ' ' . $this->city;
+	public function getFormattedAddress() {
+		return $this->street . ', ' . $this->getFormattedPostalCode() . ' ' . $this->city;
 	}
 	
 	/**
