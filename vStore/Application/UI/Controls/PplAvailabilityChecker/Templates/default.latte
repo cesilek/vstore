@@ -109,7 +109,13 @@
 			};			
 			
 			// Poveseni kontroly na eventy
-			eveningDeliveryCheck.change(checkPplAvailabilityHandler);
+			eveningDeliveryCheck.change(function () {
+				if($(this).is(':checked'))
+					checkPplAvailabilityHandler();
+				else
+					deliveryAttrInput.val('');	
+			});
+			
 			controlEl.find('.checkPplAvailabilityLink').click(function () {
 				checkPplAvailabilityHandler();
 			
