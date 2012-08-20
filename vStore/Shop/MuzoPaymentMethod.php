@@ -61,24 +61,24 @@ class MuzoPaymentMethod extends DirectPaymentMethod {
 		$method = parent::fromConfig($id, $config, $context);
 		
 		$method->_muzoGatewayUrl = $config->get('muzo.gateway.url');
-		if(!isset($method->_muzoGatewayUrl)) throw new vBuilder\InvalidConfigurationException("Muzo: Missing '$id.muzo.gateway.url' option");
+		if(!isset($method->_muzoGatewayUrl) && $method->isEnabled()) throw new vBuilder\InvalidConfigurationException("Muzo: Missing '$id.muzo.gateway.url' option");
 		
 		$method->_muzoGatewayPublicKey = $config->get('muzo.gateway.publicKey');
-		if(!isset($method->_muzoGatewayPublicKey)) throw new vBuilder\InvalidConfigurationException("Muzo: Missing '$id.muzo.gateway.publicKey' option");
+		if(!isset($method->_muzoGatewayPublicKey) && $method->isEnabled()) throw new vBuilder\InvalidConfigurationException("Muzo: Missing '$id.muzo.gateway.publicKey' option");
 		
 		$method->_muzoGatewayPublicKey = APP_DIR . '/../' . $method->_muzoGatewayPublicKey;
-		if(!file_exists($method->_muzoGatewayPublicKey)) throw new Nette\InvalidStateException("Muzo: Missing gateway public key '".$method->_muzoGatewayPublicKey."'");
+		if(!file_exists($method->_muzoGatewayPublicKey) && $method->isEnabled()) throw new Nette\InvalidStateException("Muzo: Missing gateway public key '".$method->_muzoGatewayPublicKey."'");
 		
 		$method->_muzoMerchantNumber = $config->get('muzo.merchant.number');
-		if(!isset($method->_muzoMerchantNumber)) throw new vBuilder\InvalidConfigurationException("Muzo: Missing '$id.muzo.merchant.number' option");
+		if(!isset($method->_muzoMerchantNumber) && $method->isEnabled()) throw new vBuilder\InvalidConfigurationException("Muzo: Missing '$id.muzo.merchant.number' option");
 		
 		$method->_muzoMerchantPrivateKey = $config->get('muzo.merchant.privateKey');
-		if(!isset($method->_muzoMerchantPrivateKey)) throw new vBuilder\InvalidConfigurationException("Muzo: Missing '$id.muzo.merchant.privateKey' option");
+		if(!isset($method->_muzoMerchantPrivateKey) && $method->isEnabled()) throw new vBuilder\InvalidConfigurationException("Muzo: Missing '$id.muzo.merchant.privateKey' option");
 		$method->_muzoMerchantPrivateKey = APP_DIR . '/../' . $method->_muzoMerchantPrivateKey;
-		if(!file_exists($method->_muzoMerchantPrivateKey)) throw new Nette\InvalidStateException("Muzo: Missing merchant private key '".$method->_muzoMerchantPrivateKey."'");
+		if(!file_exists($method->_muzoMerchantPrivateKey) && $method->isEnabled()) throw new Nette\InvalidStateException("Muzo: Missing merchant private key '".$method->_muzoMerchantPrivateKey."'");
 		
 		$method->_muzoMerchantPasspharse = $config->get('muzo.merchant.passpharse');
-		if(!isset($method->_muzoMerchantPasspharse)) throw new vBuilder\InvalidConfigurationException("Muzo: Missing '$id.muzo.merchant.passpharse' option");
+		if(!isset($method->_muzoMerchantPasspharse) && $method->isEnabled()) throw new vBuilder\InvalidConfigurationException("Muzo: Missing '$id.muzo.merchant.passpharse' option");
 		
 		return $method;
 	}
@@ -93,6 +93,8 @@ class MuzoPaymentMethod extends DirectPaymentMethod {
 	 * @return vStore\Application\UI\Controls\WebPay
 	 */
 	function createComponent(Order $order, Nette\Callback $onSuccessCallback, Nette\Callback $onErrorCallback) {
+		if(!$this->isEnabled()) throw new Nette\InvalidStateException('Cannot create payment component. Payment ' . $this->id . ' is disabled by config.');
+	
 		$wp = new WebPay;
 		
 		$wp->setRequestUrl($this->_muzoGatewayUrl);
