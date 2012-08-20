@@ -124,6 +124,15 @@ CREATE TABLE `shop_coupons` (
 
 
 
+# Dump of table shop_packageInfo
+# ------------------------------------------------------------
+
+CREATE TABLE `shop_packageInfo` (
+  `orderId` int(10) unsigned NOT NULL,
+  `packageNumber` varchar(32) NOT NULL DEFAULT '',
+  PRIMARY KEY (`orderId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
