@@ -42,7 +42,10 @@ class MailNotificator extends vBuilder\Mail\MailNotificator {
 		if($this->template->getFile() == "")
 			$this->template->setFile(__DIR__ . '/Templates/email.orderConfirmation.latte');		
 
-		$this->message->addTo($order->customer->email, $order->customer->displayName);
+		// Kvuli testovani
+		if($this->message->getHeader('To') == NULL)
+			$this->message->addTo($order->customer->email, $order->customer->displayName);
+			
 		$this->message->setSubject('Potvrzeni objednavky c. ' . vStore\Latte\Helpers\Shop::formatOrderId($order->id));
 		$this->message->setHtmlBody($this->template);
 		$this->message->send();
@@ -57,6 +60,7 @@ class MailNotificator extends vBuilder\Mail\MailNotificator {
 		
 		$template->registerHelper('currency', 'vStore\Latte\Helpers\Shop::currency');
 		$template->registerHelper('formatOrderId', 'vStore\Latte\Helpers\Shop::formatOrderId');
+		$template->registerHelper('formatPostalCode', 'vBuilder\Latte\Helpers\FormatHelpers::postalCode');
 		
 		return $template;
 	}

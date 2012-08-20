@@ -49,7 +49,10 @@ class ProformaInvoiceSender extends vBuilder\Mail\MailNotificator {
 		if($this->template->getFile() == "")
 			$this->template->setFile(__DIR__ . '/Templates/email.invoice.latte');		
 
-		$this->message->addTo($order->customer->email, $order->customer->displayName);
+		// Kvuli testovani
+		if($this->message->getHeader('To') == NULL)
+			$this->message->addTo($order->customer->email, $order->customer->displayName);
+			
 		$this->message->setSubject('Vase proforma faktura k objednavce c. ' . vStore\Latte\Helpers\Shop::formatOrderId($order->id));
 		$this->message->setHtmlBody($this->template);
 		$this->message->addAttachment($invoiceFile, null, 'application/pdf');
