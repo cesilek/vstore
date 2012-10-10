@@ -118,27 +118,48 @@ class ShopOrderInvoice extends Invoice {
 	 * @return IInvoiceParticipant
 	 */
 	function getCustomer() {
+		$realDeliveryMethod = $this->order->delivery instanceof vStore\Shop\DeliveryMethods\ParametrizedDeliveryMethod
+				? $this->order->delivery->getMethod() : $this->order->delivery;
+
+
 		if(!isset($this->_customer)) {
-			if($this->order->address && $this->order->delivery instanceof vStore\Shop\ParcelDeliveryMethod) {
-					$addr = new InvoiceAddress(
-						$this->order->customer->displayName,
-						$this->order->address->street . ' ' . $this->order->address->houseNumber,
-						$this->order->address->city,
-						$this->order->address->zip,
-						isset($this->order->delivery->availableCountries[$this->order->address->country])
-									? $this->order->delivery->availableCountries[$this->order->address->country]
-									: $this->order->address->country
-					);
+			$in = NULL;
+			$tin = NULL;
+			$invoiceAddress = NULL;
+
+			if($this->order->company) {
+				
+				$invoiceAddress = new InvoiceAddress(
+					$this->order->company->name,
+					$this->order->company->address->street . ' ' . $this->order->company->address->houseNumber,
+					$this->order->company->address->city,
+					$this->order->company->address->zip,
+					$this->order->company->address->countryName
+				);
+			} 
+
+			if($this->order->address && $realDeliveryMethod instanceof vStore\Shop\DeliveryMethods\ParcelDeliveryMethod) {
+				$contactAddress = new InvoiceAddress(
+					$this->order->customer->displayName,
+					$this->order->address->street . ' ' . $this->order->address->houseNumber,
+					$this->order->address->city,
+					$this->order->address->zip,
+					isset($this->order->delivery->availableCountries[$this->order->address->country])
+								? $this->order->delivery->availableCountries[$this->order->address->country]
+								: $this->order->address->country
+				);
+
 			} else {
-				$addr = new InvoiceAddress(
+				$contactAddress = new InvoiceAddress(
 						$this->order->customer->displayName
 				);
 			}
 
 			$this->_customer = new InvoiceParticipant(
-					null,
-					null,
-					$addr
+				$in,
+				$tin,
+				isset($invoiceAddress) ? $invoiceAddress : $contactAddress,
+				$contactAddress
 			);
 		}
 		

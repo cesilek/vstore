@@ -44,6 +44,22 @@ use vStore,
  */
 class ShippingAddress extends vBuilder\Orm\ActiveEntity {
 	
+	/**
+	 * Returns country full name (instead of country code)
+	 *
+	 * @return string
+	 */
+	public function getCountryName() {
+		if(isset($this->context) && isset($this->context->shop->availableCountries[$this->country]))
+			return $this->context->shop->availableCountries[$this->country];
+		else
+			return $this->country;
+	}
 	
-	
+}
+
+class CompanyAddress extends ShippingAddress {
+
+
+
 }

@@ -322,7 +322,7 @@ class CartControl extends vStore\Application\UI\Control {
 	}
 	
 	public function createComponentCustomerForm() {
-		$allowCompanyOrders = false; // TODO: config
+		$allowCompanyOrders = true; // TODO: config
 	
 		$form = new Form;
 		$form->onSuccess[] = callback($this, 'customerFormSubmitted');
@@ -403,28 +403,24 @@ class CartControl extends vStore\Application\UI\Control {
 		}
 		
 		// Fakturační adresa ---------------------------------------------------------
-		if($allowCompanyOrders) {				
-			$form->addText('invoiceStreet', 'Ulice')
-					->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
-					->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE)
-						->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Ulice).');
+		if($allowCompanyOrders) {
+			$c = $form->addText('invoiceStreet', 'Ulice')->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE);
+			if(isset($form['differentInvoiceAddress'])) $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
+			$c->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Ulice).');
 		
-			$form->addText('invoiceHouseNumber', 'Číslo popisné')
-					->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
-					->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE)
-						->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Č.P.).');
+			$c = $form->addText('invoiceHouseNumber', 'Číslo popisné')->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE);
+			if(isset($form['differentInvoiceAddress'])) $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
+			$c->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Č.P.).');
 
-			$form->addText('invoiceCity', 'Město')
-					->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
-					->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE)
-						->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Město).');
+			$form->addText('invoiceCity', 'Město')->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE);
+			if(isset($form['differentInvoiceAddress'])) $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
+			$c->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Město).');
 
-			$form->addText('invoiceZip', 'PSČ')
-					->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
-					->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE)
-						->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (PSČ).');
+			$c = $form->addText('invoiceZip', 'PSČ')->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE);
+			if(isset($form['differentInvoiceAddress'])) $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
+			$c->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (PSČ).');
 
-			$form->addSelect('invoiceCountry', 'Země', $this->order->delivery->availableCountries);
+			$form->addSelect('invoiceCountry', 'Země', $this->shop->getAvailableCountries());
 		}
 		
 		
@@ -434,16 +430,26 @@ class CartControl extends vStore\Application\UI\Control {
 		
 		// Načtení dat z poslední objednávky ---------------------------------------------
 		
-		$customer = null;
-		if($this->order->customer) {
-			$customer = $this->order->customer;
-		} elseif($this->context->user->isLoggedIn()) {
+		$customer = $this->order->customer ?: NULL;
+		$company = $this->order->company ?: NULL;
+		$justLoaded = false;
+		
+		if($this->context->user->isLoggedIn()) {
 			// Predtim hledame jen s adresou, je mozne, ze dosud zadna objednavka nebyla poslana postou
 			if(!isset($lastUserOrder) || $lastUserOrder == FALSE)
 				$lastUserOrder = $this->shop->getUserOrders()->orderBy('[timestamp] DESC')->fetch();
 			
-			if($lastUserOrder && $lastUserOrder->customer)
-				$customer = $lastUserOrder->customer;
+			if($lastUserOrder) {
+				if(!$customer && $lastUserOrder->customer) {
+					$customer = $lastUserOrder->customer;
+
+					// Dosud nebyly vyplneny informace o zakaznikovi => zrovna jsem je nacetl
+					$justLoaded = true;	
+				}
+
+				// Nacitame data o firme jen jednou
+				if(!$company && $lastUserOrder->company) $company = $lastUserOrder->company;				
+			}	
 		}
 		
 		
@@ -453,6 +459,23 @@ class CartControl extends vStore\Application\UI\Control {
 			$form['surname']->setDefaultValue($customer->surname);
 			$form['email']->setDefaultValue($customer->email);
 			$form['phone']->setDefaultValue($customer->phone);
+		}
+
+		if($allowCompanyOrders && $company) {
+			if($justLoaded || $this->order->company) $form['businessCustomer']->setDefaultValue(TRUE);
+			$form['companyIn']->setDefaultValue($company->in);
+			$form['companyTin']->setDefaultValue($company->tin);
+			$form['companyName']->setDefaultValue($company->name);
+
+			if($company->address) {
+				if(isset($form['differentInvoiceAddress'])) $form['differentInvoiceAddress']->setDefaultValue(TRUE);
+
+				$form['invoiceStreet']->setDefaultValue($company->address->street);
+				$form['invoiceHouseNumber']->setDefaultValue($company->address->houseNumber);
+				$form['invoiceCity']->setDefaultValue($company->address->city);
+				$form['invoiceZip']->setDefaultValue($company->address->zip);
+				$form['invoiceCountry']->setDefaultValue($company->address->country);
+			}
 		}
 		
 		$form['note']->setDefaultValue($this->order->note);
@@ -482,7 +505,7 @@ class CartControl extends vStore\Application\UI\Control {
 			$invoiceAddress = null;
 			
 			// Firemni zakaznici
-			if(isset($values->businessCustomer)) {
+			if(isset($form['businessCustomer']) && $values->businessCustomer) {
 				if($this->order->company == null)
 					$this->order->company = $this->order->repository->create('vStore\\Shop\\Company');
 				
@@ -490,9 +513,9 @@ class CartControl extends vStore\Application\UI\Control {
 				$this->order->company->tin = $values->companyTin;
 				$this->order->company->name = $values->companyName;
 								
-				if($values->differentInvoiceAddress) {
+				if(!isset($form['differentInvoiceAddress']) || $values->differentInvoiceAddress) {
 					if($this->order->company->address == null)
-						$this->order->company->address = $this->order->repository->create('vStore\\Shop\\ShippingAddress');
+						$this->order->company->address = $this->order->repository->create('vStore\\Shop\\CompanyAddress');
 				
 					$this->order->company->address->street = $values->invoiceStreet;
 					$this->order->company->address->houseNumber = $values->invoiceHouseNumber;

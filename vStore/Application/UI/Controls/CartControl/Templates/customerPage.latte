@@ -57,7 +57,7 @@
 		</table>
 	</div>
 	
-	<div class="invoiceAddress" n:if="isset($form['invoiceStreet']) && isset($form['differentInvoiceAddress'])">
+	<div class="invoiceAddress" n:if="isset($form['invoiceStreet'])">
 		<h3>Fakturační adresa</h3>
 		<table>
 			<tr>
@@ -141,13 +141,17 @@
 		var form = container.parents('FORM');
 		var companyInfo = container.find('DIV.companyInfo');
 		var invoiceAddress = container.find('DIV.invoiceAddress');
-	
+
 		// Nakup na firmu ---------
 		if(companyInfo.size() && container.find('[name=businessCustomer]').size()) {
 			form.find('[name=businessCustomer]').change(function () {
 				if($(this).is(':checked') && companyInfo.is(':hidden')) {
 					companyInfo.slideDown();
-					form.find('[name=differentInvoiceAddress]').change();
+					if(form.find('[name=differentInvoiceAddress]').size())
+						form.find('[name=differentInvoiceAddress]').change();
+					else
+						invoiceAddress.slideDown();
+
 				} else if(companyInfo.is(':visible')) {
 					companyInfo.hide();
 					invoiceAddress.hide();
@@ -165,6 +169,10 @@
 				}
 			}).change();
 		}
+
+		// If it is checked by default
+		if(form.find('[name=businessCustomer]').size() && form.find('[name=businessCustomer]').is(':checked'))
+			form.find('[name=businessCustomer]').change();
 	</script>
 </div>	
 {/form}

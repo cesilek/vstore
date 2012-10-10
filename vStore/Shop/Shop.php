@@ -162,6 +162,25 @@ class Shop extends vBuilder\Object {
 	}
 	
 	/**
+	 * Returns array of all defined countries by shop delivery methods
+	 *
+	 * @return array of string
+	 */
+	public function getAvailableCountries() {
+		$countries = array();
+		foreach($this->getAvailableDeliveryMethods() as $method) {
+			if($method instanceof Shop\DeliveryMethods\ParcelDeliveryMethod) {
+				foreach($method->getAvailableCountries() as $code=>$name) {
+					if(!isset($countries[$code]))
+						$countries[$code] = $name;
+				}
+			}
+		}
+
+		return $countries;
+	}
+
+	/**
 	 * Returns payment method object
 	 * 
 	 * @param string id of method

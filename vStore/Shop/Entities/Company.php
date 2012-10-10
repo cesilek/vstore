@@ -36,7 +36,7 @@ use vStore,
  * @Column(in)
  * @Column(tin)
  * @Column(name)
- * @Column(address, type="OneToOne", entity="vStore\Shop\ShippingAddress", joinOn="address=id")
+ * @Column(address, type="OneToOne", entity="vStore\Shop\CompanyAddress", joinOn="address=id")
  * 
  * @author Adam Staněk (velbloud)
  * @since Jun 2, 2012
