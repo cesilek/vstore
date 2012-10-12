@@ -24,8 +24,8 @@
 namespace vStore\Shop;
 
 use vStore,
-		vBuilder,
-		Nette;
+	vBuilder,
+	Nette;
 
 /**
  * Invoice generator for shop orders
@@ -87,6 +87,22 @@ class InvoiceGenerator extends vBuilder\Object {
 		
 		$orderInvoice = new vStore\Invoicing\ShopOrderInvoice($order);
 		
+		if(!($order->payment instanceof InvoicePaymentMethod)) {
+			$ok = false;
+			foreach($this->context->shop->getAvailablePaymentMethods() as $m) {
+				if($m instanceof InvoicePaymentMethod) {
+									
+					$orderInvoice->setSupplier($m->invoiceSupplier);
+					$orderInvoice->setAuthor($m->invoiceIssuer);
+					$ok = true;
+					
+					break;
+				}
+			}
+			
+			if(!$ok) throw new Nette\InvalidStateException("No supplier information could have been received");
+		}
+
 		$this->renderer->renderToFile($orderInvoice, $outputFile);
 		
 		return $outputFile;

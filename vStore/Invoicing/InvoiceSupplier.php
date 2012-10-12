@@ -32,7 +32,7 @@ use vBuilder,
  * @author Adam Staněk (velbloud)
  * @since Oct 3, 2011
  */
-class InvoiceSupplier extends InvoiceParticipant {
+class InvoiceSupplier extends InvoiceParticipant implements IInvoiceSupplier {
 		
 	/** @var IInvoiceBankAccount bank account info */
 	protected $bankAccount;

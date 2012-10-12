@@ -24,7 +24,8 @@
 namespace vStore\Invoicing;
 
 use vStore,
-		Nette;
+	Nette,
+	vStore\Shop\InvoicePaymentMethod;
 
 /**
  * Class for creating invoices from vStore shop orders
@@ -40,8 +41,15 @@ class ShopOrderInvoice extends Invoice {
 	/** @var InvoiceParticipant */
 	private $_customer;
 	
-	/** @var array of rder items */
+	/** @var array of order items */
 	private $_items;
+	
+	/** @var IInvoiceSupplier */
+	private $_supplier;
+	
+	/** @var string */
+	private $_author;
+	
 	
 	/**
 	 * Constructor
@@ -52,10 +60,12 @@ class ShopOrderInvoice extends Invoice {
 		$this->order = $order;
 		
 		if(!isset($order->customer))
-			throw new Nette\InvalidStateException("Order customer ahs to be set");			
+			throw new Nette\InvalidStateException("Order customer has to be set");			
 		
-		if(!($order->payment instanceof vStore\Shop\InvoicePaymentMethod))
-			throw new Nette\InvalidStateException("Order with proforma invoice payment expected");
+		if($order->payment instanceof InvoicePaymentMethod) {
+			$this->_supplier = $order->payment->invoiceSupplier;
+			$this->_author = $order->payment->invoiceIssuer;
+		}
 	}
 		
 	/**
@@ -83,7 +93,17 @@ class ShopOrderInvoice extends Invoice {
 	 * @return \DateTime
 	 */
 	function getAuthor() {
-		return $this->order->payment->invoiceIssuer;
+		/* if(!isset($this->_author))
+			throw new Nette\InvalidStateException("Invoice issuer (author) is not set"); */
+	
+		return $this->_author;
+	}
+	
+	/*
+	 * @param string
+	 */
+	function setAuthor($name) {
+		$this->_author = $name;
 	}
 	
 	/**
@@ -111,7 +131,17 @@ class ShopOrderInvoice extends Invoice {
 	 * @return IInvoiceSupplier
 	 */
 	function getSupplier() {
-		return $this->order->payment->invoiceSupplier;
+		if(!isset($this->_supplier))
+			throw new Nette\InvalidStateException("No invoice supplier has been set");
+			
+		return $this->_supplier;
+	}
+	
+	/**
+	 * @param IInvoiceSupplier
+	 */
+	function setSupplier(IInvoiceSupplier $supplier) {
+		$this->_supplier = $supplier;
 	}
 	
 	/**
