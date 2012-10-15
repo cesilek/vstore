@@ -166,6 +166,9 @@ class ShopOrderInvoice extends Invoice {
 					$this->order->company->address->zip,
 					$this->order->company->address->countryName
 				);
+
+				$in = $this->order->company->in;
+				$tin = $this->order->company->tin;
 			} 
 
 			if($this->order->address && $realDeliveryMethod instanceof vStore\Shop\DeliveryMethods\ParcelDeliveryMethod) {
