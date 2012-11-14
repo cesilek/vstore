@@ -349,7 +349,7 @@ class CartControl extends vStore\Application\UI\Control {
 				
 			$form->addText('companyIn', 'IČ')
 				->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
-					->addRule(Form::FILLED, 'Pokud is přejete objednat zboží jako firemní zákazník, je třeba vyplnit IČ společnosti')
+					->addRule(Form::FILLED, 'Pokud si přejete objednat zboží jako firemní zákazník, je třeba vyplnit IČ společnosti')
 					->addRule(function ($formControl) {
 						return vBuilder\Utils\Validators::isCzechSubjectIn($formControl->getValue());
 					}, 'Zadané IČ společnosti není platné');
@@ -358,7 +358,7 @@ class CartControl extends vStore\Application\UI\Control {
 			
 			$form->addText('companyName', 'Název společnosti')
 				->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE)
-					->addRule(Form::FILLED, 'Pokud is přejete objednat zboží jako firemní zákazník, je třeba vyplnit název Vaší společnosti');	
+					->addRule(Form::FILLED, 'Pokud si přejete objednat zboží jako firemní zákazník, je třeba vyplnit název Vaší společnosti');	
 		}
 					
 		// Adresa dodání -----------------------------------------------------------
