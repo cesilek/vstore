@@ -404,20 +404,21 @@ class CartControl extends vStore\Application\UI\Control {
 		
 		// Fakturační adresa ---------------------------------------------------------
 		if($allowCompanyOrders) {
+		
 			$c = $form->addText('invoiceStreet', 'Ulice')->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE);
-			if(isset($form['differentInvoiceAddress'])) $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
+			if(isset($form['differentInvoiceAddress'])) $c = $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
 			$c->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Ulice).');
 		
 			$c = $form->addText('invoiceHouseNumber', 'Číslo popisné')->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE);
-			if(isset($form['differentInvoiceAddress'])) $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
+			if(isset($form['differentInvoiceAddress'])) $c = $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
 			$c->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Č.P.).');
 
 			$form->addText('invoiceCity', 'Město')->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE);
-			if(isset($form['differentInvoiceAddress'])) $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
+			if(isset($form['differentInvoiceAddress'])) $c = $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
 			$c->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (Město).');
 
 			$c = $form->addText('invoiceZip', 'PSČ')->addConditionOn($form['businessCustomer'], Form::EQUAL, TRUE);
-			if(isset($form['differentInvoiceAddress'])) $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
+			if(isset($form['differentInvoiceAddress'])) $c = $c->addConditionOn($form['differentInvoiceAddress'], Form::EQUAL, TRUE);
 			$c->addRule(Form::FILLED, 'Je nutné vyplnit fakturační adresu (PSČ).');
 
 			$form->addSelect('invoiceCountry', 'Země', $this->shop->getAvailableCountries());
@@ -525,9 +526,7 @@ class CartControl extends vStore\Application\UI\Control {
 				} else {
 					if($this->order->address == null)
 						$this->order->address = $this->order->repository->create('vStore\\Shop\\ShippingAddress');
-						
-					$this->order->company->address = $this->order->address;
-				
+										
 					// Pokud nejde o doruceni, tak si musim adresu nastavit sam, jinak se to nastavi
 					// o par radku nize
 					if(!$this->isCustomerAddressNeeded()) {
@@ -536,7 +535,14 @@ class CartControl extends vStore\Application\UI\Control {
 						$this->order->address->city = $values->city;
 						$this->order->address->zip = $values->zip;
 						$this->order->address->country = $values->country;
-					}					
+					}
+					
+					$this->order->company->address = $this->order->repository->create('vStore\\Shop\\CompanyAddress');
+					$this->order->company->address->street = $values->street;
+					$this->order->company->address->houseNumber = $values->houseNumber;
+					$this->order->company->address->city = $values->city;
+					$this->order->company->address->zip = $values->zip;
+					$this->order->company->address->country = $values->country;					
 				}
 			} else
 				$this->order->company = null;
