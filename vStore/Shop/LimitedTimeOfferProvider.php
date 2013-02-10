@@ -59,6 +59,9 @@ class LimitedTimeOfferProvider extends vBuilder\Object {
 
 	/** @var array|null */
 	private $_data;
+
+	/** @var array */
+	private $_productPageTypes = array();
 	
 	/**
 	 * Initializes services for usage of this class.
@@ -89,7 +92,7 @@ class LimitedTimeOfferProvider extends vBuilder\Object {
 		static::initialize($context);
 
 		$this->_context = $context;
-
+		$this->_productPageTypes = vBuilder\Utils\ClassInfo::getAllClassesImplementing('vStore\\Shop\\IProduct');
 
 		// $this->db = &$context->database->connection;
 		$this->db = &$this->context->connection;
@@ -121,20 +124,30 @@ class LimitedTimeOfferProvider extends vBuilder\Object {
 	 */
 	protected function getCandidates() {
 	
-		$classes = vBuilder\Utils\ClassInfo::getAllClassesImplementing('vStore\\Shop\\IProduct');
-
 		$structure = $this->context->redaction->getStructure();
-		$pageIds = array_filter($structure->getAllPageIds(), function ($pageId) use ($structure, $classes) {
-			if(!in_array($structure->pageType($pageId), $classes))
-				return false;
-
-			if(!$structure->pageVisibility($pageId))
-				return false;
-
-			return $structure->pageFlagIsSet($pageId, LimitedTimeOfferProvider::FLAG_NAME);
-		});
+		$pageIds = array_filter($structure->getAllPageIds(), \callback($this, 'canBeCandidate'));
 
 		return array_values($pageIds);
+	}
+
+	/**
+	 * Returns true if product with given ID can be offer candidate
+	 * @return bool
+	 */
+	public function canBeCandidate($pageId) {
+		$classes = $this->_productPageTypes;
+		$structure = $this->context->redaction->getStructure();
+
+		if(!$structure->pageExists($pageId))
+			return false;
+
+		if(!in_array($structure->pageType($pageId), $classes))
+			return false;
+
+		if(!$structure->pageVisibility($pageId))
+			return false;
+
+		return $structure->pageFlagIsSet($pageId, LimitedTimeOfferProvider::FLAG_NAME);
 	}
 	
 	/**
@@ -249,7 +262,17 @@ class LimitedTimeOfferProvider extends vBuilder\Object {
 	 * @return array of newly autofilled ids
 	 */
 	protected function autofill($n) {
-		$data = &$this->getData();
+
+		// Musim zamknout tabulku, aby nelosovalo vice sezeni zaroven
+		// MySQL neumi zamykani s posranymi aliasy...
+		$this->db->query("LOCK TABLES [$this->tableName] WRITE, [$this->tableName] AS [tlo1] WRITE, [$this->tableName] AS [tlo2] WRITE");
+
+		// No-cache kvuli zamku
+		// Data sice nacteme znovu, ale je to lepsi, je nacitat 2x jednou za cas,
+		// nez pri kazdem cteni zamykat tabulku pro pripad, ze bychom potrebovali
+		// provest autofill.
+		$data = &$this->getData(true);
+
 		$candidates = array_diff($this->getCandidates(), $data['blacklist']);
 
 		// Date/Time interval
@@ -307,6 +330,8 @@ class LimitedTimeOfferProvider extends vBuilder\Object {
 
 		$this->db->query("INSERT INTO [$this->tableName] %ex", $iData);
 
+		$this->db->query("UNLOCK TABLES");
+
 		return $chosen;
 	}
 
@@ -323,17 +348,17 @@ class LimitedTimeOfferProvider extends vBuilder\Object {
 	 * 
 	 * @return array
 	 */
-	protected function & getData() {
+	protected function & getData($nocache = false) {
 
-		if(!isset($this->_data)) {
+		if(!isset($this->_data) || $nocache) {
 
 			$lastOffers = $this->db->query(
-				"SELECT * FROM [$this->tableName] tlo1",
+				"SELECT * FROM [$this->tableName] AS [tlo1]",
 				"WHERE [until] = (",
-				"	SELECT MAX([until]) FROM [$this->tableName] tlo2",
+				"	SELECT MAX([until]) FROM [$this->tableName] AS [tlo2]",
 				"	WHERE ABS([tlo1.productId]) = ABS([tlo2.productId])",
 				")",
-				"GROUP BY ABS([tlo1.productId])"
+				"GROUP BY ABS([productId])"
 			)->setType('since', \dibi::DATETIME)
 				->setType('until', \dibi::DATETIME)
 				->setType('productId', \dibi::INTEGER);
@@ -353,21 +378,42 @@ class LimitedTimeOfferProvider extends vBuilder\Object {
 
 					if($record->productId == 0)
 						$data['isAutofillEnabled'] = false;
-					elseif($record->productId < 0)
-						$data['blacklist'][] = abs($record->productId);
-					else
-						$data['activeDeals'][$record->productId] = array(
-							'until' => $record->until
-						);
+					else {
+
+						if($this->canBeCandidate(abs($record->productId))) {
+							if($record->productId < 0)
+								$data['blacklist'][] = abs($record->productId);
+							else
+								$data['activeDeals'][$record->productId] = array(
+									'until' => $record->until
+								);
+						}
+
+						// Pokud produkt uz nemuze byt pouzit (byl smazat, byl mu odstranen flag, ...)
+						// Je treba upravit stavajici zaznamy v DB aby prestaly platit
+						else {
+							// Nepotrebuje zamknout tabulku, protoze sam o sobe nic neovlivnuje
+							// (je v oifovane vetvi, jen updatuje tabulku pro ostatni session,
+							// kterym to nevadi - bud bude proveden pred tim a vubec se sem nedostanou
+							// a nebo se jen posune cas na nejaky jiny until, coz nam nevadi)		
+							$this->db->query(
+								"UPDATE [$this->tableName] SET",
+								"	[until] = %t", $now,
+								"WHERE",
+								"	[id] = %i", $record->id
+							);
+						}
+
+					}
 
 				// Inactive deals for priority queue
-				} elseif($record->productId != 0) {
+				} elseif($record->productId != 0 && $this->canBeCandidate(abs($record->productId))) {
 					$validForDays = (int) $record->until->diff($record->since)->format('%a');
 					$beforeDays = (int) $now->diff($record->until)->format('%a');
 					
 					// Adjusts priority for blacklist records
 					// 	- it's not exact because we don't take date of actual usage
-					// 	  but only the factor how long it has been this product disabled,
+					// 	  but only the factor how long has been this product disabled,
 					// 	  => let's just say that disabled products deserve some more propagation :-)
 					$priority = $record->productId < 0
 						? 0 - ($validForDays + $beforeDays)
