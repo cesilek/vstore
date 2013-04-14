@@ -282,8 +282,8 @@ class Order extends vBuilder\Orm\ActiveEntity {
 		// Nesmim polozku pridat vice jak jednou, kvuli pripadnym deletum
 		if(!$this->_itemsAltered && $this->repository instanceof vBuilder\Orm\SessionRepository) {
 			$this->_itemsAltered = true;
-			
-			if($this->context->config->get('shop.scheduledDiscounts.enabled', false) && !$this->hasDiscountCode()) {
+
+			if($this->context->parameters['shop']['scheduledDiscounts']['enabled'] && !$this->hasDiscountCode()) {
 				if($this->getItemWithId(self::DISCOUNT_ITEM_ID) === null) {
 					$items->add($this->repository->create('vStore\\Shop\\ScheduledDiscountOrderItem'));
 				}

@@ -11,12 +11,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
-
+ *
  * vStore is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -144,17 +144,18 @@ class Shop extends vBuilder\Object {
 	 */
 	public function getAvailableDeliveryMethods() {
 		if(!isset($this->_availableDeliveryMethods)) {
-			$methods = $this->context->config->shop->deliveryMethods;
-			$methodIds = $methods->getKeys();
-			foreach($methodIds as $id) {
-				$m = $methods->$id;
-				
-				if(($class = $m->get('type')) != null) {
-					$class = 'vStore\\Shop\\DeliveryMethods\\' . ucfirst($class);
-				} else
-					$class = 'vStore\\Shop\\DeliveryMethods\\GeneralDeliveryMethod';
-				
-				$this->_availableDeliveryMethods[$id] = $class::fromConfig($id, $m, $this->context);
+
+			$this->_availableDeliveryMethods = array();
+
+			if(isset($this->context->parameters['shop']['deliveryMethods']) && is_array($this->context->parameters['shop']['deliveryMethods'])) {
+				foreach($this->context->parameters['shop']['deliveryMethods'] as $key => $config) {
+
+					$class = isset($config['type'])
+						? 'vStore\\Shop\\DeliveryMethods\\' . ucfirst($config['type'])
+						: 'vStore\\Shop\\DeliveryMethods\\GeneralDeliveryMethod';
+
+					$this->_availableDeliveryMethods[$key] = $class::fromConfig($key, $config, $this->context);
+				}
 			}
 		}
 		
@@ -202,18 +203,20 @@ class Shop extends vBuilder\Object {
 	 */
 	public function getAvailablePaymentMethods() {
 		if(!isset($this->_availablePaymentMethods)) {
-			$methods = $this->context->config->shop->paymentMethods;
-			$methodIds = $methods->getKeys();
-			foreach($methodIds as $id) {
-				$m = $methods->$id;
-				
-				if(($class = $m->get('type')) != null) {
-					$class = 'vStore\\Shop\\' . ucfirst($class) . 'PaymentMethod';
-				} else
-					$class = 'vStore\\Shop\\PaymentMethod';
-				
-				$this->_availablePaymentMethods[$id] = $class::fromConfig($id, $m, $this->context);
+
+			$this->_availablePaymentMethods = array();
+
+			if(isset($this->context->parameters['shop']['paymentMethods']) && is_array($this->context->parameters['shop']['paymentMethods'])) {
+				foreach($this->context->parameters['shop']['paymentMethods'] as $key => $config) {
+
+					$class = isset($config['type'])
+						? 'vStore\\Shop\\' . ucfirst($config['type']) . 'PaymentMethod'
+						: 'vStore\\Shop\\PaymentMethod';
+
+					$this->_availablePaymentMethods[$key] = $class::fromConfig($key, $config, $this->context);
+				}
 			}
+
 		}
 		
 		return $this->_availablePaymentMethods;

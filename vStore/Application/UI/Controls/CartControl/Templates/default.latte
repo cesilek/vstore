@@ -7,7 +7,7 @@
 			<div class="cmsContent perex">{msg perex-shoppingCart, parse => true}</div>
 		{/block}
 
-		{if $control->context->config->get('shop.coupons.enabled', false)}
+		{if $control->isCouponDiscountEnabled()}
 		{block discountCouponForm}
 			{form cartDiscountCouponForm}
 				<ul class="error" n:if="$form->hasErrors()">

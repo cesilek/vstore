@@ -74,7 +74,7 @@ class QuickPick extends BaseForm {
 			$this->presenter->sendPayload();
 		}
 		
-		$this->presenter->redirect('addToCart', array ('product' => $values));
+		$this->presenter->redirect('addToCartMultiple', array ('product' => $values));
 	}
 	
 	public function quickPickFormError(Form $form) {

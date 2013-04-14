@@ -48,13 +48,13 @@ class Ppl extends ParcelDeliveryMethod {
 	 * Creates method from app configuration
 	 * 
 	 * @param string id
-	 * @param vBuilder\Config\ConfigDAO config
+	 * @param array config
 	 * @param Nette\DI\IContainer DI context
 	 */
-	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
+	static function fromConfig($id, array $config, Nette\DI\IContainer $context) {
 		$method = parent::fromConfig($id, $config, $context);
 		
-		if($config->get('allowEveningDelivery') === FALSE)
+		if(isset($config['allowEveningDelivery']) && $config['allowEveningDelivery'] === FALSE)
 			$method->_controlClass = NULL;
 		
 		return $method;

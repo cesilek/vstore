@@ -37,9 +37,13 @@ class AutoRegistrator extends vBuilder\Mail\MailNotificator {
 		
 	public function onOrderCreated(vStore\Shop\Order $order) {
 		$customer = $order->customer;
-		$entityName = vBuilder\Security::getUserClassName();
 		
 		if($this->context->user->isLoggedIn()) return ;
+
+		if($this->context->authenticator instanceof vBuilder\Security\Authenticator) {
+			$entityName = $this->context->authenticator->getUserClass();
+		} else
+			$entityName = "vBuilder\\Security\\User";
 		
 		$potentialUser = $this->context->repository->findAll($entityName)->where('[email] = %s', $customer->email)->fetch();
 		

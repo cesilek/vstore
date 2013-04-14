@@ -34,7 +34,7 @@ use vBuilder,
  */
 interface IDeliveryMethod {
 	
-	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context);
+	static function fromConfig($id, array $config, Nette\DI\IContainer $context);
 	
 	/**
 	 * @return bool

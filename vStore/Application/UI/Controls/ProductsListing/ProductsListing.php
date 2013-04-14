@@ -34,7 +34,7 @@ use vStore, Nette,
  * @author Jirka Vebr
  * @since Aug 16, 2011
  */
-class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl {
+class ProductsListing extends Nette\Application\UI\Control {
 	
 	const LIST_ALL = -1;
 	
@@ -85,8 +85,8 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	 * @param type $raw 
 	 */
 	public function setFluent(vBuilder\Redaction\Fluent $fluent) {
-		if(!is_subclass_of($fluent->getRowClass(), $this->branch->getBaseDocument()))
-			throw new Nette\InvalidArgumentException("Fluent has to return entities descendant of '{$this->branch->getBaseDocument()}'");
+		if(!is_subclass_of($fluent->getRowClass(), $this->redaction->branch->getBaseDocument()))
+			throw new Nette\InvalidArgumentException("Fluent has to return entities descendant of '{$this->redaction->branch->getBaseDocument()}'");
 		
 		$this->fluent = $fluent;
 		$this->appliedFluent = null;
@@ -205,7 +205,17 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 	 * @return Nette\Templating\FileTemplate
 	 */
 	public function createTemplate($file = null, $class = null) {
-		return parent::createTemplate($file, $class);
+		$tpl = parent::createTemplate($file, $class);
+		$tpl->redaction = $this->redaction;
+		return $tpl;
+	}
+
+	public function templatePrepareFilters($template) {
+		$engine = $this->getPresenter()->getContext()->nette->createLatte();
+
+		vBuilder\Latte\Macros\RedactionMacros::install($engine->compiler);
+
+		$template->registerFilter($engine);
 	}
 
 	/**
@@ -301,4 +311,9 @@ class ProductsListing extends vBuilder\Application\UI\Controls\RedactionControl 
 		}
 		return $this->_data;
 	}	
+
+	public function getRedaction() {
+		return $this->getPresenter()->getContext()->redaction;
+	}
+
 }

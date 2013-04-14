@@ -1,5 +1,6 @@
 {default $cartMode => false}
 {var $total => 0} {* Musime ho pocitat zvlast, kvuli $item->isVisible() *}
+{var $_form = isset($form) ? $form : NULL}
 
 <table class="orderItems">
 	<thead>

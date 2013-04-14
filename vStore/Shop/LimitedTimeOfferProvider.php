@@ -92,7 +92,7 @@ class LimitedTimeOfferProvider extends vBuilder\Object {
 		static::initialize($context);
 
 		$this->_context = $context;
-		$this->_productPageTypes = vBuilder\Utils\ClassInfo::getAllClassesImplementing('vStore\\Shop\\IProduct');
+		$this->_productPageTypes = $this->context->classInfo->getAllClassesImplementing('vStore\\Shop\\IProduct');
 
 		// $this->db = &$context->database->connection;
 		$this->db = &$this->context->connection;

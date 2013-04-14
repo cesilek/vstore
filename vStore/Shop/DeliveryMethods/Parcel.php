@@ -46,20 +46,22 @@ class ParcelDeliveryMethod extends GeneralDeliveryMethod {
 	 * Creates method from app configuration
 	 * 
 	 * @param string id
-	 * @param vBuilder\Config\ConfigDAO config
+	 * @param array config
 	 * @param Nette\DI\IContainer DI context
 	 */
-	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
+	static function fromConfig($id, array $config, Nette\DI\IContainer $context) {
 		$method = parent::fromConfig($id, $config, $context);
 		
 		$method->_countries = array();
 		$method->_freeOfChargeLimit = array();
 		$method->_charge = array();
-		foreach($config->get('countries')->getKeys() as $key) {
-			$country = $config->get('countries')->{$key};
-			$method->_countries[$key] = $country->get('name', $key);
-			$method->_freeOfChargeLimit[$key] = $country->get('freeOfChargeLimit');
-			$method->_charge[$key] = (float) $country->get('charge', 0);
+
+		if(isset($config['countries'])) {
+			foreach((array) $config['countries'] as $key => $country) {
+				$method->_countries[$key] = isset($country['name']) ? $country['name'] : $key;
+				$method->_freeOfChargeLimit[$key] = isset($country['freeOfChargeLimit']) ? $country['freeOfChargeLimit'] : NULL;
+				$method->_charge[$key] = isset($country['charge']) ? (float) $country['charge'] : 0.0;
+			}
 		}
 		
 		return $method;

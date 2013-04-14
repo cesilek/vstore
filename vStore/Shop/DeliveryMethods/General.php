@@ -11,12 +11,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
-
+ *
  * vStore is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with vStore bundle. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -57,21 +57,21 @@ class GeneralDeliveryMethod extends vBuilder\Object implements IDeliveryMethod {
 	 * Creates method from app configuration
 	 * 
 	 * @param string id
-	 * @param vBuilder\Config\ConfigDAO config
+	 * @param array config
 	 * @param Nette\DI\IContainer DI context
 	 */
-	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
+	static function fromConfig($id, array $config, Nette\DI\IContainer $context) {
 		$method = new static;
 		
 		$method->_id = $id;
-		$method->_name = $config->get('name', $method->_name ? $method->_name : $id);
-		if($config->get('description'))  $method->_description = $config->get('description');
-		if($config->get('suitablePayments')) $method->_suitablePayments = $config->get('suitablePayments')->toArray();
-		if($config->get('control')) $method->_controlClass = $config->get('control');		
-		if($config->get('enabled') !== NULL) $method->_enabled = (bool) $config->get('enabled');
+		$method->_name = isset($config['name']) ? $config['name'] : ($method->_name ? $method->_name : $id);
+		if(isset($config['description']))  $method->_description = $config['description'];
+		if(isset($config['suitablePayments'])) $method->_suitablePayments = (array) $config['suitablePayments'];
+		if(isset($config['control'])) $method->_controlClass = $config['control'];		
+		if(array_key_exists('enabled', $config)) $method->_enabled = (bool) $config['enabled'];
 		
-		if($config->get('moreInfoUrl')) {		
-			$method->_moreInfoUrl = $config->get('moreInfoUrl');
+		if(isset($config['moreInfoUrl'])) {		
+			$method->_moreInfoUrl = $config['moreInfoUrl'];
 			if(is_numeric($method->_moreInfoUrl)) {
 				$method->_moreInfoUrl = $context->redaction->link('//' + $method->_moreInfoUrl);
 			}

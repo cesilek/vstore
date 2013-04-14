@@ -73,7 +73,7 @@ class ProformaInvoiceSender extends vBuilder\Mail\MailNotificator {
 	public function templatePrepareFilters($template, &$engine = null) {
 		parent::templatePrepareFilters($template, $engine);		
 	
-		vBuilder\Latte\Macros\RedactionMacros::install($engine->parser);
+		vBuilder\Latte\Macros\RedactionMacros::install($engine->compiler);
 	}
 	
 }

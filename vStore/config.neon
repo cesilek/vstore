@@ -1,0 +1,34 @@
+services:
+	shop:
+		class: vStore\Shop
+
+	shopInvoiceGenerator:
+		class: vStore\Shop\InvoiceGenerator
+
+	postOfficeProvider:
+		class: vStore\ThirdPartyServices\CzechPost\PostOfficeProvider
+	
+	pplInfoProvider:
+		class: vStore\ThirdPartyServices\Ppl\InfoProvider
+		
+	limitedTimeOfferProvider:
+		class: vStore\Shop\LimitedTimeOfferProvider
+		
+parameters:
+	shop:
+		scheduledDiscounts:
+			enabled: false
+
+		coupons:
+			enabled: false
+
+		#deliveryMethods:
+		#	personaly:
+		#		name: Osobně
+		#		description: "Osobně vyzvednutím na pobočce"
+		#		suitablePayments: [cash]
+
+		#paymentMethods:
+		#	cash:
+		#		name: Hotově
+		#		description: Při osobním odběru

@@ -97,7 +97,7 @@ abstract class InvoiceRenderer extends vBuilder\Object {
 		$template = new Nette\Templating\FileTemplate($this->templateFile);
 		
 		$template->registerFilter(new Nette\Latte\Engine);
-		$template->registerHelperLoader('Nette\Templating\DefaultHelpers::loader');
+		$template->registerHelperLoader('Nette\Templating\Helpers::loader');
 		$template->registerHelper('currency', 'vStore\Latte\Helpers\Shop::currency');
 		
 		$template->baseUrl = rtrim($this->context->httpRequest->getUrl()->getBaseUrl(), '/');

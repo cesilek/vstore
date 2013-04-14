@@ -41,21 +41,21 @@ class InvoicePaymentMethod extends PaymentMethod {
 	/** @var vStore\Invoicing\InvoiceSupplier invoice supplier */
 	private $_invoiceSupplier;
 	
-	/** @var vBuilder\Config\ConfigDAO config */
+	/** @var array config */
 	private $_invoicingConfig;
 	
 	/**
 	 * Creates method from app configuration
 	 * 
 	 * @param string id
-	 * @param vBuilder\Config\ConfigDAO config
+	 * @param array config
 	 * @param Nette\DI\IContainer DI context
 	 */
-	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
+	static function fromConfig($id, array $config, Nette\DI\IContainer $context) {
 		$method = parent::fromConfig($id, $config, $context);
 		
-		$method->_invoiceIssuer = $config->get('invoicing.issuer');
-		$method->_invoicingConfig = $config->get('invoicing');
+		$method->_invoicingConfig = isset($config['invoicing']) ? $config['invoicing'] : NULL;
+		$method->_invoiceIssuer = isset($method->_invoicingConfig['issuer'])  ? $method->_invoicingConfig['issuer'] : NULL;		
 		
 		return $method;
 	}
@@ -79,28 +79,28 @@ class InvoicePaymentMethod extends PaymentMethod {
 			if(!isset($this->_invoicingConfig)) throw new Nette\InvalidStateException("Missing invoicing configuration");
 			
 				$addr = new vStore\Invoicing\InvoiceAddress(
-					$this->_invoicingConfig->get('address.name'),
-					$this->_invoicingConfig->get('address.street'),
-					$this->_invoicingConfig->get('address.city'),
-					$this->_invoicingConfig->get('address.zip'),
-					$this->_invoicingConfig->get('address.country')
+					$this->_invoicingConfig['address']['name'],
+					$this->_invoicingConfig['address']['street'],
+					$this->_invoicingConfig['address']['city'],
+					$this->_invoicingConfig['address']['zip'],
+					$this->_invoicingConfig['address']['country']
 				);
 
 				$this->_invoiceSupplier = new vStore\Invoicing\InvoiceSupplier(
-						$this->_invoicingConfig->get('in'),
-						$this->_invoicingConfig->get('tin'),
+						$this->_invoicingConfig['in'],
+						$this->_invoicingConfig['tin'],
 						$addr,
 						new vStore\Invoicing\InvoiceBankAccount(
-								$this->_invoicingConfig->get('bankInfo.accountNumber'),
-								$this->_invoicingConfig->get('bankInfo.bankCode'),
-								$this->_invoicingConfig->get('bankInfo.bankName'),
-								$this->_invoicingConfig->get('bankInfo.swift'),
-								$this->_invoicingConfig->get('bankInfo.iban')
+							$this->_invoicingConfig['bankInfo']['accountNumber'],
+							$this->_invoicingConfig['bankInfo']['bankCode'],
+							$this->_invoicingConfig['bankInfo']['bankName'],
+							$this->_invoicingConfig['bankInfo']['swift'],
+							$this->_invoicingConfig['bankInfo']['iban']
 						),
-						$this->_invoicingConfig->get('email'),
-						$this->_invoicingConfig->get('phone'),
-						$this->_invoicingConfig->get('web'),
-						FILES_DIR . '/..' . $this->_invoicingConfig->get('logo')
+						$this->_invoicingConfig['email'],
+						$this->_invoicingConfig['phone'],
+						$this->_invoicingConfig['web'],
+						FILES_DIR . '/..' . $this->_invoicingConfig['logo']
 				);
 		}
 		

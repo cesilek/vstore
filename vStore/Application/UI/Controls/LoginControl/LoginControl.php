@@ -44,7 +44,8 @@ class LoginControl extends BaseForm {
 
 		$form->addHidden('backlink', $this->presenter->getParam('backlink'));
 		
-		$login = $this->getContext()->config->get('user.login');
+		$login = 'username';
+
 		if ($login === 'username') {
 			$form->addText('username','Přihlašovací jméno:')
 				  ->setRequired('Prosím zadejte Vaše přihlašovací jméno');

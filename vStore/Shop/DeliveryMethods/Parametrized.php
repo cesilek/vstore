@@ -122,10 +122,10 @@ class ParametrizedDeliveryMethod extends vBuilder\Object implements IDeliveryMet
 	 * Creates method from app configuration
 	 * 
 	 * @param string id
-	 * @param vBuilder\Config\ConfigDAO config
+	 * @param array config
 	 * @param Nette\DI\IContainer DI context
 	 */
-	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
+	static function fromConfig($id, array $config, Nette\DI\IContainer $context) {
 		throw new \LogicException("Parametrized delivery method is not meant to be created from config");
 	}	
 	

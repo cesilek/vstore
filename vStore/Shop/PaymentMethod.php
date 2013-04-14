@@ -52,17 +52,17 @@ class PaymentMethod extends vBuilder\Object implements IPaymentMethod {
 	 * Creates method from app configuration
 	 * 
 	 * @param string id
-	 * @param vBuilder\Config\ConfigDAO config
+	 * @param array config
 	 * @param Nette\DI\IContainer DI context
 	 */
-	static function fromConfig($id, vBuilder\Config\ConfigDAO $config, Nette\DI\IContainer $context) {
+	static function fromConfig($id, array $config, Nette\DI\IContainer $context) {
 		$method = new static;
 		
 		$method->_id = $id;
-		$method->_name = $config->get('name', $id);
-		$method->_description = $config->get('description');
-		$method->_charge = $config->get('charge');
-		if($config->get('enabled') !== NULL) $method->_enabled = (bool) $config->get('enabled');
+		$method->_name = isset($config['name']) ? $config['name'] : $id;
+		$method->_description = isset($config['description']) ? $config['description'] : NULL;
+		$method->_charge = isset($config['charge']) ? $config['charge'] : NULL;
+		if(array_key_exists('enabled', $config)) $method->_enabled = (bool) $config['enabled'];
 		
 		return $method;
 	}
