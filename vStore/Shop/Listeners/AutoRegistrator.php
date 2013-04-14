@@ -52,7 +52,8 @@ class AutoRegistrator extends vBuilder\Mail\MailNotificator {
 			return;
 		}
 		
-		$login = $this->context->config->get('user.login');
+		// $login = $this->context->config->get('user.login');
+		$login = 'username';
 		$i = '';
 		do {
 			$newUsername = Strings::webalize($customer->name).'.'.Strings::webalize($customer->surname).$i;

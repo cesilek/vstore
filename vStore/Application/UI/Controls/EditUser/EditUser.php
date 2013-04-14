@@ -46,7 +46,7 @@ class EditUser extends vStore\Application\UI\Control {
 				->setRequired('Vyplnťe prosím své stávající heslo');
 		$form->addPassword('password', 'Zvolte si prosím své nové heslo')
 				->setRequired('Prosím vyplňte své nové heslo')
-				->addRule(Form::MIN_LENGTH, 'Vaše nové heslo musí být dlouhé nejméně %d znaků.', $this->context->config->get('security.password.minLength', 6));
+				->addRule(Form::MIN_LENGTH, 'Vaše nové heslo musí být dlouhé nejméně %d znaků.', $this->context->parameters['security']['password']['minLength']);
 		$form->addPassword('passwordCheck', 'Heslo znovu pro kontrolu:')
 				->setRequired('Prosím vyplňte své druhé helso pro kontrolu.')
 				->addRule(Form::EQUAL, 'Vyplněná hesla se neshodují', $form['password']);

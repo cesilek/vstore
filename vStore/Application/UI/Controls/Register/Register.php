@@ -52,6 +52,11 @@ class Register extends BaseForm {
 		return $this->_targetLink;
 	}
 	
+	public function getLoginField() {
+		// return $this->getContext()->config->get('user.login');
+		return 'username';
+	}
+
 	/**
 	 * Sets link of target page
 	 * (page to which will user be redirected after succesful registration)
@@ -74,16 +79,14 @@ class Register extends BaseForm {
 		$form = new Form($this, $name);
 		
 		$form->onSuccess[] = callback($this, $name.'Submitted');
-		
-		$login = $this->getContext()->config->get('user.login');
-		
+				
 		$form->addText('name', 'Jméno')
 				->setRequired('Prosím vyplňte své jméno');
 		$form->addText('surname', 'Přijímení')
 				->setRequired('Prosím vyplňte své přijímení');
 		
 		
-		if ($login === 'username') {
+		if ($this->getLoginField() === 'username') {
 			$form->addText('username','Uživatelské jméno:')
 				  ->setRequired('Prosím vyplňte své uživatelské jméno.');
 		}
@@ -91,11 +94,10 @@ class Register extends BaseForm {
 		$form->addText('email','E-mail:')
 			  ->addRule(Form::EMAIL, 'Prosím vyplňte validní emailovou adresu.')
 			  ->setRequired('Prosím vyplňte svou emailovou adresu.');
-		
-		
+
 		$form->addPassword('password', 'Heslo:')
 				->setRequired('Prosím vyplňte své heslo')
-				->addRule(Form::MIN_LENGTH, 'Vaše heslo musí být dlouhé nejméně %d znaků.', $this->context->config->get('security.password.minLength', 6));
+				->addRule(Form::MIN_LENGTH, 'Vaše heslo musí být dlouhé nejméně %d znaků.', $this->context->parameters['security']['password']['minLength']);
 		$form->addPassword('passwordCheck', 'Heslo znovu pro kontrolu:')
 				->setRequired('Prosím vyplňte své druhé helso pro kontrolu.')
 				->addRule(Form::EQUAL, 'Vyplněná hesla se neshodují', $form['password']);
@@ -118,7 +120,11 @@ class Register extends BaseForm {
 	
 	public function registerFormSubmitted(Form $form) {
 		$values = $form->values;
-		$entityName = vBuilder\Security::getUserClassName();
+
+		if($this->context->authenticator instanceof vBuilder\Security\Authenticator) {
+			$entityName = $this->context->authenticator->getUserClass();
+		} else
+			$entityName = "vBuilder\\Security\\User";
 		
 		$potentialUser = $this->getContext()->repository->findAll($entityName)->where('[email] = %s', $values->email)->fetch();
 		if($potentialUser) {
@@ -126,9 +132,7 @@ class Register extends BaseForm {
 			return;
 		}
 		
-		$login = $this->getContext()->config->get('user.login');
-		
-		if ($login === 'username') {
+		if ($this->getLoginField() === 'username') {
 			$potentialUser = $this->getContext()->repository->findAll($entityName)->where('[username] = %s', $values->username)->fetch();
 			if($potentialUser) {
 				$form->addError('Uživatel se zadaným uživatelským jménem je již registrován.');
@@ -143,7 +147,7 @@ class Register extends BaseForm {
 		$user->setName($values->name);
 		$user->setSurname($values->surname);
 
-		if ($login === 'username') {
+		if ($this->getLoginField() === 'username') {
 			$user->setUsername($values->username);
 		}
 		
