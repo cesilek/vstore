@@ -113,11 +113,16 @@ class Order extends vBuilder\Orm\ActiveEntity {
 			$monthPrefix = $date->format('Ym');
 			$e->data->timestamp = $date->format('Y-m-d H:i:s');
 			
+			// Nette\Diagnostics\Debugger::log("Saving order");
+
 			// Pred ulozenim odstranim schovane nulove polozky (nulove slevy atd.)
 			// Zaroven to vyvola load => musim nacist polozky,
 			// protoze jakmile se zmeni ID, nemam je podle ceho svazat
+			// 
+			// Volani getPrice() by zaroven nemo zaridit znovunacteni getEffectivePrice()
+			// u produktu, kde je to potreba.
 			foreach($e->items as $curr) {
-				if(!$curr->isVisible() && $curr->getPrice() == 0) {
+				if($curr->getPrice() == 0 && !$curr->isVisible()) {
 					$e->items->remove($curr);
 				}
 			}
@@ -131,7 +136,9 @@ class Order extends vBuilder\Orm\ActiveEntity {
 
 		};
 		
-		$this->onPostSave[] = function ($e) use ($db) {			
+		$this->onPostSave[] = function ($e) use ($db) {
+			// Nette\Diagnostics\Debugger::log("Order saved");	
+
 			$db->query("UNLOCK TABLES");
 		};
 		

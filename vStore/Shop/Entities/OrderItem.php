@@ -63,6 +63,8 @@ class OrderItem extends vBuilder\Orm\ActiveEntity {
 	 * @return float 
 	 */
 	public function getPrice() {
+		// Nette\Diagnostics\Debugger::log("OrderItem repository is session: " . ($this->repository instanceof vBuilder\Orm\SessionRepository ? 'true' : 'false'));
+
 		// Pokud data jeste nejsou ulozena v databazi, nacitame VZDY aktualni cenu
 		if($this->repository instanceof vBuilder\Orm\SessionRepository && $this->productId > 0) {
 			$price = $this->context->redaction->get($this->productId)->getEffectivePrice();
