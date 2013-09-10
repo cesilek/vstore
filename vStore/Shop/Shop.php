@@ -54,6 +54,13 @@ class Shop extends vBuilder\Object {
 	  * @warning called from connector not model!
 	  */
 	public $onOrderDone = array();
+
+	/**
+	  * @var array of order listeners
+	  *
+	  * @warning called from connector not model!
+	  */
+	public $onOrderCanceled = array();
 	
 	public function __construct(Nette\DI\IContainer $context) {
 		$this->context = $context;	
